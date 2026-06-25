@@ -142,6 +142,7 @@ function normalizeRoom(snap) {
     started: !!data.started,
     lotteryPhase: !!data.lotteryPhase,
     level: data.level || 'ashbal',
+    stateVersion: typeof data.stateVersion === 'number' ? data.stateVersion : 0,
     boardState: { ...defaultBoardState(), ...(data.boardState || {}) },
   };
 }
@@ -259,6 +260,7 @@ export async function syncGameState(code, gameState) {
     currentTurn: gameState.currentTurn ?? gameState.currentIndex ?? 0,
     started: !!gameState.started,
     level: gameState.level || 'ashbal',
+    stateVersion: typeof gameState.stateVersion === 'number' ? gameState.stateVersion : Date.now(),
     boardState: {
       ...defaultBoardState(),
       ...(gameState.boardState || {}),
@@ -266,6 +268,7 @@ export async function syncGameState(code, gameState) {
   };
 
   if (typeof gameState.started === 'boolean') payload.started = gameState.started;
+  if (typeof gameState.lotteryPhase === 'boolean') payload.lotteryPhase = gameState.lotteryPhase;
   await update(roomRef(code), payload);
 }
 
@@ -293,6 +296,7 @@ export async function beginOnlineLottery(code) {
     currentTurn: 0,
     players,
     boardState: defaultBoardState(),
+    stateVersion: Date.now(),
   });
 }
 
@@ -317,6 +321,7 @@ export async function startOnlineGame(code, { currentTurn, level, players }) {
     lotteryPhase: false,
     currentTurn: currentTurn ?? 0,
     level: level || 'ashbal',
+    stateVersion: Date.now(),
     players: playersToMap(
       (players || []).map((p) => {
         const { startScore, ...rest } = p;
