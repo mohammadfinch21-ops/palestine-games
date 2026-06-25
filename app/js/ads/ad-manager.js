@@ -39,9 +39,16 @@ export async function initAds() {
   }
 }
 
+function findExistingAdSenseScript() {
+  return (
+    document.querySelector('script[data-adsense]')
+    || document.querySelector('script[src*="pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"]')
+  );
+}
+
 function loadAdSenseScript() {
   if (adsenseLoaded || !AD_CONFIG.publisherId.includes('pub-')) return;
-  if (document.querySelector('script[data-adsense]')) {
+  if (findExistingAdSenseScript()) {
     adsenseLoaded = true;
     pushAdSenseSlots();
     return;

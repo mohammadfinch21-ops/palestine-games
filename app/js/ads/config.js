@@ -36,7 +36,7 @@ export const AD_CONFIG = {
    * Example placeholder — replace with YOUR id:
    *   publisherId: 'ca-pub-1234567890123456',
    */
-  publisherId: 'ca-pub-XXXXXXXXXXXXXXXX',
+  publisherId: 'ca-pub-7224635870129371',
 
   /**
    * Ad unit Slot IDs — one per unit in AdSense → Ads → By ad unit → Display ads
