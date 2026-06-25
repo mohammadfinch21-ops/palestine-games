@@ -242,8 +242,8 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
     const finish = () => {
       if (completed) return;
       completed = true;
-      if (!modalOptions.deferClose) hideModal();
       onComplete?.(userWasCorrect, steps, card);
+      if (!modalOptions.deferClose) hideModal();
     };
 
     setTimeout(finish, 450);

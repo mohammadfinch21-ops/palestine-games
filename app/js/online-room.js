@@ -305,8 +305,9 @@ export async function beginOnlineLottery(code) {
  */
 export async function syncPlayerLotteryScore(code, playerId, score) {
   if (!getDb() || !code || !playerId) return;
-  await update(ref(getDb(), `rooms/${code}/players/${playerId}`), {
-    startScore: Math.max(0, Number(score) || 0),
+  await update(roomRef(code), {
+    [`players/${playerId}/startScore`]: Math.max(0, Number(score) || 0),
+    stateVersion: Date.now(),
   });
 }
 

@@ -84,6 +84,7 @@ export function initTrainGame() {
     lotteryPromptOpen: false,
     resolvingLottery: false,
     lotteryTieModalOpen: false,
+    lotteryPromptRetryTimer: null,
     localStateVersion: 0,
     lastAppliedStateVersion: 0,
   };
@@ -462,26 +463,105 @@ export function initTrainGame() {
     online.localStateVersion = Math.max(online.localStateVersion || 0, remoteVersion);
   }
 
+  function hasNewLotteryProgress(room) {
+    if (!room?.lotteryPhase || room.started) return false;
+    return room.players.some((rp) => {
+      const local = state.players.find((p) => String(p.id) === String(rp.id));
+      if (!local) return typeof rp.startScore === 'number';
+      if (typeof rp.startScore === 'number' && typeof local.startScore !== 'number') return true;
+      if (typeof rp.startScore === 'number' && typeof local.startScore === 'number') {
+        return rp.startScore !== local.startScore;
+      }
+      return typeof local.startScore === 'number' && typeof rp.startScore !== 'number';
+    });
+  }
+
+  function mergeLotteryPlayerScores(remotePlayers) {
+    remotePlayers.forEach((rp) => {
+      let local = state.players.find((p) => String(p.id) === String(rp.id));
+      if (!local) {
+        state.players.push({ ...rp });
+        return;
+      }
+      local.name = rp.name;
+      local.color = rp.color;
+      local.position = rp.position;
+      if (typeof rp.startScore === 'number') local.startScore = rp.startScore;
+      else delete local.startScore;
+    });
+  }
+
+  function clearLotteryPromptRetry() {
+    if (online.lotteryPromptRetryTimer) {
+      clearTimeout(online.lotteryPromptRetryTimer);
+      online.lotteryPromptRetryTimer = null;
+    }
+  }
+
+  function scheduleLotteryPromptRetry() {
+    if (online.lotteryPromptRetryTimer) return;
+    online.lotteryPromptRetryTimer = setTimeout(() => {
+      online.lotteryPromptRetryTimer = null;
+      promptOnlineLotteryIfNeeded();
+    }, 400);
+  }
+
+  function finalizeLotteryRoomSync(room, hadLotteryScores = false) {
+    lotteryActive = true;
+    const hasScores = room.players.some((p) => typeof p.startScore === 'number');
+    if (hadLotteryScores && !hasScores) {
+      online.lotteryTieModalOpen = false;
+      online.lotteryPromptOpen = false;
+    }
+
+    const tieInfo = getLotteryTieInfo(room.players);
+    if (tieInfo && !online.isHost && !online.lotteryTieModalOpen) {
+      online.lotteryTieModalOpen = true;
+      const names = tieInfo.names.map((n) => `<strong>${n}</strong>`).join(' و ');
+      showModal({
+        title: 'تعادل! إعادة القرعة',
+        bodyHtml: `<p>تعادل بين ${names} بنتيجة <strong>${tieInfo.best}</strong>.</p><p>انتظر سؤال القرعة الجديد…</p>`,
+        actions: [{ label: 'حسناً', className: 'btn-primary' }],
+      });
+    }
+
+    promptOnlineLotteryIfNeeded();
+    tryResolveOnlineLottery(room);
+  }
+
   function promptOnlineLotteryIfNeeded() {
     if (!online.lotteryPhase || state.started || online.lotteryPromptOpen) return;
     const me = state.players.find((p) => String(p.id) === String(online.myId));
     if (!me || typeof me.startScore === 'number') return;
-    if (!areCardsReady()) return;
+    if (!areCardsReady()) {
+      scheduleLotteryPromptRetry();
+      return;
+    }
+    clearLotteryPromptRetry();
 
     online.lotteryPromptOpen = true;
     const card = pickTiebreakCard();
-    showQuestionCardModal(card, async (userWasCorrect, steps) => {
-      online.lotteryPromptOpen = false;
-      const score = userWasCorrect ? steps : 0;
-      try {
-        await syncPlayerLotteryScore(online.roomCode, online.myId, score);
-      } catch (err) {
-        showModal({
-          title: 'خطأ',
-          bodyHtml: `<p>${err.message || 'تعذّر حفظ نتيجة القرعة'}</p>`,
-        });
-      }
-    });
+    showQuestionCardModal(
+      card,
+      async (userWasCorrect, steps) => {
+        const score = userWasCorrect ? steps : 0;
+        me.startScore = score;
+        try {
+          await syncPlayerLotteryScore(online.roomCode, online.myId, score);
+        } catch (err) {
+          delete me.startScore;
+          showModal({
+            title: 'خطأ',
+            bodyHtml: `<p>${err.message || 'تعذّر حفظ نتيجة القرعة'}</p>`,
+          });
+        } finally {
+          online.lotteryPromptOpen = false;
+          hideModal();
+          updateUI();
+        }
+      },
+      { deferClose: true },
+    );
   }
 
   async function finishOnlineStart(winnerIdx, bestScore) {
@@ -587,7 +667,22 @@ export function initTrainGame() {
     if (!room || !online.mode) return;
 
     const remoteVersion = room.stateVersion ?? 0;
-    if (remoteVersion > 0 && remoteVersion < (online.lastAppliedStateVersion || 0)) {
+    const versionStale = remoteVersion > 0 && remoteVersion < (online.lastAppliedStateVersion || 0);
+    const inLotteryRemote = room.lotteryPhase && !room.started;
+    const lotteryProgress = inLotteryRemote && hasNewLotteryProgress(room);
+
+    if (versionStale && !lotteryProgress) return;
+
+    if (versionStale && lotteryProgress) {
+      online.lotteryPhase = true;
+      mergeLotteryPlayerScores(room.players);
+      lotteryActive = true;
+      renderOnlineLobby({
+        ...room,
+        players: state.players,
+      });
+      updateUI();
+      finalizeLotteryRoomSync({ ...room, players: state.players });
       return;
     }
 
@@ -647,25 +742,7 @@ export function initTrainGame() {
 
     if (inLottery) {
       lotteryActive = true;
-      const hasScores = room.players.some((p) => typeof p.startScore === 'number');
-      if (hadLotteryScores && !hasScores) {
-        online.lotteryTieModalOpen = false;
-        online.lotteryPromptOpen = false;
-      }
-
-      const tieInfo = getLotteryTieInfo(room.players);
-      if (tieInfo && !online.isHost && !online.lotteryTieModalOpen) {
-        online.lotteryTieModalOpen = true;
-        const names = tieInfo.names.map((n) => `<strong>${n}</strong>`).join(' و ');
-        showModal({
-          title: 'تعادل! إعادة القرعة',
-          bodyHtml: `<p>تعادل بين ${names} بنتيجة <strong>${tieInfo.best}</strong>.</p><p>انتظر سؤال القرعة الجديد…</p>`,
-          actions: [{ label: 'حسناً', className: 'btn-primary' }],
-        });
-      }
-
-      promptOnlineLotteryIfNeeded();
-      tryResolveOnlineLottery(room);
+      finalizeLotteryRoomSync(room, hadLotteryScores);
     }
 
     if (!wasStarted && state.started && !online.isHost) {
@@ -775,6 +852,7 @@ export function initTrainGame() {
     online.lotteryPromptOpen = false;
     online.resolvingLottery = false;
     online.lotteryTieModalOpen = false;
+    clearLotteryPromptRetry();
     online.localStateVersion = 0;
     online.lastAppliedStateVersion = 0;
     onlineAuth?.classList.remove('hidden');
@@ -964,11 +1042,23 @@ export function initTrainGame() {
     if (onlineStartBtn) onlineStartBtn.disabled = true;
     try {
       await beginOnlineLottery(online.roomCode);
+      online.lotteryPhase = true;
       lotteryActive = true;
-      showModal({
-        title: 'تحديد من يبدأ',
-        bodyHtml: `<p>كل لاعب يجيب سؤالاً من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong> على جهازه. من يحصل على أعلى نتيجة يبدأ.</p>`,
-      });
+      hideModal();
+      promptOnlineLotteryIfNeeded();
+      if (!online.lotteryPromptOpen) {
+        showModal({
+          title: 'تحديد من يبدأ',
+          bodyHtml: `<p>كل لاعب يجيب سؤالاً من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong> على جهازه. من يحصل على أعلى نتيجة يبدأ.</p>`,
+          actions: [
+            {
+              label: 'ابدأ سؤالي',
+              className: 'btn-gold',
+              onClick: () => promptOnlineLotteryIfNeeded(),
+            },
+          ],
+        });
+      }
     } catch (err) {
       showModal({ title: 'خطأ', bodyHtml: `<p>${err.message || 'تعذّر بدء القرعة'}</p>` });
       if (onlineStartBtn) onlineStartBtn.disabled = state.players.length < MIN_PLAYERS;
