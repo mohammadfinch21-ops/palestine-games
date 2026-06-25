@@ -85,6 +85,8 @@ export function initTrainGame() {
     lotteryTieModalOpen: false,
   };
 
+  let lotteryActive = false;
+
   const DEFAULT_LOCAL_PLAYERS = () => [
     { id: 1, name: 'اللاعب 1', position: 1, color: PLAYER_COLORS[0] },
     { id: 2, name: 'اللاعب 2', position: 1, color: PLAYER_COLORS[1] },
@@ -366,7 +368,9 @@ export function initTrainGame() {
   }
 
   async function finishOnlineStart(winnerIdx, bestScore) {
+    hideModal();
     resetQuestionSession();
+    lotteryActive = false;
     state.currentIndex = winnerIdx;
     state.started = true;
     state.waitingForMove = true;
@@ -389,12 +393,14 @@ export function initTrainGame() {
       showModal({
         title: 'انطلقت الرحلة!',
         bodyHtml: `<p>يبدأ <strong>${winner?.name || 'لاعب'}</strong> 🔑 (نتيجة: ${bestScore}).</p><p>الهدف: الوصول للمربع 100 — القدس 🇵🇸</p>`,
+        actions: [{ label: 'ابدأ اللعب', className: 'btn-gold' }],
       });
       flashPlayerChip(winnerIdx);
     }
     online.resolvingLottery = false;
     online.lotteryPhase = false;
     online.lotteryTieModalOpen = false;
+    renderBoard();
     updateUI();
   }
 
@@ -473,6 +479,7 @@ export function initTrainGame() {
 
     const bs = room.boardState || {};
     const localMoveInProgress = state.processingMove && isMyTurn();
+    const hostFinishingLottery = online.resolvingLottery && online.isHost;
 
     if (!localMoveInProgress) {
       state.players = room.players.map((p) => ({ ...p }));
@@ -486,7 +493,13 @@ export function initTrainGame() {
       Math.max(0, state.players.length - 1),
     );
     state.gameOver = !!bs.gameOver;
-    state.started = !!room.started;
+    if (!hostFinishingLottery) {
+      state.started = !!room.started;
+    }
+    if (room.started) {
+      lotteryActive = false;
+      online.lotteryPhase = false;
+    }
 
     if (room.level && room.level !== getTrainLevel()) {
       setTrainLevel(room.level);
@@ -497,6 +510,7 @@ export function initTrainGame() {
     updateUI();
 
     if (room.lotteryPhase && !room.started) {
+      lotteryActive = true;
       const hasScores = room.players.some((p) => typeof p.startScore === 'number');
       if (hadLotteryScores && !hasScores) {
         online.lotteryTieModalOpen = false;
@@ -522,6 +536,7 @@ export function initTrainGame() {
       showModal({
         title: 'انطلقت الرحلة!',
         bodyHtml: `<p>بدأ المضيف اللعب!</p><p>يبدأ <strong>${starter?.name || 'لاعب'}</strong> 🔑</p>`,
+        actions: [{ label: 'ابدأ اللعب', className: 'btn-gold' }],
       });
     }
   }
@@ -809,6 +824,7 @@ export function initTrainGame() {
     if (onlineStartBtn) onlineStartBtn.disabled = true;
     try {
       await beginOnlineLottery(online.roomCode);
+      lotteryActive = true;
       showModal({
         title: 'تحديد من يبدأ',
         bodyHtml: `<p>كل لاعب يجيب سؤالاً من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong> على جهازه. من يحصل على أعلى نتيجة يبدأ.</p>`,
@@ -937,6 +953,10 @@ export function initTrainGame() {
 
   function getNextPlayerIndex(fromIndex = state.currentIndex) {
     return (fromIndex + 1) % state.players.length;
+  }
+
+  function normalizePosition(pos) {
+    return Math.max(1, Math.min(BOARD_SIZE, Math.round(Number(pos) || 1)));
   }
 
   function getPlayerKey(playerOrIndex, active = false) {
@@ -1246,7 +1266,16 @@ export function initTrainGame() {
 
     const askRound = () => {
       let qIndex = 0;
-      state.players.forEach((p) => delete p.startScore);
+      lotteryActive = true;
+      state.started = false;
+      state.waitingForMove = false;
+      state.processingMove = false;
+      state.gameOver = false;
+      state.highlightSquare = null;
+      state.players.forEach((p) => {
+        p.position = 1;
+        delete p.startScore;
+      });
 
       const askNext = () => {
         if (qIndex >= state.players.length) {
@@ -1255,11 +1284,15 @@ export function initTrainGame() {
         }
         const player = state.players[qIndex];
         const card = pickTiebreakCard();
-        showQuestionCardModal(card, (userWasCorrect, steps) => {
-          player.startScore = userWasCorrect ? steps : 0;
-          qIndex++;
-          askNext();
-        });
+        showQuestionCardModal(
+          card,
+          (userWasCorrect, steps) => {
+            player.startScore = userWasCorrect ? steps : 0;
+            qIndex++;
+            askNext();
+          },
+          { deferClose: true },
+        );
       };
 
       askNext();
@@ -1273,6 +1306,7 @@ export function initTrainGame() {
 
       if (tied.length > 1) {
         const names = tied.map((i) => `<strong>${state.players[i].name}</strong>`).join(' و ');
+        hideModal();
         showModal({
           title: 'تعادل! إعادة القرعة',
           bodyHtml: `<p>تعادل بين ${names} بنتيجة <strong>${best}</strong>.</p><p>يُعاد سؤال لجميع اللاعبين حتى يظهر فائز واحد.</p>`,
@@ -1284,7 +1318,7 @@ export function initTrainGame() {
         return;
       }
 
-      finishStart(tied[0]);
+      setTimeout(() => finishStart(tied[0]), 0);
     };
 
     showModal({
@@ -1295,8 +1329,14 @@ export function initTrainGame() {
   }
 
   function finishStart(winnerIdx) {
+    hideModal();
     resetQuestionSession();
-    const best = state.players[winnerIdx].startScore || 0;
+    lotteryActive = false;
+
+    const winner = getPlayerByIndex(winnerIdx);
+    if (!winner) return;
+
+    const best = winner.startScore || 0;
     state.currentIndex = winnerIdx;
     state.started = true;
     state.waitingForMove = true;
@@ -1307,11 +1347,14 @@ export function initTrainGame() {
       p.position = 1;
       delete p.startScore;
     });
+
     showModal({
       title: 'انطلقت الرحلة!',
-      bodyHtml: `<p>يبدأ <strong>${state.players[winnerIdx].name}</strong> 🔑 (نتيجة: ${best}).</p><p>الهدف: الوصول للمربع 100 — القدس 🇵🇸</p>`,
+      bodyHtml: `<p>يبدأ <strong>${winner.name}</strong> 🔑 (نتيجة: ${best}).</p><p>الهدف: الوصول للمربع 100 — القدس 🇵🇸</p>`,
+      actions: [{ label: 'ابدأ اللعب', className: 'btn-gold' }],
     });
     flashPlayerChip(winnerIdx);
+    renderBoard();
     updateUI();
     pushOnlineState();
   }
@@ -1319,6 +1362,7 @@ export function initTrainGame() {
   function resetGame() {
     onTrainReset();
     resetQuestionSession();
+    lotteryActive = false;
     state.players.forEach((p) => {
       p.position = 1;
       delete p.startScore;
@@ -1333,20 +1377,32 @@ export function initTrainGame() {
   }
 
   function drawProgressQuestion() {
-    if (!isMyTurn() || !areCardsReady() || !state.waitingForMove || state.processingMove) return;
+    if (
+      lotteryActive ||
+      !state.started ||
+      !isMyTurn() ||
+      !areCardsReady() ||
+      !state.waitingForMove ||
+      state.processingMove
+    ) {
+      return;
+    }
     const card = pickRandomCard();
     showQuestionCardModal(card, (userWasCorrect, steps) => {
-      moveAfterAnswer(userWasCorrect, steps);
+      setTimeout(() => moveAfterAnswer(userWasCorrect, steps), 0);
     });
   }
 
   function moveAfterAnswer(userWasCorrect, steps) {
+    if (!state.started || lotteryActive) return;
+
     const actingIndex = state.currentIndex;
     const player = getPlayerByIndex(actingIndex);
     if (!player) return;
 
     const delta = Math.max(0, Number(steps) || 0);
-    const from = player.position;
+    const from = normalizePosition(player.position);
+    player.position = from;
     const nextPlayer = getPlayerByIndex(getNextPlayerIndex(actingIndex));
     const stepWord = delta === 1 ? 'خطوة' : 'خطوات';
 
@@ -1412,6 +1468,8 @@ export function initTrainGame() {
 
   function animateMovePlayer(playerIndex, from, to, onDone) {
     const player = getPlayerByIndex(playerIndex);
+    const start = normalizePosition(from);
+    const end = normalizePosition(to);
     state.waitingForMove = false;
     state.processingMove = true;
     updateUI();
@@ -1424,18 +1482,21 @@ export function initTrainGame() {
       return;
     }
 
-    if (from >= to) {
-      player.position = to;
+    if (start >= end) {
+      player.position = end;
       clearHighlight();
       state.processingMove = false;
+      state.waitingForMove = true;
+      renderBoard();
+      updateUI();
       pushOnlineState();
       onDone?.();
       return;
     }
 
-    let current = from;
-    player.position = from;
-    highlightSquare(from);
+    let current = start;
+    player.position = start;
+    highlightSquare(start);
 
     const stepForward = () => {
       const active = getPlayerByIndex(playerIndex);
@@ -1450,9 +1511,9 @@ export function initTrainGame() {
       highlightSquare(current);
       renderBoard();
       pushOnlineState();
-      updateUI(`تحرك ${active.name} — مربع ${current}${current === to ? ' ✓' : '…'}`);
+      updateUI(`تحرك ${active.name} — مربع ${current}${current === end ? ' ✓' : '…'}`);
 
-      if (current < to) {
+      if (current < end) {
         setTimeout(stepForward, 180);
       } else {
         setTimeout(() => {
