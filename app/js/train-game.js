@@ -10,6 +10,7 @@ import { MAP_IMAGE, getMapPosition } from './board-path-coords.js';
 import {
   pickRandomCard,
   pickTiebreakCard,
+  beginMainGameSession,
   resetQuestionSession,
   areCardsReady,
   getCardsLoadState,
@@ -369,7 +370,7 @@ export function initTrainGame() {
 
   async function finishOnlineStart(winnerIdx, bestScore) {
     hideModal();
-    resetQuestionSession();
+    beginMainGameSession();
     lotteryActive = false;
     state.currentIndex = winnerIdx;
     state.started = true;
@@ -1330,7 +1331,7 @@ export function initTrainGame() {
 
   function finishStart(winnerIdx) {
     hideModal();
-    resetQuestionSession();
+    beginMainGameSession();
     lotteryActive = false;
 
     const winner = getPlayerByIndex(winnerIdx);

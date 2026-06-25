@@ -151,8 +151,11 @@ export function pickRandom(arr) {
 /** Deck per level for the current game session — draw without replacement, then smart recycle. */
 const sessionDecks = new Map();
 
-/** Card ids already drawn this game (tiebreak + main gameplay). */
+/** Card ids drawn during main gameplay (المواجهة). */
 const usedQuestionIds = new Set();
+
+/** Card ids drawn during lottery/tiebreak (القرعة) — excluded from main game until pool recycles. */
+const lotteryUsedIds = new Set();
 
 /** Order of recently drawn ids — used to avoid immediate repeats on recycle. */
 const recentDrawOrder = [];
@@ -163,14 +166,15 @@ const recycleCounts = new Map();
 /** Minimum cards before we warn the user that repeats are likely. */
 export const LOW_POOL_THRESHOLD = 8;
 
+function sessionDeckKey(levelId, tiebreak = false) {
+  return tiebreak ? `${levelId}:lottery` : `${levelId}:main`;
+}
+
 function getCardId(card) {
   return card?.id ?? null;
 }
 
-function markQuestionUsed(card) {
-  const id = getCardId(card);
-  if (!id) return;
-  usedQuestionIds.add(id);
+function trackRecentDraw(id) {
   recentDrawOrder.push(id);
   const poolSize = getValidatedPool().length;
   const maxRecent = Math.max(1, Math.min(5, Math.floor(poolSize / 2) || 1));
@@ -179,16 +183,39 @@ function markQuestionUsed(card) {
   }
 }
 
+function markQuestionUsed(card) {
+  const id = getCardId(card);
+  if (!id) return;
+  usedQuestionIds.add(id);
+  trackRecentDraw(id);
+}
+
+function markLotteryQuestionUsed(card) {
+  const id = getCardId(card);
+  if (!id) return;
+  lotteryUsedIds.add(id);
+  trackRecentDraw(id);
+}
+
 function getValidatedPool(levelId = selectedLevelId) {
   return getPlayableCards(levelId).filter(
     (c) => isPlayableCard(c) && isValidQuestion(c.question) && c.options?.every(isValidOption),
   );
 }
 
+function getLotteryUnusedPool(levelId = selectedLevelId) {
+  return getValidatedPool(levelId).filter((c) => {
+    const id = getCardId(c);
+    return id ? !lotteryUsedIds.has(id) : true;
+  });
+}
+
+/** Main-game pool — skips lottery-used and gameplay-used cards until recycle. */
 function getUnusedPool(levelId = selectedLevelId) {
   return getValidatedPool(levelId).filter((c) => {
     const id = getCardId(c);
-    return id ? !usedQuestionIds.has(id) : true;
+    if (!id) return true;
+    return !usedQuestionIds.has(id) && !lotteryUsedIds.has(id);
   });
 }
 
@@ -203,38 +230,57 @@ function buildRecycledPool(levelId = selectedLevelId) {
 
   recycleCounts.set(levelId, (recycleCounts.get(levelId) || 0) + 1);
   usedQuestionIds.clear();
+  lotteryUsedIds.clear();
   return shuffle(recycled);
 }
 
-function getAvailablePool(levelId = selectedLevelId) {
-  const unused = getUnusedPool(levelId);
+function buildRecycledLotteryPool(levelId = selectedLevelId) {
+  const pool = getValidatedPool(levelId);
+  if (!pool.length) return [];
+
+  recycleCounts.set(`${levelId}:lottery`, (recycleCounts.get(`${levelId}:lottery`) || 0) + 1);
+  lotteryUsedIds.clear();
+  return shuffle([...pool]);
+}
+
+function getAvailablePool(levelId = selectedLevelId, tiebreak = false) {
+  const unused = tiebreak ? getLotteryUnusedPool(levelId) : getUnusedPool(levelId);
   if (unused.length) return { cards: unused, recycled: false };
-  const recycled = buildRecycledPool(levelId);
+  const recycled = tiebreak ? buildRecycledLotteryPool(levelId) : buildRecycledPool(levelId);
   return { cards: recycled, recycled: recycled.length > 0 };
 }
 
-function refillSessionDeck(levelId) {
-  const { cards, recycled } = getAvailablePool(levelId);
+function refillSessionDeck(levelId, tiebreak = false) {
+  const key = sessionDeckKey(levelId, tiebreak);
+  const { cards, recycled } = getAvailablePool(levelId, tiebreak);
   if (!cards.length) {
-    sessionDecks.delete(levelId);
+    sessionDecks.delete(key);
     return null;
   }
   const deck = { remaining: shuffle(cards), recycled };
-  sessionDecks.set(levelId, deck);
+  sessionDecks.set(key, deck);
   return deck;
 }
 
 /** Clear shuffled session decks (all levels or one). Call on new game or level change. */
 export function resetQuestionSession(levelId = null) {
   if (levelId != null) {
-    sessionDecks.delete(levelId);
+    sessionDecks.delete(sessionDeckKey(levelId, false));
+    sessionDecks.delete(sessionDeckKey(levelId, true));
     recycleCounts.delete(levelId);
+    recycleCounts.delete(`${levelId}:lottery`);
     return;
   }
   sessionDecks.clear();
   usedQuestionIds.clear();
+  lotteryUsedIds.clear();
   recentDrawOrder.length = 0;
   recycleCounts.clear();
+}
+
+/** After lottery completes: reset shuffled decks but keep lottery-used ids out of main draws. */
+export function beginMainGameSession() {
+  sessionDecks.clear();
 }
 
 export function getSessionQuestionStats(levelId = selectedLevelId) {
@@ -263,17 +309,21 @@ export function getLowPoolMessage(levelId = selectedLevelId) {
 }
 
 function drawFromSessionDeck(levelId = selectedLevelId, options = {}) {
-  const pool = getValidatedPool(levelId);
-  if (!pool.length) return { card: null, recycled: false };
+  const tiebreak = Boolean(options.tiebreak);
+  if (!getValidatedPool(levelId).length) return { card: null, recycled: false };
 
-  let deck = sessionDecks.get(levelId);
+  const key = sessionDeckKey(levelId, tiebreak);
+  let deck = sessionDecks.get(key);
   if (!deck?.remaining.length) {
-    deck = refillSessionDeck(levelId);
+    deck = refillSessionDeck(levelId, tiebreak);
     if (!deck) return { card: null, recycled: false };
   }
 
   const card = deck.remaining.pop() ?? null;
-  if (card && !options.tiebreak) markQuestionUsed(card);
+  if (card) {
+    if (tiebreak) markLotteryQuestionUsed(card);
+    else markQuestionUsed(card);
+  }
   return { card, recycled: Boolean(deck.recycled) };
 }
 
