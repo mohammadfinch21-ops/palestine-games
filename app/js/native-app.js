@@ -1,6 +1,8 @@
 /**
  * Native shell detection & Capacitor chrome (StatusBar, SplashScreen).
  * Web browsers are unaffected — no `native-app` class is added.
+ * UI layout matches the Netlify web app (styles.css); mobile-native.css
+ * only adds safe-area / tap / overscroll tweaks — not a separate shell.
  */
 
 export function isNativeApp() {
@@ -30,46 +32,11 @@ export async function initNativeShell() {
   await callPlugin('StatusBar', 'setBackgroundColor', { color: '#1a3d2e' });
   await callPlugin('StatusBar', 'setOverlaysWebView', { overlay: false });
 
-  const bottomNav = document.getElementById('native-bottom-nav');
-  if (bottomNav) bottomNav.hidden = false;
-
-  initTrainSidebarSheet();
   initNativeBackGuard();
 
-  /* Hide splash once DOM shell is ready */
   await callPlugin('SplashScreen', 'hide');
 
   return true;
-}
-
-function initTrainSidebarSheet() {
-  const toggle = document.getElementById('train-sidebar-toggle');
-  const sidebar = document.querySelector('.train-sidebar');
-  const backdrop = document.getElementById('train-sidebar-backdrop');
-  if (!toggle || !sidebar) return;
-
-  const close = () => {
-    sidebar.classList.remove('open');
-    backdrop?.classList.remove('open');
-    toggle.setAttribute('aria-expanded', 'false');
-  };
-
-  const open = () => {
-    sidebar.classList.add('open');
-    backdrop?.classList.add('open');
-    toggle.setAttribute('aria-expanded', 'true');
-  };
-
-  toggle.addEventListener('click', () => {
-    if (sidebar.classList.contains('open')) close();
-    else open();
-  });
-
-  backdrop?.addEventListener('click', close);
-
-  document.addEventListener('native-screen-change', (e) => {
-    if (e.detail?.screen !== 'train') close();
-  });
 }
 
 /** Prevent Android hardware back from leaving the app unintentionally on home */
@@ -77,7 +44,7 @@ function initNativeBackGuard() {
   const App = window.Capacitor?.Plugins?.App;
   if (!App?.addListener) return;
 
-  App.addListener('backButton', ({ canGoBack }) => {
+  App.addListener('backButton', () => {
     const active = document.querySelector('.screen.active')?.id?.replace('screen-', '') ?? 'menu';
     if (active === 'menu') {
       App.exitApp?.();

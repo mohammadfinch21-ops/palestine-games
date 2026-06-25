@@ -2,7 +2,7 @@
 # Mobile Build Guide (Capacitor + AdMob)
 
 > المجلد: `mobile/` — يغلّف محتوى الويب من `../app/` داخل WebView أصلي.
-> **واجهة الجوال ≠ موقع الويب:** التطبيق يكتشف Capacitor ويُفعّل تجربة أصلية (شريط سفلي، شاشة كاملة، انتقالات).
+> **واجهة التطبيق = موقع الويب:** نفس `styles.css` وتخطيط Netlify؛ الجوال يضيف فقط safe-area ولمسات لمس خفيفة عبر `mobile-native.css`.
 
 ---
 
@@ -12,18 +12,20 @@
 
 | الميزة | متصفح الويب (`app/`) | تطبيق Capacitor (`mobile/`) |
 |--------|----------------------|-----------------------------|
-| الكشف | بدون `native-app` | `Capacitor.isNativePlatform()` → `body.native-app` |
-| التنقل | بطاقات القائمة + زر «القائمة» | **شريط تبويب سفلي** (🏠 🚂 🃏 ℹ️) |
-| التخطيط | تخطيط سطح المكتب/الويب | ملء الشاشة + safe-area + لوحة قطار قابلة للتمرير |
-| الشريط الجانبي (القطار) | عمود ثابت | **لوحة سفلية** (bottom sheet) عبر ☰ |
+| الكشف | بدون `native-app` | `Capacitor.isNativePlatform()` → `html.native-app` |
+| التنقل | بطاقات القائمة + زر «القائمة» | **نفس التنقل** (بطاقات + زر رجوع) |
+| التخطيط | `styles.css` | **نفس `styles.css`** + `mobile-native.css` (safe-area، tap، overscroll فقط) |
+| الشريط الجانبي (القطار) | عمود ثابت / مكدّس تحت 900px | **نفس السلوك** — بدون bottom sheet ولا شريط تبويب سفلي |
 | الإعلانات | AdSense (Netlify) | AdMob (أصلي) |
-| شاشة البداية | — | Splash بشعار فلسطين (#1a3d2e) |
-| CSS | `styles.css` | `styles.css` + `mobile-native.css` (`.native-app` فقط) |
+| شاشة البداية | — | Splash بشعار فلسطين (#1a3d2e) + StatusBar |
+| مرجع التصميم | https://palestine-games.netlify.app | يجب أن يطابق الموقع حرفياً تقريباً |
 
 الملفات الرئيسية:
-- `app/js/native-app.js` — StatusBar، SplashScreen، شريط سفلي
-- `app/css/mobile-native.css` — تخطيط الجوال
-- `app/js/app.js` — انتقالات الشاشات + ربط التبويبات
+- `app/js/native-app.js` — StatusBar، SplashScreen، زر الرجوع في Android (بدون إعادة تخطيط)
+- `app/css/mobile-native.css` — safe-area / tap-highlight / overscroll فقط
+- `app/js/app.js` — تنقل الشاشات (مشترك بين الويب والجوال)
+
+**اختبار المظهر:** افتح `app/index.html` في Chrome — هذا المرجع. APK يجب أن يبدو مماثلاً (مع اختلاف الإعلانات فقط: AdMob بدل AdSense).
 
 ---
 
@@ -77,7 +79,7 @@ npx cap open android
 في **Android Studio**:
 1. **Tools → Device Manager** → أنشئ محاكي (مثلاً Pixel 6، API 34)
 2. اضغط **Run ▶** (أو Shift+F10)
-3. تحقق من: شاشة Splash → شريط التبويب السفلي → انتقالات بين الشاشات → ☰ لفتح لوحة القطار
+3. تحقق من: شاشة Splash → **نفس القائمة والألعاب كالموقع** → زر «القائمة» → لوحة القطار مكدّسة كالويب
 
 **من سطر الأوامر (APK تجريبي):**
 
@@ -87,7 +89,7 @@ gradlew.bat assembleDebug
 adb install -r app\build\outputs\apk\debug\app-debug.apk
 ```
 
-**ملاحظة:** في المتصفح (`app/index.html`) يبقى التصميم القديم — لاختبار الواجهة الأصلية استخدم المحاكي أو `adb` وليس Chrome فقط.
+**ملاحظة:** في المتصفح (`app/index.html` أو Netlify) وفي APK يجب أن يكون المظهر متطابقاً. إن اختلف APK، راجع أن `mobile-native.css` لا يعيد كتابة التخطيط.
 
 ---
 
@@ -237,8 +239,8 @@ npx cap sync
 | `mobile/package.json` | تبعيات Capacitor |
 | `app/js/ads/admob-config.js` | معرفات وحدات AdMob |
 | `app/js/ads/native-ads.js` | جسر AdMob في WebView |
-| `app/js/native-app.js` | كشف Capacitor + StatusBar + SplashScreen + شريط سفلي |
-| `app/css/mobile-native.css` | تخطيط أصلي (`.native-app` فقط) |
+| `app/js/native-app.js` | كشف Capacitor + StatusBar + SplashScreen + زر رجوع Android |
+| `app/css/mobile-native.css` | لمسات جوال فقط (`.native-app`) — لا تخطيط منفصل |
 | `app/generate_splash_assets.py` | توليد splash من `assets/logo.png` |
 | `app/js/ads/ad-manager.js` | يختار AdSense (ويب) أو AdMob (جوال) |
 
@@ -248,8 +250,8 @@ npx cap sync
 
 ### Web vs native UI
 
-- **Browser:** unchanged layout (menu cards, back buttons, AdSense sticky banner).
-- **Capacitor app:** `body.native-app` enables bottom tab bar, full-screen layout, slide transitions, train sidebar as bottom sheet, and native splash/status bar. Same game logic and RTL Arabic.
+- **Browser & Capacitor:** same layout from `styles.css` (menu cards, back buttons, train sidebar stacking on narrow screens).
+- **Capacitor only:** `html.native-app` enables StatusBar/SplashScreen, Android hardware back, AdMob, and minimal touch/safe-area tweaks in `mobile-native.css`. **No bottom tab bar or separate native shell.**
 
 Regenerate branding after logo changes:
 
