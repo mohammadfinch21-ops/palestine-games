@@ -1,5 +1,5 @@
 /* ===== Native Capacitor shell — only when html.native-app ===== */
-/* Layout & navigation match styles.css / Netlify web. Minimal mobile tweaks only. */
+/* Layout & navigation match styles.css / Netlify web. Mobile train uses bottom action bar. */
 
 html.native-app,
 html.native-app body {
@@ -7,13 +7,7 @@ html.native-app body {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Native-only train controls stay hidden — web uses stacked sidebar layout */
-.btn-sidebar-toggle,
-.train-sidebar-backdrop {
-  display: none !important;
-}
-
-/* Slightly larger tap targets on touch devices (no layout paradigm change) */
+/* Slightly larger tap targets on touch devices */
 @media (pointer: coarse) {
   html.native-app button:not(.modal-close),
   html.native-app .menu-card,
@@ -29,7 +23,8 @@ html.native-app body {
   html.native-app .panel .btn-outline,
   html.native-app .panel .btn-rewarded,
   html.native-app .memory-actions button,
-  html.native-app .memory-play-all-btn {
+  html.native-app .memory-play-all-btn,
+  html.native-app .train-mbar-btn {
     min-height: 44px;
   }
 

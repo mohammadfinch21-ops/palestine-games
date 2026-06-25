@@ -137,7 +137,7 @@
 
       <div id="train-sidebar-backdrop" class="train-sidebar-backdrop" aria-hidden="true"></div>
       <div class="train-layout">
-        <aside class="train-sidebar">
+        <aside class="train-sidebar" id="train-sidebar-sheet">
           <div class="panel panel-mode">
             <h3>نوع اللعب</h3>
             <div class="mode-toggle" role="group" aria-label="نوع اللعب">
@@ -231,6 +231,22 @@
           </div>
         </main>
       </div>
+
+      <nav class="train-mobile-bar" id="train-mobile-bar" aria-label="إجراءات اللعب السريعة">
+        <div class="train-mobile-bar-turn" aria-live="polite">
+          <span id="train-mobile-turn-dot" class="train-mobile-turn-dot" aria-hidden="true" hidden></span>
+          <span id="train-mobile-turn-label" class="train-mobile-turn-label">اضغط «ابدأ» لتحديد من يبدأ</span>
+        </div>
+        <div class="train-mobile-bar-row">
+          <div id="train-mobile-level-wrap" class="train-mobile-levels" aria-label="مرحلة الأسئلة"></div>
+          <div class="train-mobile-actions">
+            <button type="button" class="train-mbar-btn train-mbar-btn--gold" id="train-mobile-start-btn">▶ ابدأ</button>
+            <button type="button" class="train-mbar-btn train-mbar-btn--primary" id="train-mobile-draw-btn" disabled>🃏 سؤال</button>
+            <button type="button" class="train-mbar-btn train-mbar-btn--menu" id="train-mobile-menu-btn" aria-expanded="false" aria-controls="train-sidebar-sheet" aria-label="المزيد — لاعبون وإعدادات">☰</button>
+          </div>
+        </div>
+      </nav>
+
       <div id="ad-banner-train" class="ad-banner ad-banner--game" data-ad-slot="banner-game" aria-label="إعلان"></div>
     </section>
 

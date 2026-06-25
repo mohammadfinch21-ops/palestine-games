@@ -135,6 +135,94 @@ export function initTrainGame() {
   const chatInput = document.getElementById('online-chat-input');
   const chatSendBtn = document.getElementById('online-chat-send-btn');
 
+  const trainSidebar = document.getElementById('train-sidebar-sheet');
+  const trainSidebarBackdrop = document.getElementById('train-sidebar-backdrop');
+  const trainSidebarToggle = document.getElementById('train-sidebar-toggle');
+  const mobileLevelWrap = document.getElementById('train-mobile-level-wrap');
+  const levelPanel = document.querySelector('.panel-level');
+  const mobileStartBtn = document.getElementById('train-mobile-start-btn');
+  const mobileDrawBtn = document.getElementById('train-mobile-draw-btn');
+  const mobileMenuBtn = document.getElementById('train-mobile-menu-btn');
+  const mobileTurnDot = document.getElementById('train-mobile-turn-dot');
+  const mobileTurnLabel = document.getElementById('train-mobile-turn-label');
+  const mobileLayoutMq = window.matchMedia('(max-width: 900px)');
+
+  function isMobileTrainLayout() {
+    return mobileLayoutMq.matches || document.documentElement.classList.contains('native-app');
+  }
+
+  function setTrainSidebarOpen(open) {
+    trainSidebar?.classList.toggle('is-open', open);
+    trainSidebarBackdrop?.classList.toggle('is-visible', open);
+    trainSidebarBackdrop?.setAttribute('aria-hidden', open ? 'false' : 'true');
+    trainSidebarToggle?.setAttribute('aria-expanded', open ? 'true' : 'false');
+    mobileMenuBtn?.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.body.classList.toggle('train-sidebar-open', open);
+  }
+
+  function closeTrainSidebar() {
+    setTrainSidebarOpen(false);
+  }
+
+  function toggleTrainSidebar() {
+    setTrainSidebarOpen(!trainSidebar?.classList.contains('is-open'));
+  }
+
+  function relocateLevelSelector(mobile) {
+    if (!levelSelectorEl || !levelPanel || !mobileLevelWrap) return;
+    if (mobile) {
+      mobileLevelWrap.appendChild(levelSelectorEl);
+    } else if (levelSelectorEl.parentElement !== levelPanel) {
+      const anchor = poolWarningEl || null;
+      levelPanel.insertBefore(levelSelectorEl, anchor);
+    }
+  }
+
+  function applyMobileTrainLayout() {
+    const mobile = isMobileTrainLayout();
+    document.body.classList.toggle('train-mobile-layout', mobile);
+    relocateLevelSelector(mobile);
+    if (!mobile) closeTrainSidebar();
+  }
+
+  function initMobileTrainBar() {
+    trainSidebarToggle?.addEventListener('click', toggleTrainSidebar);
+    mobileMenuBtn?.addEventListener('click', toggleTrainSidebar);
+    trainSidebarBackdrop?.addEventListener('click', closeTrainSidebar);
+    mobileStartBtn?.addEventListener('click', () => startBtn?.click());
+    mobileDrawBtn?.addEventListener('click', () => drawBtn?.click());
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && trainSidebar?.classList.contains('is-open')) {
+        closeTrainSidebar();
+      }
+    });
+
+    mobileLayoutMq.addEventListener('change', applyMobileTrainLayout);
+    applyMobileTrainLayout();
+  }
+
+  function syncMobileBar() {
+    if (!document.body.classList.contains('train-mobile-layout')) return;
+    if (mobileStartBtn) {
+      mobileStartBtn.disabled = startBtn.disabled;
+      mobileStartBtn.hidden = startBtn.hidden;
+    }
+    if (mobileDrawBtn) {
+      mobileDrawBtn.disabled = drawBtn.disabled;
+      mobileDrawBtn.classList.toggle('btn-pulse-ready', drawBtn.classList.contains('btn-pulse-ready'));
+    }
+    if (mobileTurnLabel) {
+      mobileTurnLabel.textContent = currentPlayerName?.textContent || '—';
+      mobileTurnLabel.style.color = currentPlayerName?.style.color || '';
+      mobileTurnLabel.classList.toggle('is-waiting', currentPlayerName?.classList.contains('is-waiting') ?? false);
+    }
+    if (mobileTurnDot) {
+      mobileTurnDot.hidden = currentPlayerDot?.hidden ?? true;
+      mobileTurnDot.innerHTML = currentPlayerDot?.innerHTML || '';
+    }
+  }
+
   function getPlayerColor(playerId) {
     const player = state.players.find((p) => p.id === playerId);
     return player?.color || 'var(--green-dark)';
@@ -939,6 +1027,7 @@ export function initTrainGame() {
 
   document.addEventListener('train-level-changed', () => renderLevelSelector());
 
+  initMobileTrainBar();
   renderLevelSelector();
   renderBoard();
   renderPlayers();
@@ -1010,19 +1099,37 @@ export function initTrainGame() {
   }
 
   function renderBoard() {
+    state.players.forEach((p) => {
+      p.position = normalizePosition(p.position);
+    });
+
     const hl = state.highlightSquare ? getMapPosition(state.highlightSquare) : null;
     const highlightHtml = hl
       ? `<div class="map-highlight" style="left:${hl.x}%;top:${hl.y}%"></div>`
       : '';
+    const tokensHtml = renderTokens();
 
-    boardEl.innerHTML = `
+    let mapRoot = boardEl.querySelector('#board-map');
+    if (!mapRoot) {
+      boardEl.innerHTML = `
       <div class="board-map" id="board-map">
-        <img src="${MAP_IMAGE}" alt="خارطة فلسطين — مسار اللعبة" class="board-map-img" decoding="async" />
+        <img src="${MAP_IMAGE}" alt="map" class="board-map-img" decoding="async" />
         <div class="board-tokens-layer" aria-hidden="false">
           ${highlightHtml}
-          ${renderTokens()}
+          ${tokensHtml}
         </div>
       </div>`;
+      return;
+    }
+
+    let tokensLayer = mapRoot.querySelector('.board-tokens-layer');
+    if (!tokensLayer) {
+      tokensLayer = document.createElement('div');
+      tokensLayer.className = 'board-tokens-layer';
+      tokensLayer.setAttribute('aria-hidden', 'false');
+      mapRoot.appendChild(tokensLayer);
+    }
+    tokensLayer.innerHTML = `${highlightHtml}${tokensHtml}`;
   }
 
   function canRemovePlayer() {
@@ -1230,6 +1337,7 @@ export function initTrainGame() {
     renderLevelSelector();
     updatePoolWarning();
     updateChatVisibility();
+    syncMobileBar();
   }
 
   function startGame() {
@@ -1390,7 +1498,7 @@ export function initTrainGame() {
     }
     const card = pickRandomCard();
     showQuestionCardModal(card, (userWasCorrect, steps) => {
-      setTimeout(() => moveAfterAnswer(userWasCorrect, steps), 0);
+      moveAfterAnswer(userWasCorrect, steps);
     });
   }
 
@@ -1458,7 +1566,7 @@ export function initTrainGame() {
     const player = getPlayerByIndex(actingIndex);
     if (!player) return;
     const steps = Math.floor(Math.random() * 6) + 1;
-    const from = player.position;
+    const from = normalizePosition(player.position);
     const to = Math.min(BOARD_SIZE, from + steps);
     showModal({
       title: 'النرد',
@@ -1511,7 +1619,6 @@ export function initTrainGame() {
       active.position = current;
       highlightSquare(current);
       renderBoard();
-      pushOnlineState();
       updateUI(`تحرك ${active.name} — مربع ${current}${current === end ? ' ✓' : '…'}`);
 
       if (current < end) {
@@ -1534,7 +1641,7 @@ export function initTrainGame() {
     const actingIndex = state.currentIndex;
     const player = getPlayerByIndex(actingIndex);
     if (!player) return;
-    const from = player.position;
+    const from = normalizePosition(player.position);
     const to = Math.min(BOARD_SIZE, from + Math.max(0, Number(steps) || 0));
     animateMovePlayer(actingIndex, from, to, () => processSquare(actingIndex));
   }
