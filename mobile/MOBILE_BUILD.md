@@ -38,6 +38,33 @@
 | **سريع** | في `mobile/android/gradle.properties` تأكد من وجود: `android.overridePathCheck=true` (مُفعّل افتراضياً في هذا المستودع) |
 | **أفضل على المدى الطويل** | انسخ المشروع إلى مسار ASCII فقط، مثلاً `C:\dev\palestine-games` ثم أعد البناء من هناك |
 
+إذا استمر الفشل في `:app:mergeDebugResources` بسبب **ترميز المسار العربي** (أخطاء غامضة أثناء دمج الموارد وليس فقط `overridePathCheck`):
+
+```powershell
+xcopy /E /I "C:\Users\...\لعبة قطار فلسطين" C:\dev\palestine-games
+cd C:\dev\palestine-games\mobile\android
+gradlew.bat assembleDebug
+```
+
+---
+
+### تكرار موارد Splash (`Duplicate resources`)
+
+لا تضع `splash.png` و `splash.xml` معاً في `res/drawable/` — Android يعتبرهما نفس الاسم `drawable/splash`.
+
+| الملف | الدور |
+|-------|--------|
+| **`drawable/splash.xml`** | **يُبقى** — layer-list بخلفية `#1a3d2e` + `@drawable/splash_logo` (يتوافق مع Capacitor `androidSplashResourceName: "splash"`) |
+| **`drawable/splash.png`** | **يُحذف** من `drawable/` فقط — يتعارض مع `splash.xml` |
+| **`drawable-port-*` / `drawable-land-*`** | `splash.png` فقط (بدون xml) — لا تعارض؛ صور اتجاه/كثافة من أصول Capacitor الافتراضية |
+
+بعد تغيير الشعار:
+
+```bash
+cd app && python generate_splash_assets.py   # يحدّث splash_logo.png فقط
+cd ../mobile && npx cap sync
+```
+
 ---
 
 ### المتطلبات
