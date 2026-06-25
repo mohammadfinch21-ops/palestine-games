@@ -1,0 +1,2548 @@
+{
+  "total_cards": 175,
+  "covers": 0,
+  "color_totals": {
+    "yellow": 26,
+    "green": 32,
+    "brown": 55,
+    "red": 62
+  },
+  "pages": {
+    "1": {
+      "count": 10,
+      "colors": {
+        "yellow": 10
+      },
+      "covers": 0
+    },
+    "2": {
+      "count": 16,
+      "colors": {
+        "yellow": 16
+      },
+      "covers": 0
+    },
+    "3": {
+      "count": 16,
+      "colors": {
+        "green": 16
+      },
+      "covers": 0
+    },
+    "4": {
+      "count": 16,
+      "colors": {
+        "green": 16
+      },
+      "covers": 0
+    },
+    "5": {
+      "count": 16,
+      "colors": {
+        "brown": 16
+      },
+      "covers": 0
+    },
+    "6": {
+      "count": 16,
+      "colors": {
+        "brown": 16
+      },
+      "covers": 0
+    },
+    "7": {
+      "count": 7,
+      "colors": {
+        "brown": 7
+      },
+      "covers": 0
+    },
+    "8": {
+      "count": 16,
+      "colors": {
+        "brown": 16
+      },
+      "covers": 0
+    },
+    "9": {
+      "count": 16,
+      "colors": {
+        "red": 16
+      },
+      "covers": 0
+    },
+    "10": {
+      "count": 16,
+      "colors": {
+        "red": 16
+      },
+      "covers": 0
+    },
+    "11": {
+      "count": 14,
+      "colors": {
+        "red": 14
+      },
+      "covers": 0
+    },
+    "12": {
+      "count": 16,
+      "colors": {
+        "red": 16
+      },
+      "covers": 0
+    }
+  },
+  "cards": [
+    {
+      "file": "card-p01-00.jpeg",
+      "page": 1,
+      "idx": 0,
+      "color": "yellow",
+      "conf": 0.9,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        225,
+        175,
+        71
+      ]
+    },
+    {
+      "file": "card-p01-01.jpeg",
+      "page": 1,
+      "idx": 1,
+      "color": "yellow",
+      "conf": 0.907,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        224,
+        174,
+        70
+      ]
+    },
+    {
+      "file": "card-p01-02.jpeg",
+      "page": 1,
+      "idx": 2,
+      "color": "yellow",
+      "conf": 0.768,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        212,
+        165,
+        74
+      ]
+    },
+    {
+      "file": "card-p01-03.jpeg",
+      "page": 1,
+      "idx": 3,
+      "color": "yellow",
+      "conf": 0.768,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        212,
+        165,
+        74
+      ]
+    },
+    {
+      "file": "card-p01-04.jpeg",
+      "page": 1,
+      "idx": 4,
+      "color": "yellow",
+      "conf": 0.854,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        220,
+        170,
+        71
+      ]
+    },
+    {
+      "file": "card-p01-05.jpeg",
+      "page": 1,
+      "idx": 5,
+      "color": "yellow",
+      "conf": 0.854,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        220,
+        170,
+        71
+      ]
+    },
+    {
+      "file": "card-p01-06.jpeg",
+      "page": 1,
+      "idx": 6,
+      "color": "yellow",
+      "conf": 0.769,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        211,
+        164,
+        74
+      ]
+    },
+    {
+      "file": "card-p01-07.jpeg",
+      "page": 1,
+      "idx": 7,
+      "color": "yellow",
+      "conf": 0.77,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        211,
+        164,
+        74
+      ]
+    },
+    {
+      "file": "card-p01-08.jpeg",
+      "page": 1,
+      "idx": 8,
+      "color": "yellow",
+      "conf": 0.776,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        213,
+        166,
+        74
+      ]
+    },
+    {
+      "file": "card-p01-09.jpeg",
+      "page": 1,
+      "idx": 9,
+      "color": "yellow",
+      "conf": 0.776,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        213,
+        166,
+        74
+      ]
+    },
+    {
+      "file": "card-p02-00.jpeg",
+      "page": 2,
+      "idx": 0,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-01.jpeg",
+      "page": 2,
+      "idx": 1,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-02.jpeg",
+      "page": 2,
+      "idx": 2,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-03.jpeg",
+      "page": 2,
+      "idx": 3,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-04.jpeg",
+      "page": 2,
+      "idx": 4,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-05.jpeg",
+      "page": 2,
+      "idx": 5,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-06.jpeg",
+      "page": 2,
+      "idx": 6,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-07.jpeg",
+      "page": 2,
+      "idx": 7,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-08.jpeg",
+      "page": 2,
+      "idx": 8,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-09.jpeg",
+      "page": 2,
+      "idx": 9,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-10.jpeg",
+      "page": 2,
+      "idx": 10,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-11.jpeg",
+      "page": 2,
+      "idx": 11,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-12.jpeg",
+      "page": 2,
+      "idx": 12,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-13.jpeg",
+      "page": 2,
+      "idx": 13,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-14.jpeg",
+      "page": 2,
+      "idx": 14,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p02-15.jpeg",
+      "page": 2,
+      "idx": 15,
+      "color": "yellow",
+      "conf": 0.886,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        233,
+        186,
+        83
+      ]
+    },
+    {
+      "file": "card-p03-00.jpeg",
+      "page": 3,
+      "idx": 0,
+      "color": "green",
+      "conf": 0.759,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        122,
+        144,
+        103
+      ]
+    },
+    {
+      "file": "card-p03-01.jpeg",
+      "page": 3,
+      "idx": 1,
+      "color": "green",
+      "conf": 0.759,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        122,
+        144,
+        103
+      ]
+    },
+    {
+      "file": "card-p03-02.jpeg",
+      "page": 3,
+      "idx": 2,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        121,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-03.jpeg",
+      "page": 3,
+      "idx": 3,
+      "color": "green",
+      "conf": 0.889,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        122,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-04.jpeg",
+      "page": 3,
+      "idx": 4,
+      "color": "green",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        121,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-05.jpeg",
+      "page": 3,
+      "idx": 5,
+      "color": "green",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        121,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-06.jpeg",
+      "page": 3,
+      "idx": 6,
+      "color": "green",
+      "conf": 0.899,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        121,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-07.jpeg",
+      "page": 3,
+      "idx": 7,
+      "color": "green",
+      "conf": 0.899,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        121,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-08.jpeg",
+      "page": 3,
+      "idx": 8,
+      "color": "green",
+      "conf": 0.899,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        121,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-09.jpeg",
+      "page": 3,
+      "idx": 9,
+      "color": "green",
+      "conf": 0.899,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        121,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-10.jpeg",
+      "page": 3,
+      "idx": 10,
+      "color": "green",
+      "conf": 0.759,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        125,
+        147,
+        105
+      ]
+    },
+    {
+      "file": "card-p03-11.jpeg",
+      "page": 3,
+      "idx": 11,
+      "color": "green",
+      "conf": 0.759,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        125,
+        147,
+        105
+      ]
+    },
+    {
+      "file": "card-p03-12.jpeg",
+      "page": 3,
+      "idx": 12,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        121,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-13.jpeg",
+      "page": 3,
+      "idx": 13,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        121,
+        153,
+        108
+      ]
+    },
+    {
+      "file": "card-p03-14.jpeg",
+      "page": 3,
+      "idx": 14,
+      "color": "green",
+      "conf": 0.873,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        122,
+        152,
+        107
+      ]
+    },
+    {
+      "file": "card-p03-15.jpeg",
+      "page": 3,
+      "idx": 15,
+      "color": "green",
+      "conf": 0.872,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        122,
+        152,
+        107
+      ]
+    },
+    {
+      "file": "card-p04-00.jpeg",
+      "page": 4,
+      "idx": 0,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-01.jpeg",
+      "page": 4,
+      "idx": 1,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-02.jpeg",
+      "page": 4,
+      "idx": 2,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-03.jpeg",
+      "page": 4,
+      "idx": 3,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-04.jpeg",
+      "page": 4,
+      "idx": 4,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-05.jpeg",
+      "page": 4,
+      "idx": 5,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-06.jpeg",
+      "page": 4,
+      "idx": 6,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-07.jpeg",
+      "page": 4,
+      "idx": 7,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-08.jpeg",
+      "page": 4,
+      "idx": 8,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-09.jpeg",
+      "page": 4,
+      "idx": 9,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-10.jpeg",
+      "page": 4,
+      "idx": 10,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-11.jpeg",
+      "page": 4,
+      "idx": 11,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-12.jpeg",
+      "page": 4,
+      "idx": 12,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-13.jpeg",
+      "page": 4,
+      "idx": 13,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-14.jpeg",
+      "page": 4,
+      "idx": 14,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p04-15.jpeg",
+      "page": 4,
+      "idx": 15,
+      "color": "green",
+      "conf": 0.895,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        129,
+        165,
+        121
+      ]
+    },
+    {
+      "file": "card-p05-00.jpeg",
+      "page": 5,
+      "idx": 0,
+      "color": "brown",
+      "conf": 0.085,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        64,
+        43
+      ]
+    },
+    {
+      "file": "card-p05-01.jpeg",
+      "page": 5,
+      "idx": 1,
+      "color": "brown",
+      "conf": 0.09,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        98,
+        66,
+        44
+      ]
+    },
+    {
+      "file": "card-p05-02.jpeg",
+      "page": 5,
+      "idx": 2,
+      "color": "brown",
+      "conf": 0.054,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        88,
+        57,
+        36
+      ]
+    },
+    {
+      "file": "card-p05-03.jpeg",
+      "page": 5,
+      "idx": 3,
+      "color": "brown",
+      "conf": 0.06,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        90,
+        59,
+        37
+      ]
+    },
+    {
+      "file": "card-p05-04.jpeg",
+      "page": 5,
+      "idx": 4,
+      "color": "brown",
+      "conf": 0.054,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        88,
+        57,
+        36
+      ]
+    },
+    {
+      "file": "card-p05-05.jpeg",
+      "page": 5,
+      "idx": 5,
+      "color": "brown",
+      "conf": 0.103,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        97,
+        65,
+        43
+      ]
+    },
+    {
+      "file": "card-p05-06.jpeg",
+      "page": 5,
+      "idx": 6,
+      "color": "brown",
+      "conf": 0.069,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        89,
+        58,
+        36
+      ]
+    },
+    {
+      "file": "card-p05-07.jpeg",
+      "page": 5,
+      "idx": 7,
+      "color": "brown",
+      "conf": 0.069,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        89,
+        58,
+        36
+      ]
+    },
+    {
+      "file": "card-p05-08.jpeg",
+      "page": 5,
+      "idx": 8,
+      "color": "brown",
+      "conf": 0.1,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        97,
+        66,
+        45
+      ]
+    },
+    {
+      "file": "card-p05-09.jpeg",
+      "page": 5,
+      "idx": 9,
+      "color": "brown",
+      "conf": 0.088,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        93,
+        63,
+        42
+      ]
+    },
+    {
+      "file": "card-p05-10.jpeg",
+      "page": 5,
+      "idx": 10,
+      "color": "brown",
+      "conf": 0.085,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        95,
+        64,
+        43
+      ]
+    },
+    {
+      "file": "card-p05-11.jpeg",
+      "page": 5,
+      "idx": 11,
+      "color": "brown",
+      "conf": 0.089,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        98,
+        66,
+        44
+      ]
+    },
+    {
+      "file": "card-p05-12.jpeg",
+      "page": 5,
+      "idx": 12,
+      "color": "brown",
+      "conf": 0.054,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        88,
+        57,
+        36
+      ]
+    },
+    {
+      "file": "card-p05-13.jpeg",
+      "page": 5,
+      "idx": 13,
+      "color": "brown",
+      "conf": 0.06,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        90,
+        59,
+        37
+      ]
+    },
+    {
+      "file": "card-p05-14.jpeg",
+      "page": 5,
+      "idx": 14,
+      "color": "brown",
+      "conf": 0.054,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        88,
+        57,
+        36
+      ]
+    },
+    {
+      "file": "card-p05-15.jpeg",
+      "page": 5,
+      "idx": 15,
+      "color": "brown",
+      "conf": 0.104,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        97,
+        65,
+        44
+      ]
+    },
+    {
+      "file": "card-p06-00.jpeg",
+      "page": 6,
+      "idx": 0,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-01.jpeg",
+      "page": 6,
+      "idx": 1,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-02.jpeg",
+      "page": 6,
+      "idx": 2,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-03.jpeg",
+      "page": 6,
+      "idx": 3,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-04.jpeg",
+      "page": 6,
+      "idx": 4,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-05.jpeg",
+      "page": 6,
+      "idx": 5,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-06.jpeg",
+      "page": 6,
+      "idx": 6,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-07.jpeg",
+      "page": 6,
+      "idx": 7,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-08.jpeg",
+      "page": 6,
+      "idx": 8,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-09.jpeg",
+      "page": 6,
+      "idx": 9,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-10.jpeg",
+      "page": 6,
+      "idx": 10,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-11.jpeg",
+      "page": 6,
+      "idx": 11,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-12.jpeg",
+      "page": 6,
+      "idx": 12,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-13.jpeg",
+      "page": 6,
+      "idx": 13,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-14.jpeg",
+      "page": 6,
+      "idx": 14,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p06-15.jpeg",
+      "page": 6,
+      "idx": 15,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p07-00.jpeg",
+      "page": 7,
+      "idx": 0,
+      "color": "brown",
+      "conf": 0.069,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        89,
+        58,
+        36
+      ]
+    },
+    {
+      "file": "card-p07-01.jpeg",
+      "page": 7,
+      "idx": 1,
+      "color": "brown",
+      "conf": 0.069,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        89,
+        58,
+        36
+      ]
+    },
+    {
+      "file": "card-p07-02.jpeg",
+      "page": 7,
+      "idx": 2,
+      "color": "brown",
+      "conf": 0.1,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        97,
+        66,
+        45
+      ]
+    },
+    {
+      "file": "card-p07-03.jpeg",
+      "page": 7,
+      "idx": 3,
+      "color": "brown",
+      "conf": 0.088,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        93,
+        63,
+        42
+      ]
+    },
+    {
+      "file": "card-p07-04.jpeg",
+      "page": 7,
+      "idx": 4,
+      "color": "brown",
+      "conf": 0.088,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        93,
+        63,
+        42
+      ]
+    },
+    {
+      "file": "card-p07-05.jpeg",
+      "page": 7,
+      "idx": 5,
+      "color": "brown",
+      "conf": 0.088,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        93,
+        63,
+        42
+      ]
+    },
+    {
+      "file": "card-p07-06.jpeg",
+      "page": 7,
+      "idx": 6,
+      "color": "brown",
+      "conf": 0.088,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        93,
+        63,
+        42
+      ]
+    },
+    {
+      "file": "card-p08-00.jpeg",
+      "page": 8,
+      "idx": 0,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-01.jpeg",
+      "page": 8,
+      "idx": 1,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-02.jpeg",
+      "page": 8,
+      "idx": 2,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-03.jpeg",
+      "page": 8,
+      "idx": 3,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-04.jpeg",
+      "page": 8,
+      "idx": 4,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-05.jpeg",
+      "page": 8,
+      "idx": 5,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-06.jpeg",
+      "page": 8,
+      "idx": 6,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-07.jpeg",
+      "page": 8,
+      "idx": 7,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-08.jpeg",
+      "page": 8,
+      "idx": 8,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-09.jpeg",
+      "page": 8,
+      "idx": 9,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-10.jpeg",
+      "page": 8,
+      "idx": 10,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-11.jpeg",
+      "page": 8,
+      "idx": 11,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-12.jpeg",
+      "page": 8,
+      "idx": 12,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-13.jpeg",
+      "page": 8,
+      "idx": 13,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-14.jpeg",
+      "page": 8,
+      "idx": 14,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p08-15.jpeg",
+      "page": 8,
+      "idx": 15,
+      "color": "brown",
+      "conf": 0.002,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        96,
+        67,
+        47
+      ]
+    },
+    {
+      "file": "card-p09-00.jpeg",
+      "page": 9,
+      "idx": 0,
+      "color": "red",
+      "conf": 0.892,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        188,
+        42,
+        39
+      ]
+    },
+    {
+      "file": "card-p09-01.jpeg",
+      "page": 9,
+      "idx": 1,
+      "color": "red",
+      "conf": 0.892,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        188,
+        42,
+        39
+      ]
+    },
+    {
+      "file": "card-p09-02.jpeg",
+      "page": 9,
+      "idx": 2,
+      "color": "red",
+      "conf": 0.792,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        184,
+        50,
+        45
+      ]
+    },
+    {
+      "file": "card-p09-03.jpeg",
+      "page": 9,
+      "idx": 3,
+      "color": "red",
+      "conf": 0.792,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        184,
+        50,
+        45
+      ]
+    },
+    {
+      "file": "card-p09-04.jpeg",
+      "page": 9,
+      "idx": 4,
+      "color": "red",
+      "conf": 0.881,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        187,
+        42,
+        39
+      ]
+    },
+    {
+      "file": "card-p09-05.jpeg",
+      "page": 9,
+      "idx": 5,
+      "color": "red",
+      "conf": 0.881,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        187,
+        42,
+        39
+      ]
+    },
+    {
+      "file": "card-p09-06.jpeg",
+      "page": 9,
+      "idx": 6,
+      "color": "red",
+      "conf": 0.899,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        42,
+        39
+      ]
+    },
+    {
+      "file": "card-p09-07.jpeg",
+      "page": 9,
+      "idx": 7,
+      "color": "red",
+      "conf": 0.899,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        42,
+        39
+      ]
+    },
+    {
+      "file": "card-p09-08.jpeg",
+      "page": 9,
+      "idx": 8,
+      "color": "red",
+      "conf": 0.796,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        184,
+        51,
+        46
+      ]
+    },
+    {
+      "file": "card-p09-09.jpeg",
+      "page": 9,
+      "idx": 9,
+      "color": "red",
+      "conf": 0.796,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        184,
+        51,
+        46
+      ]
+    },
+    {
+      "file": "card-p09-10.jpeg",
+      "page": 9,
+      "idx": 10,
+      "color": "red",
+      "conf": 0.792,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        184,
+        51,
+        46
+      ]
+    },
+    {
+      "file": "card-p09-11.jpeg",
+      "page": 9,
+      "idx": 11,
+      "color": "red",
+      "conf": 0.792,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        184,
+        51,
+        46
+      ]
+    },
+    {
+      "file": "card-p09-12.jpeg",
+      "page": 9,
+      "idx": 12,
+      "color": "red",
+      "conf": 0.792,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        183,
+        50,
+        45
+      ]
+    },
+    {
+      "file": "card-p09-13.jpeg",
+      "page": 9,
+      "idx": 13,
+      "color": "red",
+      "conf": 0.792,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        183,
+        50,
+        45
+      ]
+    },
+    {
+      "file": "card-p09-14.jpeg",
+      "page": 9,
+      "idx": 14,
+      "color": "red",
+      "conf": 0.906,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p09-15.jpeg",
+      "page": 9,
+      "idx": 15,
+      "color": "red",
+      "conf": 0.906,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p10-00.jpeg",
+      "page": 10,
+      "idx": 0,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-01.jpeg",
+      "page": 10,
+      "idx": 1,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-02.jpeg",
+      "page": 10,
+      "idx": 2,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-03.jpeg",
+      "page": 10,
+      "idx": 3,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-04.jpeg",
+      "page": 10,
+      "idx": 4,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-05.jpeg",
+      "page": 10,
+      "idx": 5,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-06.jpeg",
+      "page": 10,
+      "idx": 6,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-07.jpeg",
+      "page": 10,
+      "idx": 7,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-08.jpeg",
+      "page": 10,
+      "idx": 8,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-09.jpeg",
+      "page": 10,
+      "idx": 9,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-10.jpeg",
+      "page": 10,
+      "idx": 10,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-11.jpeg",
+      "page": 10,
+      "idx": 11,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-12.jpeg",
+      "page": 10,
+      "idx": 12,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-13.jpeg",
+      "page": 10,
+      "idx": 13,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-14.jpeg",
+      "page": 10,
+      "idx": 14,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p10-15.jpeg",
+      "page": 10,
+      "idx": 15,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p11-00.jpeg",
+      "page": 11,
+      "idx": 0,
+      "color": "red",
+      "conf": 0.901,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-01.jpeg",
+      "page": 11,
+      "idx": 1,
+      "color": "red",
+      "conf": 0.901,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-02.jpeg",
+      "page": 11,
+      "idx": 2,
+      "color": "red",
+      "conf": 0.896,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        42,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-03.jpeg",
+      "page": 11,
+      "idx": 3,
+      "color": "red",
+      "conf": 0.896,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        42,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-04.jpeg",
+      "page": 11,
+      "idx": 4,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-05.jpeg",
+      "page": 11,
+      "idx": 5,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-06.jpeg",
+      "page": 11,
+      "idx": 6,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-07.jpeg",
+      "page": 11,
+      "idx": 7,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-08.jpeg",
+      "page": 11,
+      "idx": 8,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-09.jpeg",
+      "page": 11,
+      "idx": 9,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-10.jpeg",
+      "page": 11,
+      "idx": 10,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-11.jpeg",
+      "page": 11,
+      "idx": 11,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-12.jpeg",
+      "page": 11,
+      "idx": 12,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p11-13.jpeg",
+      "page": 11,
+      "idx": 13,
+      "color": "red",
+      "conf": 0.908,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        189,
+        41,
+        39
+      ]
+    },
+    {
+      "file": "card-p12-00.jpeg",
+      "page": 12,
+      "idx": 0,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-01.jpeg",
+      "page": 12,
+      "idx": 1,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-02.jpeg",
+      "page": 12,
+      "idx": 2,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-03.jpeg",
+      "page": 12,
+      "idx": 3,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-04.jpeg",
+      "page": 12,
+      "idx": 4,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-05.jpeg",
+      "page": 12,
+      "idx": 5,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-06.jpeg",
+      "page": 12,
+      "idx": 6,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-07.jpeg",
+      "page": 12,
+      "idx": 7,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-08.jpeg",
+      "page": 12,
+      "idx": 8,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-09.jpeg",
+      "page": 12,
+      "idx": 9,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-10.jpeg",
+      "page": 12,
+      "idx": 10,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-11.jpeg",
+      "page": 12,
+      "idx": 11,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-12.jpeg",
+      "page": 12,
+      "idx": 12,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-13.jpeg",
+      "page": 12,
+      "idx": 13,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-14.jpeg",
+      "page": 12,
+      "idx": 14,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    },
+    {
+      "file": "card-p12-15.jpeg",
+      "page": 12,
+      "idx": 15,
+      "color": "red",
+      "conf": 0.888,
+      "cover": false,
+      "cover_reason": "",
+      "avg_rgb": [
+        198,
+        53,
+        51
+      ]
+    }
+  ]
+}

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>ألعاب فلسطين — القطار وبطاقات الذاكرة | الإئتلاف الكشفي العالمي</title>
+  <meta name="description" content="ألعاب تعليمية عن فلسطين — لعبة القطار (لوحة 100 مربعاً) وبطاقات الذاكرة عن التاريخ والجغرافيا. من الإئتلاف الكشفي العالمي للقدس وفلسطين." />
+  <meta name="keywords" content="فلسطين, لعبة, قطار, ذاكرة, كشافة, القدس, Palestine, train game, memory game, scout, scout4pal" />
+  <meta name="author" content="الإئتلاف الكشفي العالمي للقدس وفلسطين" />
+  <meta name="theme-color" content="#1a3d2e" />
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png" />
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+  <link rel="canonical" href="https://YOUR-SITE.netlify.app/" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="ar_PS" />
+  <meta property="og:locale:alternate" content="en_US" />
+  <meta property="og:title" content="ألعاب فلسطين — القطار وبطاقات الذاكرة | الإئتلاف الكشفي العالمي" />
+  <meta property="og:description" content="رحلة ممتعة في قلب التاريخ الفلسطيني — لعبة القطار وبطاقات الذاكرة" />
+  <meta property="og:url" content="https://YOUR-SITE.netlify.app/" />
+  <meta property="og:site_name" content="ألعاب فلسطين — القطار وبطاقات الذاكرة" />
+  <meta property="og:image" content="assets/logo-full.png" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ألعاب فلسطين — القطار وبطاقات الذاكرة | الإئتلاف الكشفي العالمي" />
+  <meta name="twitter:description" content="لعبة القطار وبطاقات الذاكرة — تعليم وترفيه عن فلسطين" />
+  <meta name="twitter:image" content="assets/logo-full.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="css/mobile-native.css" />
+  <!--
+    AdSense site verification (during signup only):
+    AdSense → Sites → Add site → Verification → "Ad code snippet" or meta tag.
+    Paste the meta tag Google gives you here, deploy, then click Verify in AdSense.
+
+    Google AdSense script — optional if ad-manager.js loads it dynamically.
+    Uncomment after approval and replace ca-pub-XXXXXXXXXXXXXXXX:
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+      crossorigin="anonymous"></script>
+  -->
+</head>
+<body>
+  <div id="app">
+    <!-- Main Menu -->
+    <section id="screen-menu" class="screen active">
+      <div class="menu-bg"></div>
+      <header class="menu-header">
+        <div class="brand-lockup">
+          <img
+            src="assets/logo.png"
+            alt=""
+            class="brand-logo brand-logo--emblem"
+            width="108"
+            height="108"
+            aria-hidden="true"
+          />
+          <p class="org-name-ar">الإئتلاف الكشفي العالمي للقدس وفلسطين</p>
+          <p class="org-name-en" lang="en" dir="ltr">The Global Scout Coalition for Quds and Palestine</p>
+        </div>
+        <h1 class="game-title">ألعاب فلسطين — القطار وبطاقات الذاكرة</h1>
+        <p class="tagline">رحلة ممتعة في قلب التاريخ الفلسطيني</p>
+      </header>
+      <div class="menu-cards">
+        <button class="menu-card primary" data-screen="train">
+          <span class="card-icon">🗺️</span>
+          <span class="card-title">لعبة القطار</span>
+          <span class="card-desc">لوحة 100 مربعاً — أسئلة ومدن وتاريخ فلسطين</span>
+        </button>
+        <button class="menu-card secondary" data-screen="memory">
+          <span class="card-icon">🃏</span>
+          <span class="card-title">لعبة بطاقات الذاكرة</span>
+          <span class="card-desc">طابق صور المعالم من بطاقات الذاكرة</span>
+        </button>
+      </div>
+      <footer class="menu-footer">
+        <a href="assets/الخارطة.pdf" target="_blank" rel="noopener">عرض الخارطة الأصلية (PDF)</a>
+        <span class="footer-sep"> · </span>
+        <a href="privacy.html">سياسة الخصوصية</a>
+      </footer>
+      <div id="ad-banner-menu" class="ad-banner ad-banner--menu" data-ad-slot="banner-menu" aria-label="إعلان"></div>
+    </section>
+
+    <!-- About (native app tab) -->
+    <section id="screen-about" class="screen">
+      <div class="about-content">
+        <img src="assets/logo.png" alt="" class="about-logo" width="96" height="89" aria-hidden="true" />
+        <h2>عن ألعاب فلسطين</h2>
+        <p>
+          لعبة تعليمية ترفيهية من <strong>الإئتلاف الكشفي العالمي للقدس وفلسطين</strong> —
+          تجمع بين لوحة القطار (100 مربعاً) وبطاقات الذاكرة عن التاريخ والجغرافيا الفلسطينية.
+        </p>
+        <p>
+          🚂 <strong>لعبة القطار:</strong> أجب على الأسئلة، تحرّك على الخارطة، وتجنّب الحواجز حتى تصل إلى القدس.
+        </p>
+        <p>
+          🃏 <strong>بطاقات الذاكرة:</strong> طابق صور المعالم الفلسطينية بأقل عدد من المحاولات.
+        </p>
+        <div class="about-links">
+          <a href="assets/الخارطة.pdf" target="_blank" rel="noopener">📄 عرض الخارطة الأصلية (PDF)</a>
+          <a href="privacy.html">🔒 سياسة الخصوصية</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Train Game -->
+    <section id="screen-train" class="screen">
+      <header class="game-header">
+        <button class="btn-sidebar-toggle" id="train-sidebar-toggle" type="button" aria-label="فتح لوحة التحكم" aria-expanded="false">☰</button>
+        <button class="btn-back" data-screen="menu">← القائمة</button>
+        <div class="game-header-brand">
+          <img src="assets/logo.png" alt="" class="game-header-logo" width="40" height="37" aria-hidden="true" />
+          <h2>لعبة قطار فلسطين</h2>
+        </div>
+        <button class="btn-help" id="train-rules-btn">؟ طريقة اللعب</button>
+      </header>
+
+      <div id="train-sidebar-backdrop" class="train-sidebar-backdrop" aria-hidden="true"></div>
+      <div class="train-layout">
+        <aside class="train-sidebar">
+          <div class="panel panel-mode">
+            <h3>نوع اللعب</h3>
+            <div class="mode-toggle" role="group" aria-label="نوع اللعب">
+              <button type="button" class="mode-btn is-active" id="mode-local-btn">لعب محلي</button>
+              <button type="button" class="mode-btn" id="mode-online-btn">لعب أونلاين</button>
+            </div>
+          </div>
+
+          <div id="online-panel" class="panel online-panel hidden">
+            <h3>اللعب أونلاين</h3>
+            <div id="firebase-setup-msg" class="online-notice hidden">
+              <p><strong>Firebase غير مُعدّ</strong></p>
+              <p>أضف مفاتيح مشروعك في <code dir="ltr">js/firebase-config.js</code> — راجع <code>ONLINE_SETUP.md</code></p>
+            </div>
+            <div id="online-auth">
+              <label class="online-label" for="online-username">اسمك في اللعبة</label>
+              <input type="text" id="online-username" class="online-input" maxlength="24" placeholder="مثال: أحمد" autocomplete="nickname" />
+              <button type="button" class="btn-primary online-create-btn" id="online-create-btn">إنشاء غرفة</button>
+              <div class="online-join-row">
+                <input type="text" id="online-room-code-input" class="online-input online-code-input" maxlength="6" placeholder="ABC123" dir="ltr" autocomplete="off" />
+                <button type="button" class="btn-gold" id="online-join-btn">انضم</button>
+              </div>
+            </div>
+            <div id="online-lobby" class="hidden">
+              <div class="online-room-code-display">
+                <span>رمز الغرفة:</span>
+                <strong id="online-room-code-display" dir="ltr">------</strong>
+                <button type="button" class="btn-small" id="online-copy-code-btn">نسخ</button>
+              </div>
+              <p id="online-room-status" class="online-status-text" aria-live="polite"></p>
+              <ul id="online-lobby-players" class="online-lobby-list"></ul>
+              <button type="button" class="btn-gold" id="online-start-btn" hidden>ابدأ (2+ لاعبين)</button>
+              <button type="button" class="btn-outline online-leave-btn" id="online-leave-btn">مغادرة الغرفة</button>
+            </div>
+          </div>
+
+          <div class="panel" id="local-players-panel">
+            <h3>اللاعبون</h3>
+            <div id="players-list"></div>
+            <button class="btn-small" id="add-player-btn">+ إضافة لاعب</button>
+          </div>
+          <div class="panel panel-current-turn">
+            <h3>الدور الحالي</h3>
+            <div id="current-turn-display" class="current-turn-display" aria-live="polite">
+              <span id="current-player-dot" class="current-player-dot" aria-hidden="true" hidden></span>
+              <p id="current-player-name" class="current-player-name is-waiting">اضغط «ابدأ اللعب» لتحديد من يبدأ</p>
+            </div>
+            <p id="game-status" class="status-text">اضغط «ابدأ اللعب» لتحديد من يبدأ</p>
+            <p id="cards-loading-status" class="cards-loading-status hidden" aria-live="polite">جاري تحميل بطاقات الأسئلة…</p>
+          </div>
+          <div class="panel panel-level">
+            <h3>مرحلة الأسئلة</h3>
+            <div id="train-level-selector" class="level-selector" role="group" aria-label="اختيار مرحلة الأسئلة"></div>
+            <p id="train-pool-warning" class="train-pool-warning" hidden aria-live="polite"></p>
+          </div>
+          <div class="panel actions-panel">
+            <button class="btn-gold" id="start-game-btn">ابدأ اللعب</button>
+            <button class="btn-primary" id="draw-question-btn" disabled>اسحب سؤالاً</button>
+            <button class="btn-outline" id="roll-dice-btn" disabled>رمي النرد (بديل)</button>
+            <button class="btn-rewarded" id="train-reward-hint-btn" type="button">🎬 شاهد إعلاناً — تلميح (+2 خطوات)</button>
+          </div>
+          <div class="panel legend-panel">
+            <h3>دليل الرموز</h3>
+            <ul class="legend">
+              <li><span class="dot city"></span> مدينة — سؤال ± الرقم</li>
+              <li><span class="dot blue"></span> بداية سهم أزرق (نزول)</li>
+              <li><span class="dot yellow"></span> بداية سهم أصفر (صعود)</li>
+              <li><span class="dot barrier"></span> حاجز — تراجع 3 خطوات</li>
+              <li><span class="dot event"></span> حدث تاريخي</li>
+            </ul>
+          </div>
+        </aside>
+
+        <main class="board-wrap">
+          <div id="board" class="board" aria-label="لوحة اللعب"></div>
+          <div id="online-chat-panel" class="online-chat-panel hidden" aria-label="دردشة الغرفة">
+            <div class="online-chat-header">
+              <button type="button" id="online-chat-toggle" class="online-chat-toggle" aria-expanded="true" aria-controls="online-chat-body">
+                &#128172; &#1583;&#1585;&#1583;&#1588;&#1577;
+              </button>
+            </div>
+            <div id="online-chat-body" class="online-chat-body">
+              <div id="online-chat-toasts" class="online-chat-toasts" aria-live="polite"></div>
+              <div id="online-chat-messages" class="online-chat-messages" role="log" aria-label="رسائل الدردشة"></div>
+              <div id="online-chat-presets" class="online-chat-presets" role="group" aria-label="رسائل سريعة"></div>
+              <div class="online-chat-compose">
+                <input type="text" id="online-chat-input" class="online-chat-input" maxlength="200" placeholder="اكتب رسالة…" autocomplete="off" />
+                <button type="button" id="online-chat-send-btn" class="online-chat-send-btn btn-gold">إرسال</button>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      <div id="ad-banner-train" class="ad-banner ad-banner--game" data-ad-slot="banner-game" aria-label="إعلان"></div>
+    </section>
+
+    <!-- Memory Game -->
+    <section id="screen-memory" class="screen">
+      <header class="game-header">
+        <button class="btn-back" data-screen="menu">← القائمة</button>
+        <div class="game-header-brand">
+          <img src="assets/logo.png" alt="" class="game-header-logo" width="40" height="37" aria-hidden="true" />
+          <h2>بطاقات الذاكرة</h2>
+        </div>
+        <button class="btn-help" id="memory-rules-btn">؟ طريقة اللعب</button>
+      </header>
+      <div id="memory-stage-picker" class="memory-stage-picker">
+        <h3 class="memory-stage-picker-title">اختر المرحلة الكشفية</h3>
+        <p class="memory-stage-picker-hint">اختر مرحلة واحدة أو العب جميع المراحل بالترتيب</p>
+        <div id="memory-stage-selector" class="memory-stage-selector level-selector" role="group" aria-label="اختيار مرحلة الذاكرة"></div>
+        <button type="button" class="btn-gold memory-play-all-btn" id="memory-play-all-btn">▶ العب جميع المراحل بالترتيب</button>
+      </div>
+      <div id="memory-game-area" class="memory-game-area" hidden>
+        <div class="memory-stage-bar" data-stage="ashbal" data-stage-color="yellow">
+          <span id="memory-stage-badge" class="memory-stage-badge" aria-hidden="true">أشبال</span>
+          <span id="memory-stage-label" class="memory-stage-label">مرحلة أشبال (1 من 4)</span>
+          <span id="memory-global-progress" class="memory-global-progress">التقدّم الكلي: <strong id="memory-global-pairs">0</strong> / <span id="memory-global-total">27</span></span>
+        </div>
+        <div class="memory-stats">
+          <span>المحاولات: <strong id="memory-moves">0</strong></span>
+          <span>المرحلة: <strong id="memory-pairs">0</strong> / <span id="memory-total">12</span></span>
+          <span>الوقت: <strong id="memory-time">0:00</strong></span>
+        </div>
+        <div class="memory-progress-wrap" aria-hidden="true">
+          <div class="memory-progress-bar"><div id="memory-progress-fill" class="memory-progress-fill"></div></div>
+        </div>
+        <p id="memory-message" class="memory-message">اقلب بطاقتين وابحث عن الزوج المتطابق</p>
+        <div id="memory-board" class="memory-board"></div>
+        <div class="memory-actions">
+          <button class="btn-gold memory-next-stage" id="memory-next-stage" type="button" hidden>المرحلة التالية →</button>
+          <button class="btn-rewarded" id="memory-reward-hint-btn" type="button">🎬 شاهد إعلاناً — كشف زوج واحد</button>
+          <button class="btn-outline memory-change-stage" id="memory-change-stage" type="button">↩ اختيار مرحلة أخرى</button>
+          <button class="btn-gold" id="memory-restart" type="button">العب مجدداً</button>
+        </div>
+      </div>
+      <div id="ad-banner-memory" class="ad-banner ad-banner--game" data-ad-slot="banner-game" aria-label="إعلان"></div>
+    </section>
+  </div>
+
+  <!-- Native bottom tab bar (Capacitor only) -->
+  <nav id="native-bottom-nav" class="native-bottom-nav" aria-label="التنقل الرئيسي" hidden>
+    <button type="button" class="native-tab" data-screen="menu" aria-current="page">
+      <span class="native-tab-icon" aria-hidden="true">🏠</span>
+      <span class="native-tab-label">الرئيسية</span>
+    </button>
+    <button type="button" class="native-tab" data-screen="train">
+      <span class="native-tab-icon" aria-hidden="true">🚂</span>
+      <span class="native-tab-label">القطار</span>
+    </button>
+    <button type="button" class="native-tab" data-screen="memory">
+      <span class="native-tab-icon" aria-hidden="true">🃏</span>
+      <span class="native-tab-label">الذاكرة</span>
+    </button>
+    <button type="button" class="native-tab" data-screen="about">
+      <span class="native-tab-icon" aria-hidden="true">ℹ️</span>
+      <span class="native-tab-label">عن اللعبة</span>
+    </button>
+  </nav>
+
+  <!-- Modals -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div class="modal" role="dialog" aria-modal="true">
+      <button class="modal-close" aria-label="إغلاق">×</button>
+      <h3 id="modal-title"></h3>
+      <div id="modal-body"></div>
+      <div id="modal-actions" class="modal-actions"></div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

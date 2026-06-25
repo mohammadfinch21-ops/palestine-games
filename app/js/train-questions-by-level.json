@@ -1,0 +1,926 @@
+{
+  "version": 3,
+  "source": "كرت لعبة قطار فلسطين.pdf",
+  "levelOrder": [
+    "ashbal",
+    "scout",
+    "rover",
+    "advanced"
+  ],
+  "levels": {
+    "ashbal": {
+      "id": "ashbal",
+      "nameArabic": "أشبال",
+      "color": "yellow",
+      "cards": [
+        {
+          "id": "q-p15-00",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "بحيرة تقع على حدود فلسطين، ما اسمها",
+          "options": [
+            "بحيرة القرعون",
+            "بحيرة فكتوريا",
+            "بحيرة طبريا"
+          ],
+          "correctAnswer": "بحيرة طبريا",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p15-02",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "ما آخر مدينة في جنوب فلسطين",
+          "options": [
+            "مدينة الخليل",
+            "مدينة جنين"
+          ],
+          "correctAnswer": "مدينة الخليل",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p15-10",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "ما أشهر أعمال السلطان سليمان القانوني في القدس",
+          "options": [
+            "بناء سور مدينة",
+            "بناء المصلى المرواني"
+          ],
+          "correctAnswer": "بناء سور مدينة",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p15-11",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "ما أكبر مدينة في جنوب فلسطين",
+          "options": [
+            "غزة",
+            "عكا",
+            "طبريا"
+          ],
+          "correctAnswer": "طبريا",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p15-15",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "كم مضاعف أجر الصلاة في المسجد الأقصى المبارك",
+          "options": [
+            "خمسمائة صلاة",
+            "خمسمائة ألف صلاة"
+          ],
+          "correctAnswer": "خمسمائة صلاة",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p17-09",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "كم تبلغ مساحة فلسطين تقريباً",
+          "options": [
+            "سبعة وعشرون ألف كيلومتر مربع",
+            "خمسة عشر ألف كيلومتر مربع",
+            "أربعون ألف كيلومتر مربع",
+            "عشرة آلاف كيلومتر مربع"
+          ],
+          "correctAnswer": "سبعة وعشرون ألف كيلومتر مربع",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p17-10",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "ما الديانة الرسمية في فلسطين",
+          "options": [
+            "الإسلام",
+            "الديانة اليهودية"
+          ],
+          "correctAnswer": "الإسلام",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p17-11",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "ما ألوان العلم الفلسطيني",
+          "options": [
+            "أخضر وأبيض وأسود فقط",
+            "أحمر وأبيض وأسود فقط",
+            "أزرق وأبيض وأخضر"
+          ],
+          "correctAnswer": "أخضر وأبيض وأسود فقط",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p19-19",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "متى حدثت نكبة فلسطين",
+          "options": [
+            "1948",
+            "1967",
+            "1940"
+          ],
+          "correctAnswer": "1948",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p19-20",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "اذكر ثلاثة معالم دينية في القدس",
+          "options": [
+            "المسجد الأقصى",
+            "كنيسة القيامة",
+            "حائط البراق",
+            "جبل الهيكل"
+          ],
+          "correctAnswer": "المسجد الأقصى",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p19-22",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "أين موقع مدينة بئر السبع",
+          "options": [
+            "النقب",
+            "النقب الشمالي",
+            "النقب الجنوبي"
+          ],
+          "correctAnswer": "النقب",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p19-26",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "أين موقع مدينة حيفا",
+          "options": [
+            "حيفا",
+            "القدس",
+            "غزة",
+            "نابلس"
+          ],
+          "correctAnswer": "حيفا",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p21-08",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "ما شكل فلسطين على الخريطة",
+          "options": [
+            "مثلثي",
+            "مربعي"
+          ],
+          "correctAnswer": "مثلثي",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p21-12",
+          "level": "ashbal",
+          "levelName": "أشبال",
+          "color": "yellow",
+          "question": "ما المعجزة المرتبطة بالمسجد الأقصى",
+          "options": [
+            "الإسراء والمعراج",
+            "نزول القرآن الكريم"
+          ],
+          "correctAnswer": "الإسراء والمعراج",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        }
+      ]
+    },
+    "scout": {
+      "id": "scout",
+      "nameArabic": "كشاف",
+      "color": "green",
+      "cards": [
+        {
+          "id": "q-p23-06",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "ما ترتيب ألوان العلم الفلسطيني من الأعلى إلى الأسفل",
+          "options": [
+            "أخضر وأبيض وأسود فقط",
+            "أحمر وأبيض وأسود فقط",
+            "أزرق وأبيض وأخضر"
+          ],
+          "correctAnswer": "أخضر وأبيض وأسود فقط",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p23-12",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "من الذي أحضر منبر نور الدين إلى المسجد الأقصى",
+          "options": [
+            "صلاح الدين الأيوبي",
+            "عبد القادر الحسيني",
+            "سليم الأول",
+            "محمد علي باشا"
+          ],
+          "correctAnswer": "صلاح الدين الأيوبي",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p23-15",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "من الذي أمر ببناء أسوار لمدينة القدس",
+          "options": [
+            "سليمان القانوني",
+            "صلاح الدين",
+            "هيرودس"
+          ],
+          "correctAnswer": "سليمان القانوني",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p25-03",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "كم سنة بقيت القدس في سلطة الدولة العثمانية",
+          "options": [
+            "أربعمائة سنة",
+            "مائتا سنة",
+            "ستمائة سنة",
+            "مئة سنة"
+          ],
+          "correctAnswer": "أربعمائة سنة",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p25-04",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "كم سنة استمر الحكم الإسلامي لفلسطين",
+          "options": [
+            "ثلاثة عشر قرناً",
+            "خمسة قرون",
+            "قرنان",
+            "ألف سنة"
+          ],
+          "correctAnswer": "ثلاثة عشر قرناً",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p27-16",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "كم يشكل اللقب من مساحة فلسطين",
+          "options": [
+            "سبعة وعشرون ألف كيلومتر مربع",
+            "خمسة عشر ألف كيلومتر مربع",
+            "أربعون ألف كيلومتر مربع",
+            "عشرة آلاف كيلومتر مربع"
+          ],
+          "correctAnswer": "سبعة وعشرون ألف كيلومتر مربع",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p27-17",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "ما عاصمة فلسطين",
+          "options": [
+            "القدس",
+            "غزة",
+            "يافا"
+          ],
+          "correctAnswer": "القدس",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-scout-01",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "متى صدر وعد بلفور؟",
+          "options": [
+            "1917",
+            "1948",
+            "1920",
+            "1936"
+          ],
+          "correctAnswer": "1917",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-scout-02",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "متى اندلعت ثورة فلسطين الكبرى؟",
+          "options": [
+            "1936",
+            "1948",
+            "1929",
+            "1917"
+          ],
+          "correctAnswer": "1936",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-scout-03",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "ما البحر الذي يحد فلسطين من الغرب؟",
+          "options": [
+            "البحر المتوسط",
+            "البحر الأحمر",
+            "البحر الميت",
+            "البحر الأسود"
+          ],
+          "correctAnswer": "البحر المتوسط",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-scout-04",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "ما اسم الحركة التي عُرفت بالحركة القومية العربية؟",
+          "options": [
+            "الحركة القومية العربية",
+            "حزب البعث",
+            "الإخوان المسلمين",
+            "حركة فتح"
+          ],
+          "correctAnswer": "الحركة القومية العربية",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-scout-05",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "من فتح مدينة عكا في العصر الإسلامي؟",
+          "options": [
+            "عمرو العاصي",
+            "خالد الوليد",
+            "أبو عبيدة",
+            "سعد وقاص"
+          ],
+          "correctAnswer": "عمرو العاصي",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-scout-06",
+          "level": "scout",
+          "levelName": "كشاف",
+          "color": "green",
+          "question": "ما الفرق الزمني بين النكبة والنكسة؟",
+          "options": [
+            "تسعة عشر سنة",
+            "عشر سنوات",
+            "ثلاثون سنة",
+            "خمس سنوات"
+          ],
+          "correctAnswer": "تسعة عشر سنة",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        }
+      ]
+    },
+    "rover": {
+      "id": "rover",
+      "nameArabic": "جوالة",
+      "color": "red",
+      "cards": [
+        {
+          "id": "q-p31-06",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "اذكر ثلاثة من مساجد المسجد الأقصى المبارك",
+          "options": [
+            "المسجد القبلي",
+            "المسجد المرواني",
+            "مسجد عمر",
+            "قبة الصخرة"
+          ],
+          "correctAnswer": "المسجد القبلي",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p31-07",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "من أبا حامد الذي قتل والده خلال انتفاضة الأقصى عام 2000",
+          "options": [
+            "فارس عودة",
+            "محمد الدرة",
+            "إبراهيم سلامة",
+            "عبد الرحمن"
+          ],
+          "correctAnswer": "فارس عودة",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p31-08",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "اذكر ثلاث مدن فلسطينية على ساحل البحر المتوسط",
+          "options": [
+            "يافا",
+            "عكا",
+            "غزة",
+            "حيفا"
+          ],
+          "correctAnswer": "يافا",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p31-09",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "من الذي أحرق المسجد الأقصى وفي أي تاريخ",
+          "options": [
+            "دينيس مايكل روهان",
+            "باروخ غولدستين",
+            "شارون",
+            "يغال أمير"
+          ],
+          "correctAnswer": "دينيس مايكل روهان",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p31-12",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "ماذا تسمى الأراضي التي يجري فيها نهل الأردن",
+          "options": [
+            "الغور",
+            "النقب",
+            "الجليل",
+            "الساحل"
+          ],
+          "correctAnswer": "الغور",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p31-13",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "ما أرض المحشر والمنشر",
+          "options": [
+            "عرفات",
+            "مزدلفة",
+            "المدينة المنورة"
+          ],
+          "correctAnswer": "عرفات",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p33-00",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "اذكر خمس قبب للمسجد الأقصى المبارك",
+          "options": [
+            "قبة الصخرة",
+            "قبة السلسلة",
+            "قبة الخليل",
+            "قبة المعراج",
+            "قبة داود"
+          ],
+          "correctAnswer": "قبة الصخرة",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p33-03",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "أين موقع دير القديس يوحنا المعمدان",
+          "options": [
+            "أريحا",
+            "الناصرة",
+            "بيت لحم",
+            "القدس"
+          ],
+          "correctAnswer": "أريحا",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p33-10",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "ما النكسة وفي أي سنة",
+          "options": [
+            "1967",
+            "1948",
+            "1973",
+            "1956"
+          ],
+          "correctAnswer": "1967",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p33-11",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "ما النكبة وفي أي سنة",
+          "options": [
+            "1948",
+            "1967",
+            "1917",
+            "1936"
+          ],
+          "correctAnswer": "1948",
+          "stepsCorrect": 3,
+          "stepsWrong": 1,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "q-p33-14",
+          "level": "rover",
+          "levelName": "جوالة",
+          "color": "red",
+          "question": "ما المدينة الفلسطينية التي يُطلق عليها اسم دمشق الصغرى",
+          "options": [
+            "نابلس",
+            "الخليل",
+            "غزة",
+            "يافا"
+          ],
+          "correctAnswer": "نابلس",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        }
+      ]
+    },
+    "advanced": {
+      "id": "advanced",
+      "nameArabic": "المتقدم",
+      "color": "brown",
+      "cards": [
+        {
+          "id": "q-p35-27",
+          "level": "advanced",
+          "levelName": "المتقدم",
+          "color": "brown",
+          "question": "أين موقع قرية كفر قاسم بالنسبة لفلسطين",
+          "options": [
+            "شمال فلسطين",
+            "جنوب فلسطين",
+            "شرق فلسطين",
+            "غرب فلسطين"
+          ],
+          "correctAnswer": "شمال فلسطين",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-advanced-01",
+          "level": "advanced",
+          "levelName": "المتقدم",
+          "color": "brown",
+          "question": "اذكر ثلاث مدن فلسطينية جبلية",
+          "options": [
+            "نابلس",
+            "الخليل",
+            "جنين",
+            "صفد"
+          ],
+          "correctAnswer": "نابلس",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-advanced-02",
+          "level": "advanced",
+          "levelName": "المتقدم",
+          "color": "brown",
+          "question": "ما المدينة الفلسطينية التي يُطلق عليها اسم دمشق الصغرى؟",
+          "options": [
+            "نابلس",
+            "الخليل",
+            "غزة",
+            "يافا"
+          ],
+          "correctAnswer": "نابلس",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-advanced-03",
+          "level": "advanced",
+          "levelName": "المتقدم",
+          "color": "brown",
+          "question": "كم يبلغ طول فلسطين من الشمال إلى الجنوب تقريباً؟",
+          "options": [
+            "أربعمائة وسبعون كيلومتر",
+            "مائتان وسبعون كيلومتر",
+            "سبعمائة كيلومتر",
+            "مئة وخمسون كيلومتر"
+          ],
+          "correctAnswer": "أربعمائة وسبعون كيلومتر",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-advanced-04",
+          "level": "advanced",
+          "levelName": "المتقدم",
+          "color": "brown",
+          "question": "ما أخفض البقاع على سطح الأرض في فلسطين؟",
+          "options": [
+            "البحر الميت",
+            "غور الأردن",
+            "سهل الساحل",
+            "وادي عزة"
+          ],
+          "correctAnswer": "البحر الميت",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-advanced-05",
+          "level": "advanced",
+          "levelName": "المتقدم",
+          "color": "brown",
+          "question": "من محمد عبد الرؤوف القدوة الحسيني؟",
+          "options": [
+            "أبو جهاد",
+            "أبو عمار",
+            "أبو إياد",
+            "أبو علي"
+          ],
+          "correctAnswer": "أبو جهاد",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-advanced-06",
+          "level": "advanced",
+          "levelName": "المتقدم",
+          "color": "brown",
+          "question": "ما المدينة التي انطلقت منها ثورة القدس؟",
+          "options": [
+            "القدس",
+            "يافا",
+            "نابلس",
+            "غزة"
+          ],
+          "correctAnswer": "القدس",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        },
+        {
+          "id": "manual-advanced-07",
+          "level": "advanced",
+          "levelName": "المتقدم",
+          "color": "brown",
+          "question": "ما أعلى قمة جبلية في فلسطين؟",
+          "options": [
+            "جبل جرزيم",
+            "جبل عتابا",
+            "جبل الكرم",
+            "جبل حيفا"
+          ],
+          "correctAnswer": "جبل جرزيم",
+          "stepsCorrect": 3,
+          "stepsWrong": 2,
+          "isTrueFalse": false,
+          "validated": true
+        }
+      ]
+    }
+  },
+  "stats": {
+    "source_total": 784,
+    "candidates": 476,
+    "total_playable": 46,
+    "excluded": 283,
+    "excluded_invalid_question": 245,
+    "excluded_invalid_options": 38,
+    "excluded_no_level": 160,
+    "excluded_cover": 308,
+    "excluded_duplicate": 0,
+    "ashbal": 14,
+    "scout": 13,
+    "rover": 11,
+    "advanced": 8,
+    "excluded_samples": [
+      {
+        "id": "q-p03-00",
+        "reason": "invalid_question",
+        "q": "فمر سليمان بن عبد الملكء واتارالجامع اللببض وقبر الفضل بن ال"
+      },
+      {
+        "id": "q-p03-04",
+        "reason": "invalid_question",
+        "q": "لوجد 12 عامودا لهبه الصحره مي المسحد اللقص المبار صح أم خطا؟"
+      },
+      {
+        "id": "q-p03-06",
+        "reason": "invalid_question",
+        "q": "بنحون العم المسمبني من البع ألوان اللسود الأصفر اللخفر اللحم"
+      },
+      {
+        "id": "q-p03-07",
+        "reason": "invalid_question",
+        "q": "لرملا9 الدود مىافم الفطتم خفاوا إلى عتمة السجون"
+      },
+      {
+        "id": "q-p03-08",
+        "reason": "invalid_question",
+        "q": "لرمراحول الأبيض مي اعلم الئ بياض الثلج اممطلأم طبلاوا"
+      },
+      {
+        "id": "q-p03-09",
+        "reason": "invalid_question",
+        "q": "لرمل ا9 محمر مى اعم الفلسطينى |لى الشجاعة صح أم خطاء ام؟"
+      },
+      {
+        "id": "q-p03-10",
+        "reason": "invalid_question",
+        "q": "لرمر ام9 احصر مي امم الفلسطينى إلى اللشجار فى المسجد اللقصى "
+      },
+      {
+        "id": "q-p03-12",
+        "reason": "invalid_question",
+        "q": "صح أو خطأ"
+      },
+      {
+        "id": "q-p15-13",
+        "reason": "missing_options",
+        "q": "أين أرض المنشر والمحشر؟"
+      },
+      {
+        "id": "q-p21-14",
+        "reason": "missing_options",
+        "q": "من أسس مدينة اللد"
+      },
+      {
+        "id": "q-p23-02",
+        "reason": "missing_options",
+        "q": "ما اشيء الدي م يسمح السمل صللح الدبن اللبوبي للصليبن باخده م"
+      },
+      {
+        "id": "q-p23-14",
+        "reason": "missing_options",
+        "q": "اعترمت بالاح الصهيوني ومن الدولة الثانيةع"
+      }
+    ],
+    "manual_added": 13
+  }
+}

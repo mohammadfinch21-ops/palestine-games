@@ -1,0 +1,27 @@
+# Dependencies (if using local serve tools)
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Generated PDF extraction previews (keep logo PNGs)
+assets/pdf-page-*-preview.png
+assets/pdf-img-*.png
+assets/pdf-extract-log.txt
+assets/logo-crop-debug.txt
+assets/header-banner.png
+assets/logo-crop-*.png
+
+# Generated deploy bundle (drag-and-drop)
+netlify-deploy/
+
+# Secrets — never commit real ad keys in separate env files
+.env
+.env.local

@@ -1,0 +1,29 @@
+{
+  "name": "palestine-train-game-mobile",
+  "version": "1.0.0",
+  "description": "Capacitor wrapper — لعبة قطار فلسطين (Android + iOS)",
+  "private": true,
+  "scripts": {
+    "cap:sync": "npx cap sync",
+    "cap:open:android": "npx cap open android",
+    "cap:open:ios": "npx cap open ios",
+    "android:debug": "cd android && gradlew assembleDebug",
+    "android:release": "cd android && gradlew assembleRelease",
+    "ios:sync": "npx cap sync ios && npx cap open ios"
+  },
+  "dependencies": {
+    "@capacitor-community/admob": "^6.2.0",
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/app": "^6.0.2",
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/ios": "^6.2.0",
+    "@capacitor/splash-screen": "^6.0.3",
+    "@capacitor/status-bar": "^6.0.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  },
+  "capacitor": {
+    "platforms": ["android", "ios"]
+  }
+}

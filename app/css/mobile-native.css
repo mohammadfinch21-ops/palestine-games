@@ -1,0 +1,453 @@
+/* ===== Native Capacitor shell — only when body.native-app ===== */
+
+html.native-app,
+html.native-app body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+html.native-app body {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+html.native-app #app {
+  position: relative;
+  min-height: 100dvh;
+  height: 100dvh;
+  padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  overflow: hidden;
+}
+
+/* Full-bleed screens with bottom nav clearance */
+html.native-app .screen {
+  position: absolute;
+  inset: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  min-height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  display: none;
+  opacity: 0;
+  transform: translateX(0);
+  pointer-events: none;
+}
+
+html.native-app .screen.active {
+  display: block;
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+}
+
+html.native-app .screen.screen-animating {
+  display: block;
+  z-index: 2;
+}
+
+html.native-app .screen.slide-out-left {
+  animation: nativeSlideOutLeft 0.28s ease forwards;
+  z-index: 1;
+}
+
+html.native-app .screen.slide-out-right {
+  animation: nativeSlideOutRight 0.28s ease forwards;
+  z-index: 1;
+}
+
+html.native-app .screen.slide-in-right {
+  animation: nativeSlideInRight 0.28s ease forwards;
+  z-index: 2;
+}
+
+html.native-app .screen.slide-in-left {
+  animation: nativeSlideInLeft 0.28s ease forwards;
+  z-index: 2;
+}
+
+@keyframes nativeSlideInRight {
+  from { transform: translateX(24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes nativeSlideInLeft {
+  from { transform: translateX(-24px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes nativeSlideOutLeft {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(-24px); opacity: 0; }
+}
+
+@keyframes nativeSlideOutRight {
+  from { transform: translateX(0); opacity: 1; }
+  to { transform: translateX(24px); opacity: 0; }
+}
+
+/* Hide web-style chrome */
+html.native-app .btn-back,
+html.native-app .menu-footer,
+html.native-app .menu-cards,
+html.native-app #ad-banner-sticky {
+  display: none !important;
+}
+
+html.native-app #screen-menu {
+  padding-top: max(1.25rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
+  padding-bottom: 1rem;
+  overflow: visible;
+  justify-content: flex-start;
+}
+
+html.native-app .menu-header {
+  overflow: visible;
+  padding-top: max(0.75rem, calc(env(safe-area-inset-top, 0px) + 0.5rem));
+}
+
+html.native-app .brand-lockup {
+  overflow: visible;
+}
+
+html.native-app .brand-logo {
+  padding-top: 0.5rem;
+  clip-path: none;
+  -webkit-clip-path: none;
+  overflow: visible;
+  max-height: none;
+}
+
+html.native-app .brand-logo--emblem {
+  width: clamp(88px, 22vw, 108px);
+  max-width: 108px;
+}
+
+html.native-app #screen-menu.active {
+  display: flex;
+}
+
+/* Compact native header */
+html.native-app .game-header {
+  padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  padding-inline: 0.75rem;
+  min-height: 48px;
+}
+
+html.native-app .game-header h2 {
+  font-size: 1rem;
+}
+
+html.native-app .brand-logo,
+html.native-app .game-header-logo,
+html.native-app .about-logo,
+html.native-app .question-card-emblem {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+html.native-app .game-header-logo {
+  max-height: none;
+  clip-path: none;
+  -webkit-clip-path: none;
+  overflow: visible;
+}
+
+html.native-app .btn-sidebar-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: var(--white);
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+/* Train: scrollable board + bottom-sheet sidebar */
+html.native-app .train-layout {
+  grid-template-columns: 1fr;
+  min-height: auto;
+}
+
+html.native-app .train-sidebar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+  max-height: min(72vh, 520px);
+  transform: translateY(105%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  z-index: 850;
+  border-radius: 18px 18px 0 0;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.22);
+  border-left: none;
+  padding-bottom: 0.5rem;
+}
+
+html.native-app .train-sidebar.open {
+  transform: translateY(0);
+}
+
+html.native-app .train-sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 840;
+}
+
+html.native-app .train-sidebar-backdrop.open {
+  display: block;
+}
+
+html.native-app .board-wrap {
+  padding: 0.5rem;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  align-items: flex-start;
+  max-height: none;
+  flex: 1;
+}
+
+html.native-app .board {
+  min-width: 360px;
+  transform-origin: top center;
+}
+
+html.native-app .panel .btn-small,
+html.native-app .panel .btn-primary,
+html.native-app .panel .btn-gold,
+html.native-app .panel .btn-outline,
+html.native-app .panel .btn-rewarded {
+  min-height: 44px;
+}
+
+/* Memory: 3–4 column grid, polished flip */
+html.native-app .memory-board {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  max-width: 100%;
+  gap: 8px;
+  padding-inline: 0.75rem;
+}
+
+html.native-app .memory-card-inner {
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html.native-app .memory-card:not(.flipped):not(.matched):active .memory-card-inner {
+  transform: scale(0.96);
+}
+
+html.native-app .memory-stage-bar {
+  padding-inline: 0.75rem;
+}
+
+html.native-app .memory-stage-picker {
+  padding-inline: 0.75rem;
+}
+
+html.native-app .memory-stage-selector .memory-stage-btn {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+html.native-app .memory-play-all-btn {
+  min-height: 44px;
+  touch-action: manipulation;
+}
+
+html.native-app .memory-change-stage {
+  min-height: 44px;
+  width: min(100%, 360px);
+}
+
+html.native-app .memory-next-stage {
+  min-height: 44px;
+  width: min(100%, 360px);
+}
+
+html.native-app .memory-actions .btn-gold,
+html.native-app .memory-actions .btn-rewarded {
+  min-height: 44px;
+  width: min(100%, 360px);
+}
+
+@media (max-width: 360px) {
+  html.native-app .memory-board {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+/* About screen */
+html.native-app #screen-about {
+  background: linear-gradient(180deg, var(--green-dark), #0f2920);
+  color: var(--white);
+  padding: 1.25rem 1rem 2rem;
+}
+
+html.native-app .about-content {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+html.native-app .about-logo {
+  width: clamp(80px, 22vw, 96px);
+  height: auto;
+  margin: 0 auto 1rem;
+  background: transparent !important;
+}
+
+html.native-app .about-content h2 {
+  text-align: center;
+  color: var(--gold-light);
+  font-size: 1.35rem;
+  margin-bottom: 0.75rem;
+}
+
+html.native-app .about-content p {
+  line-height: 1.75;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 1rem;
+}
+
+html.native-app .about-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+html.native-app .about-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0.65rem 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  color: var(--gold-light);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+html.native-app .about-links a:active {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Bottom tab bar */
+.native-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-around;
+  min-height: 56px;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: rgba(26, 61, 46, 0.97);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.25);
+}
+
+.native-bottom-nav[hidden] {
+  display: none !important;
+}
+
+.native-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  min-height: 56px;
+  min-width: 44px;
+  padding: 0.35rem 0.25rem;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  font-family: inherit;
+  cursor: pointer;
+  transition: color 0.2s, transform 0.12s;
+}
+
+.native-tab-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.native-tab-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.native-tab[aria-current="page"] {
+  color: var(--gold-light);
+}
+
+.native-tab:active {
+  transform: scale(0.94);
+}
+
+/* Touch feedback on all interactive elements */
+html.native-app button:not(:disabled):active,
+html.native-app .menu-card:active,
+html.native-app .memory-card:active,
+html.native-app .option-btn:active {
+  transform: scale(0.97);
+  opacity: 0.92;
+}
+
+html.native-app .modal {
+  animation: nativeModalIn 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+@keyframes nativeModalIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Web-only: hide native-only controls */
+.btn-sidebar-toggle,
+.train-sidebar-backdrop {
+  display: none;
+}
+
+html.native-app .btn-sidebar-toggle {
+  display: flex;
+}
+
+html.native-app .online-chat-panel {
+  border-radius: 10px;
+}
+
+html.native-app .online-chat-preset-btn,
+html.native-app .online-chat-send-btn,
+html.native-app .online-chat-toggle {
+  min-height: 40px;
+}
+
+html.native-app .online-chat-input {
+  min-height: 40px;
+  font-size: 16px;
+}
+
+html.native-app .online-chat-body {
+  max-height: min(36vh, 260px);
+}

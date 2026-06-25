@@ -1,0 +1,21 @@
+﻿python : C:\Users\╟ط╙و╤و╙و\AppData\Roaming\Python\Python314\site-packages\torch\utils\data\dataloader.py:752: 
+UserWarning: 'pin_memory' argument is set as true but no accelerator is found, then device pinned memory won't be used.
+At C:\Users\السيريسي\AppData\Local\Temp\ps-script-de32b5bb-7ff5-4220-8d4d-82c44d389456.ps1:114 char:1
++ python -c "
++ ~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (C:\Users\╟ط╙و╤و... won't be used.:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  super().__init__(loader)
+Traceback (most recent call last):
+  File "<string>", line 21, in <module>
+    print(text[:250])
+    ~~~~~^^^^^^^^^^^^
+  File "C:\Python314\Lib\encodings\cp1256.py", line 19, in encode
+    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
+           ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'charmap' codec can't encode character '\u0665' in position 79: character maps to <undefined>
+=== p01-00 ===
+ع╞╨غ╔ ╚╟╚ ╟طع█╟╤╚╔
+
+=== p02-00 ===

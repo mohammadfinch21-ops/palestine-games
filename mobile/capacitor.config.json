@@ -1,0 +1,39 @@
+{
+  "appId": "com.scout4pal.palestinetrain",
+  "appName": "لعبة قطار فلسطين",
+  "webDir": "../app",
+  "server": {
+    "androidScheme": "https",
+    "iosScheme": "capacitor"
+  },
+  "plugins": {
+    "AdMob": {
+      "appIdAndroid": "ca-app-pub-3940256099942544~3347511713",
+      "appIdIOS": "ca-app-pub-3940256099942544~1458002511",
+      "initializeForTesting": true
+    },
+    "SplashScreen": {
+      "launchShowDuration": 1800,
+      "launchAutoHide": true,
+      "launchFadeOutDuration": 400,
+      "backgroundColor": "#1a3d2e",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false,
+      "androidScaleType": "CENTER_CROP",
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#1a3d2e"
+    }
+  },
+  "android": {
+    "allowMixedContent": false,
+    "backgroundColor": "#1a3d2e"
+  },
+  "ios": {
+    "contentInset": "automatic",
+    "backgroundColor": "#1a3d2e"
+  }
+}

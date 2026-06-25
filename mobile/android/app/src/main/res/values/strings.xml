@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">لعبة قطار فلسطين</string>
+    <string name="title_activity_main">لعبة قطار فلسطين</string>
+    <string name="package_name">com.scout4pal.palestinetrain</string>
+    <string name="custom_url_scheme">com.scout4pal.palestinetrain</string>
+</resources>

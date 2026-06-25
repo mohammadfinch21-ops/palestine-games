@@ -1,0 +1,32 @@
+﻿# Use this .gitignore when the Git repo root is the parent folder (not app/ only).
+
+# Mobile / Node
+mobile/node_modules/
+mobile/android/.gradle/
+mobile/android/app/build/
+mobile/ios/App/Pods/
+mobile/dist/
+mobile/.capacitor/
+
+# Python tooling in app/
+**/__pycache__/
+**/*.pyc
+**/.pytest_cache/
+
+# Logs and local build artifacts
+**/*-log.txt
+**/build-out.txt
+**/_test_*.png
+**/_test_*.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Secrets
+.env
+.env.local
+**/.env

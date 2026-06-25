@@ -1,0 +1,44 @@
+# Dev / build — not needed on the live site (Git-connected deploy only)
+*.py
+__pycache__/
+*.md
+*log*.txt
+*out*.txt
+build-out.txt
+verify-assets.txt
+_count.txt
+_ocr_sample.txt
+_memory_analysis.json
+_test_ocr_result.json
+_map_path.json
+prepare-netlify-deploy.ps1
+prepare-netlify-deploy.bat
+build_netlify_deploy.py
+netlify-deploy/
+
+# Git metadata (if present)
+.git/
+.gitignore
+
+# PDF extraction / logo debug artifacts (game uses pdf-page-1-preview.png + card JPEGs)
+assets/_*.png
+assets/_clip_*.png
+assets/_debug_*.png
+assets/_emblem*.png
+assets/_lockup_*.png
+assets/_pdf_img_*.png
+assets/_test_*.png
+assets/pdf-img-p*.png
+assets/logo-crop-*.png
+assets/header-banner.png
+assets/*-log.txt
+assets/*-debug.txt
+assets/extract-log.txt
+assets/question-cards-ocr-cache.json
+assets/pdf-analysis.json
+assets/map-rules-text.txt
+assets/images/memory/cards-meta.json
+assets/images/memory/cards-classified.json
+
+# Unreferenced PNG duplicates in questions/ (game uses q-p*.jpeg)
+assets/images/questions/map-*.png

@@ -1,0 +1,29 @@
+=== c:\Users\السيريسي\Downloads\لعبة قطار فلسطين\app\assets ===
+  apple-touch-icon.png  495
+  extract-log.txt  752
+  favicon-32.png  112
+  header-banner.png  399372
+  images  dir
+  logo-crop-debug.txt  61
+  logo-crop-header.png  523330
+  logo-crop-top.png  769280
+  logo-full.png  31063
+  logo-square.png  715
+  logo.png  7901
+  map-rules-text.txt  3834
+  pdf-extract-log.txt  5190
+  pdf-img-p1-0.png  153724
+  pdf-img-p1-1.png  939807
+  pdf-img-p1-2.png  939807
+  pdf-img-p1-3.png  939807
+  pdf-img-p1-4.png  939807
+  pdf-img-p1-5.png  939807
+  pdf-img-p1-6.png  939807
+  pdf-img-p1-7.png  939807
+  pdf-img-p1-8.png  939807
+  pdf-page-1-preview.png  3161135
+  الخارطة.pdf  7702596
+=== c:\Users\السيريسي\Downloads\لعبة قطار فلسطين\mobile\android\app\src\main\res\mipmap-xxhdpi ===
+  ic_launcher.png  412
+  ic_launcher_foreground.png  2155
+  ic_launcher_round.png  412

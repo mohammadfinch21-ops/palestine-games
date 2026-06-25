@@ -1,0 +1,1752 @@
+[
+  {
+    "file": "card-p01-00.jpeg",
+    "page": 1,
+    "idx": 0,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p01-01.jpeg",
+    "page": 1,
+    "idx": 1,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p01-02.jpeg",
+    "page": 1,
+    "idx": 2,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p01-03.jpeg",
+    "page": 1,
+    "idx": 3,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p01-04.jpeg",
+    "page": 1,
+    "idx": 4,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p01-05.jpeg",
+    "page": 1,
+    "idx": 5,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p01-06.jpeg",
+    "page": 1,
+    "idx": 6,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p01-07.jpeg",
+    "page": 1,
+    "idx": 7,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p01-08.jpeg",
+    "page": 1,
+    "idx": 8,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p01-09.jpeg",
+    "page": 1,
+    "idx": 9,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p02-00.jpeg",
+    "page": 2,
+    "idx": 0,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-01.jpeg",
+    "page": 2,
+    "idx": 1,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-02.jpeg",
+    "page": 2,
+    "idx": 2,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-03.jpeg",
+    "page": 2,
+    "idx": 3,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-04.jpeg",
+    "page": 2,
+    "idx": 4,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-05.jpeg",
+    "page": 2,
+    "idx": 5,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-06.jpeg",
+    "page": 2,
+    "idx": 6,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-07.jpeg",
+    "page": 2,
+    "idx": 7,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-08.jpeg",
+    "page": 2,
+    "idx": 8,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-09.jpeg",
+    "page": 2,
+    "idx": 9,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-10.jpeg",
+    "page": 2,
+    "idx": 10,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-11.jpeg",
+    "page": 2,
+    "idx": 11,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-12.jpeg",
+    "page": 2,
+    "idx": 12,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-13.jpeg",
+    "page": 2,
+    "idx": 13,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-14.jpeg",
+    "page": 2,
+    "idx": 14,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p02-15.jpeg",
+    "page": 2,
+    "idx": 15,
+    "stage": "ashbal",
+    "stageNameArabic": "أشبال",
+    "stageColor": "yellow",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p03-00.jpeg",
+    "page": 3,
+    "idx": 0,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-01.jpeg",
+    "page": 3,
+    "idx": 1,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-02.jpeg",
+    "page": 3,
+    "idx": 2,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-03.jpeg",
+    "page": 3,
+    "idx": 3,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-04.jpeg",
+    "page": 3,
+    "idx": 4,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-05.jpeg",
+    "page": 3,
+    "idx": 5,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-06.jpeg",
+    "page": 3,
+    "idx": 6,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-07.jpeg",
+    "page": 3,
+    "idx": 7,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-08.jpeg",
+    "page": 3,
+    "idx": 8,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-09.jpeg",
+    "page": 3,
+    "idx": 9,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-10.jpeg",
+    "page": 3,
+    "idx": 10,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-11.jpeg",
+    "page": 3,
+    "idx": 11,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-12.jpeg",
+    "page": 3,
+    "idx": 12,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-13.jpeg",
+    "page": 3,
+    "idx": 13,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-14.jpeg",
+    "page": 3,
+    "idx": 14,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p03-15.jpeg",
+    "page": 3,
+    "idx": 15,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p04-00.jpeg",
+    "page": 4,
+    "idx": 0,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-01.jpeg",
+    "page": 4,
+    "idx": 1,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-02.jpeg",
+    "page": 4,
+    "idx": 2,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-03.jpeg",
+    "page": 4,
+    "idx": 3,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-04.jpeg",
+    "page": 4,
+    "idx": 4,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-05.jpeg",
+    "page": 4,
+    "idx": 5,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-06.jpeg",
+    "page": 4,
+    "idx": 6,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-07.jpeg",
+    "page": 4,
+    "idx": 7,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-08.jpeg",
+    "page": 4,
+    "idx": 8,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-09.jpeg",
+    "page": 4,
+    "idx": 9,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-10.jpeg",
+    "page": 4,
+    "idx": 10,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-11.jpeg",
+    "page": 4,
+    "idx": 11,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-12.jpeg",
+    "page": 4,
+    "idx": 12,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-13.jpeg",
+    "page": 4,
+    "idx": 13,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-14.jpeg",
+    "page": 4,
+    "idx": 14,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p04-15.jpeg",
+    "page": 4,
+    "idx": 15,
+    "stage": "scout",
+    "stageNameArabic": "كشاف",
+    "stageColor": "green",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p05-00.jpeg",
+    "page": 5,
+    "idx": 0,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-01.jpeg",
+    "page": 5,
+    "idx": 1,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-02.jpeg",
+    "page": 5,
+    "idx": 2,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-03.jpeg",
+    "page": 5,
+    "idx": 3,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-04.jpeg",
+    "page": 5,
+    "idx": 4,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-05.jpeg",
+    "page": 5,
+    "idx": 5,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-06.jpeg",
+    "page": 5,
+    "idx": 6,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-07.jpeg",
+    "page": 5,
+    "idx": 7,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-08.jpeg",
+    "page": 5,
+    "idx": 8,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-09.jpeg",
+    "page": 5,
+    "idx": 9,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-10.jpeg",
+    "page": 5,
+    "idx": 10,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-11.jpeg",
+    "page": 5,
+    "idx": 11,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-12.jpeg",
+    "page": 5,
+    "idx": 12,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-13.jpeg",
+    "page": 5,
+    "idx": 13,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-14.jpeg",
+    "page": 5,
+    "idx": 14,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p05-15.jpeg",
+    "page": 5,
+    "idx": 15,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p06-00.jpeg",
+    "page": 6,
+    "idx": 0,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-01.jpeg",
+    "page": 6,
+    "idx": 1,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-02.jpeg",
+    "page": 6,
+    "idx": 2,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-03.jpeg",
+    "page": 6,
+    "idx": 3,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-04.jpeg",
+    "page": 6,
+    "idx": 4,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-05.jpeg",
+    "page": 6,
+    "idx": 5,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-06.jpeg",
+    "page": 6,
+    "idx": 6,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-07.jpeg",
+    "page": 6,
+    "idx": 7,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-08.jpeg",
+    "page": 6,
+    "idx": 8,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-09.jpeg",
+    "page": 6,
+    "idx": 9,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-10.jpeg",
+    "page": 6,
+    "idx": 10,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-11.jpeg",
+    "page": 6,
+    "idx": 11,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-12.jpeg",
+    "page": 6,
+    "idx": 12,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-13.jpeg",
+    "page": 6,
+    "idx": 13,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-14.jpeg",
+    "page": 6,
+    "idx": 14,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p06-15.jpeg",
+    "page": 6,
+    "idx": 15,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p07-00.jpeg",
+    "page": 7,
+    "idx": 0,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p07-01.jpeg",
+    "page": 7,
+    "idx": 1,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p07-02.jpeg",
+    "page": 7,
+    "idx": 2,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p07-03.jpeg",
+    "page": 7,
+    "idx": 3,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p07-04.jpeg",
+    "page": 7,
+    "idx": 4,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p07-05.jpeg",
+    "page": 7,
+    "idx": 5,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p07-06.jpeg",
+    "page": 7,
+    "idx": 6,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p08-00.jpeg",
+    "page": 8,
+    "idx": 0,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-01.jpeg",
+    "page": 8,
+    "idx": 1,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-02.jpeg",
+    "page": 8,
+    "idx": 2,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-03.jpeg",
+    "page": 8,
+    "idx": 3,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-04.jpeg",
+    "page": 8,
+    "idx": 4,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-05.jpeg",
+    "page": 8,
+    "idx": 5,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-06.jpeg",
+    "page": 8,
+    "idx": 6,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-07.jpeg",
+    "page": 8,
+    "idx": 7,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-08.jpeg",
+    "page": 8,
+    "idx": 8,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-09.jpeg",
+    "page": 8,
+    "idx": 9,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-10.jpeg",
+    "page": 8,
+    "idx": 10,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-11.jpeg",
+    "page": 8,
+    "idx": 11,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-12.jpeg",
+    "page": 8,
+    "idx": 12,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-13.jpeg",
+    "page": 8,
+    "idx": 13,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-14.jpeg",
+    "page": 8,
+    "idx": 14,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p08-15.jpeg",
+    "page": 8,
+    "idx": 15,
+    "stage": "advanced",
+    "stageNameArabic": "متقدم",
+    "stageColor": "brown",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p09-00.jpeg",
+    "page": 9,
+    "idx": 0,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-01.jpeg",
+    "page": 9,
+    "idx": 1,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-02.jpeg",
+    "page": 9,
+    "idx": 2,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-03.jpeg",
+    "page": 9,
+    "idx": 3,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-04.jpeg",
+    "page": 9,
+    "idx": 4,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-05.jpeg",
+    "page": 9,
+    "idx": 5,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-06.jpeg",
+    "page": 9,
+    "idx": 6,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-07.jpeg",
+    "page": 9,
+    "idx": 7,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-08.jpeg",
+    "page": 9,
+    "idx": 8,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-09.jpeg",
+    "page": 9,
+    "idx": 9,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-10.jpeg",
+    "page": 9,
+    "idx": 10,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-11.jpeg",
+    "page": 9,
+    "idx": 11,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-12.jpeg",
+    "page": 9,
+    "idx": 12,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-13.jpeg",
+    "page": 9,
+    "idx": 13,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-14.jpeg",
+    "page": 9,
+    "idx": 14,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p09-15.jpeg",
+    "page": 9,
+    "idx": 15,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p10-00.jpeg",
+    "page": 10,
+    "idx": 0,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-01.jpeg",
+    "page": 10,
+    "idx": 1,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-02.jpeg",
+    "page": 10,
+    "idx": 2,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-03.jpeg",
+    "page": 10,
+    "idx": 3,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-04.jpeg",
+    "page": 10,
+    "idx": 4,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-05.jpeg",
+    "page": 10,
+    "idx": 5,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-06.jpeg",
+    "page": 10,
+    "idx": 6,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-07.jpeg",
+    "page": 10,
+    "idx": 7,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-08.jpeg",
+    "page": 10,
+    "idx": 8,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-09.jpeg",
+    "page": 10,
+    "idx": 9,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-10.jpeg",
+    "page": 10,
+    "idx": 10,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-11.jpeg",
+    "page": 10,
+    "idx": 11,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-12.jpeg",
+    "page": 10,
+    "idx": 12,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-13.jpeg",
+    "page": 10,
+    "idx": 13,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-14.jpeg",
+    "page": 10,
+    "idx": 14,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p10-15.jpeg",
+    "page": 10,
+    "idx": 15,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p11-00.jpeg",
+    "page": 11,
+    "idx": 0,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-01.jpeg",
+    "page": 11,
+    "idx": 1,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-02.jpeg",
+    "page": 11,
+    "idx": 2,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-03.jpeg",
+    "page": 11,
+    "idx": 3,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-04.jpeg",
+    "page": 11,
+    "idx": 4,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-05.jpeg",
+    "page": 11,
+    "idx": 5,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-06.jpeg",
+    "page": 11,
+    "idx": 6,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-07.jpeg",
+    "page": 11,
+    "idx": 7,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-08.jpeg",
+    "page": 11,
+    "idx": 8,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-09.jpeg",
+    "page": 11,
+    "idx": 9,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-10.jpeg",
+    "page": 11,
+    "idx": 10,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-11.jpeg",
+    "page": 11,
+    "idx": 11,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-12.jpeg",
+    "page": 11,
+    "idx": 12,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p11-13.jpeg",
+    "page": 11,
+    "idx": 13,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": true,
+    "isPalestine": true
+  },
+  {
+    "file": "card-p12-00.jpeg",
+    "page": 12,
+    "idx": 0,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-01.jpeg",
+    "page": 12,
+    "idx": 1,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-02.jpeg",
+    "page": 12,
+    "idx": 2,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-03.jpeg",
+    "page": 12,
+    "idx": 3,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-04.jpeg",
+    "page": 12,
+    "idx": 4,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-05.jpeg",
+    "page": 12,
+    "idx": 5,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-06.jpeg",
+    "page": 12,
+    "idx": 6,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-07.jpeg",
+    "page": 12,
+    "idx": 7,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-08.jpeg",
+    "page": 12,
+    "idx": 8,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-09.jpeg",
+    "page": 12,
+    "idx": 9,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-10.jpeg",
+    "page": 12,
+    "idx": 10,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-11.jpeg",
+    "page": 12,
+    "idx": 11,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-12.jpeg",
+    "page": 12,
+    "idx": 12,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-13.jpeg",
+    "page": 12,
+    "idx": 13,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-14.jpeg",
+    "page": 12,
+    "idx": 14,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  },
+  {
+    "file": "card-p12-15.jpeg",
+    "page": 12,
+    "idx": 15,
+    "stage": "rover",
+    "stageNameArabic": "جوالة",
+    "stageColor": "red",
+    "isPlayable": false,
+    "excludeReason": "cover_page"
+  }
+]
