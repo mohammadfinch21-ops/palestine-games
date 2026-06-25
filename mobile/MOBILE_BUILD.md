@@ -29,6 +29,17 @@
 
 ---
 
+### مسار المشروع يحتوي أحرفاً غير ASCII (عربية)
+
+إذا ظهر الخطأ `StopExecutionException - project path contains non-ASCII characters` أثناء `gradlew.bat assembleDebug`:
+
+| الحل | الوصف |
+|------|--------|
+| **سريع** | في `mobile/android/gradle.properties` تأكد من وجود: `android.overridePathCheck=true` (مُفعّل افتراضياً في هذا المستودع) |
+| **أفضل على المدى الطويل** | انسخ المشروع إلى مسار ASCII فقط، مثلاً `C:\dev\palestine-games` ثم أعد البناء من هناك |
+
+---
+
 ### المتطلبات
 
 | الأداة | Android | iOS |
