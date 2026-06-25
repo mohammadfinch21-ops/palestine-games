@@ -694,6 +694,8 @@ button:not(:disabled):hover {
   position: relative;
   width: 100%;
   line-height: 0;
+  aspect-ratio: 999 / 1400;
+  background: #1a472a;
 }
 
 .board-map-img {
@@ -702,6 +704,7 @@ button:not(:disabled):hover {
   display: block;
   user-select: none;
   pointer-events: none;
+  object-fit: contain;
 }
 
 .board-tokens-layer {

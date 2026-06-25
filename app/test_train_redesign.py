@@ -26,7 +26,7 @@ coords = json.load(open(os.path.join(APP, "js", "map-path.json"), encoding="utf-
 ok("map path 100 squares", len(coords) == 100)
 
 for rel in [
-    "assets/pdf-page-1-preview.png",
+    "assets/map-board.jpg",
     "js/board-path-coords.js",
     "js/train-game.js",
     "js/questions.js",

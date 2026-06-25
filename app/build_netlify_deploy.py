@@ -35,7 +35,7 @@ def collect_referenced_assets() -> set[str]:
 
     refs.update(
         {
-            "assets/pdf-page-1-preview.png",
+            "assets/map-board.jpg",
             "assets/logo.png",
             "assets/favicon-32.png",
             "assets/apple-touch-icon.png",
@@ -55,7 +55,7 @@ def copy_web_runtime() -> None:
     index = OUT / "index.html"
     if index.exists():
         html = index.read_text(encoding="utf-8")
-        html = html.replace('href="assets/الخارطة.pdf"', 'href="assets/pdf-page-1-preview.png"')
+        html = html.replace('href="assets/الخارطة.pdf"', 'href="assets/map-board.jpg"')
         html = html.replace("📄 عرض الخارطة الأصلية (PDF)", "🗺️ عرض الخارطة (صورة)")
         html = html.replace("عرض الخارطة الأصلية (PDF)", "عرض الخارطة (صورة)")
         index.write_text(html, encoding="utf-8")
@@ -100,7 +100,7 @@ def compress_asset(rel: str) -> None:
 
     if suffix == ".png":
         with Image.open(src) as im:
-            if "pdf-page-1-preview" in rel:
+            if "map-board" in rel:
                 im = resize_max(im, 1200)
             else:
                 im = resize_max(im, PNG_MAX_SIDE)

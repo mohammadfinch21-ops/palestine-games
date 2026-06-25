@@ -60,6 +60,19 @@ w, h = img.size
 logo = img.crop((int(w * 0.018), int(h * 0.008), int(w * 0.105), int(h * 0.125)))
 logo.save(os.path.join(OUT_MAP, "logo.png"))
 img.crop((0, 0, w, int(h * 0.12))).save(os.path.join(OUT_MAP, "header-banner.png"))
+
+# Committed deploy asset (git-tracked) — used by train board in web + APK
+board_jpg = os.path.join(OUT_MAP, "map-board.jpg")
+board = img.copy()
+max_side = 1400
+if max(board.size) > max_side:
+    scale = max_side / max(board.size)
+    board = board.resize((int(board.size[0] * scale), int(board.size[1] * scale)), Image.Resampling.LANCZOS)
+if board.mode != "RGB":
+    board = board.convert("RGB")
+board.save(board_jpg, "JPEG", quality=78, optimize=True, progressive=True)
+lines.append(f"Map board JPEG: {board_jpg}")
+
 doc.close()
 
 # --- Memory cards: extract embedded images per page ---

@@ -1,5 +1,5 @@
 /** Token positions on map (% of board image) — from الخarطة.pdf */
-export const MAP_IMAGE = "assets/pdf-page-1-preview.png";
+export const MAP_IMAGE = "assets/map-board.jpg";
 export const MAP_PATH = {
   1: { x: 60.96, y: 19.7 },
   2: { x: 60.34, y: 23.78 },

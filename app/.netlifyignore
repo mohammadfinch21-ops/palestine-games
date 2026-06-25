@@ -20,7 +20,7 @@ netlify-deploy/
 .git/
 .gitignore
 
-# PDF extraction / logo debug artifacts (game uses pdf-page-1-preview.png + card JPEGs)
+# PDF extraction previews (game uses committed assets/map-board.jpg + card JPEGs)
 assets/_*.png
 assets/_clip_*.png
 assets/_debug_*.png

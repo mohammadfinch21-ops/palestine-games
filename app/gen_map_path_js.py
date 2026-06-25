@@ -5,7 +5,7 @@ APP = os.path.dirname(os.path.abspath(__file__))
 p = json.load(open(os.path.join(APP, "_map_path.json"), encoding="utf-8"))
 lines = [
     '/** Map token positions (percent) — extracted from الخارطة.pdf */',
-    'export const MAP_IMAGE = "assets/pdf-page-1-preview.png";',
+    'export const MAP_IMAGE = "assets/map-board.jpg";',
     "export const MAP_PATH = {",
 ]
 for k in sorted(p, key=int):
