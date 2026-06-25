@@ -1768,7 +1768,16 @@ button:not(:disabled):hover {
 
 /* ===== Train mobile bottom bar & sidebar sheet ===== */
 :root {
+  --game-header-height: 3.5rem;
   --train-mobile-bar-height: 7.25rem;
+  --train-board-available-height: calc(
+    100dvh
+    - var(--game-header-height)
+    - var(--train-mobile-bar-height)
+    - env(safe-area-inset-top, 0px)
+    - env(safe-area-inset-bottom, 0px)
+    - 0.7rem
+  );
 }
 
 .train-mobile-bar {
@@ -1964,28 +1973,55 @@ button:not(:disabled):hover {
     transform: scale(0.96);
   }
 
+  body.train-mobile-layout .game-header {
+    flex-shrink: 0;
+    min-height: var(--game-header-height);
+  }
+
   body.train-mobile-layout .train-layout {
     flex: 1;
     min-height: 0;
     display: flex;
     flex-direction: column;
     grid-template-columns: none;
-    min-height: 0;
+    max-height: calc(100dvh - var(--game-header-height));
   }
 
   body.train-mobile-layout .board-wrap {
     flex: 1;
     min-height: 0;
     order: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-height: var(--train-board-available-height);
+    height: var(--train-board-available-height);
     padding: 0.35rem;
-    padding-bottom: calc(var(--train-mobile-bar-height) + env(safe-area-inset-bottom, 0px) + 0.35rem);
-    overflow: auto;
-    justify-content: flex-start;
+    overflow: hidden;
   }
 
   body.train-mobile-layout .board {
-    max-width: 100%;
+    flex: 0 1 auto;
     width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    height: auto;
+    aspect-ratio: 999 / 1400;
+  }
+
+  body.train-mobile-layout .board-map {
+    width: 100%;
+    height: 100%;
+    max-height: 100%;
+    aspect-ratio: 999 / 1400;
+  }
+
+  body.train-mobile-layout .board-map-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center;
   }
 
   body.train-mobile-layout .train-sidebar {
@@ -2034,8 +2070,18 @@ button:not(:disabled):hover {
     max-height: min(28vh, 220px);
   }
 
+  body.train-mobile-layout .map-highlight {
+    width: 17px;
+    height: 17px;
+    border-width: 2px;
+  }
+
   body.train-mobile-layout .key-token {
-    font-size: 1.1rem;
+    font-size: clamp(0.55rem, 2.6vw, 0.72rem);
+  }
+
+  body.train-mobile-layout .key-token-active {
+    transform: scale(1.12);
   }
 }
 

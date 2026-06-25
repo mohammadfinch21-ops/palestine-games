@@ -198,8 +198,18 @@ export function initTrainGame() {
       }
     });
 
-    mobileLayoutMq.addEventListener('change', applyMobileTrainLayout);
+    mobileLayoutMq.addEventListener('change', () => {
+      applyMobileTrainLayout();
+      renderBoard();
+    });
     applyMobileTrainLayout();
+
+    let resizeBoardTimer;
+    window.addEventListener('resize', () => {
+      if (!document.body.classList.contains('train-mobile-layout')) return;
+      clearTimeout(resizeBoardTimer);
+      resizeBoardTimer = setTimeout(() => renderBoard(), 120);
+    });
   }
 
   function syncMobileBar() {
@@ -1059,7 +1069,16 @@ export function initTrainGame() {
     return `<span class="${cls}" style="--key-color:${color}" title="${state.players[idx]?.name || ''}">🔑</span>`;
   }
 
+  function getTokenOffsetScale() {
+    if (!document.body.classList.contains('train-mobile-layout')) return 1;
+    const boardMap = boardEl?.querySelector('.board-map');
+    if (!boardMap) return 0.55;
+    const w = boardMap.getBoundingClientRect().width;
+    return Math.min(1, Math.max(0.42, w / 900 * 0.58));
+  }
+
   function offsetForTokenIndex(i, total) {
+    const scale = getTokenOffsetScale();
     const spreads = {
       1: [[0, 0]],
       2: [[-8, 0], [8, 0]],
@@ -1068,7 +1087,8 @@ export function initTrainGame() {
       5: [[-12, -6], [0, -6], [12, -6], [-8, 8], [8, 8]],
       6: [[-12, -6], [0, -6], [12, -6], [-12, 8], [0, 8], [12, 8]],
     };
-    return (spreads[total] || spreads[1])[i] || [0, 0];
+    const [ox, oy] = (spreads[total] || spreads[1])[i] || [0, 0];
+    return [ox * scale, oy * scale];
   }
 
   function renderTokens() {

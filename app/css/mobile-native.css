@@ -32,4 +32,8 @@ html.native-app body {
     min-height: 44px;
     font-size: 16px;
   }
+
+  html.native-app body.train-mobile-layout .key-token {
+    font-size: clamp(0.55rem, 2.6vw, 0.72rem);
+  }
 }
