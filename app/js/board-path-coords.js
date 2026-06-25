@@ -112,3 +112,8 @@ export function getMapPosition(square) {
 export function getPathCoord(square) {
   return getMapPosition(square);
 }
+
+/** @alias getMapPosition — used by token rendering on map-board.jpg */
+export function getSquarePosition(square) {
+  return getMapPosition(square);
+}

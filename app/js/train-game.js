@@ -21,7 +21,7 @@ import {
   getLowPoolMessage,
   LOW_POOL_THRESHOLD,
 } from './questions.js';
-import { showModal, showQuestionCardModal } from './modal.js';
+import { showModal, hideModal, showQuestionCardModal } from './modal.js';
 import {
   onTrainGameOver,
   onTrainTurnComplete,
@@ -394,6 +394,7 @@ export function initTrainGame() {
     }
     online.resolvingLottery = false;
     online.lotteryPhase = false;
+    online.lotteryTieModalOpen = false;
     updateUI();
   }
 
@@ -416,24 +417,17 @@ export function initTrainGame() {
     showModal({
       title: 'تعادل! إعادة القرعة',
       bodyHtml: `<p>تعادل بين ${names} بنتيجة <strong>${tieInfo.best}</strong>.</p><p>يُعاد سؤال لجميع اللاعبين حتى يظهر فائز واحد.</p>`,
-      actions: [
-        {
-          label: 'إعادة القرعة',
-          className: 'btn-gold',
-          onClick: async () => {
-            online.lotteryTieModalOpen = false;
-            try {
-              await beginOnlineLottery(online.roomCode);
-            } catch (err) {
-              showModal({
-                title: 'خطأ',
-                bodyHtml: `<p>${err.message || 'تعذّر إعادة القرعة'}</p>`,
-              });
-            }
-          },
-        },
-      ],
     });
+    try {
+      await beginOnlineLottery(online.roomCode);
+    } catch (err) {
+      showModal({
+        title: 'خطأ',
+        bodyHtml: `<p>${err.message || 'تعذّر إعادة القرعة'}</p>`,
+      });
+    } finally {
+      online.lotteryTieModalOpen = false;
+    }
   }
 
   async function tryResolveOnlineLottery(room) {
@@ -477,17 +471,21 @@ export function initTrainGame() {
     online.hostId = room.hostId;
     online.lotteryPhase = !!room.lotteryPhase;
 
-    state.players = room.players.map((p) => ({ ...p }));
+    const bs = room.boardState || {};
+    const localMoveInProgress = state.processingMove && isMyTurn();
+
+    if (!localMoveInProgress) {
+      state.players = room.players.map((p) => ({ ...p }));
+      state.waitingForMove = !!bs.waitingForMove;
+      state.processingMove = !!bs.processingMove;
+      state.highlightSquare = bs.highlightSquare ?? null;
+    }
+
     state.currentIndex = Math.min(
       Math.max(0, room.currentTurn),
       Math.max(0, state.players.length - 1),
     );
-
-    const bs = room.boardState || {};
-    state.waitingForMove = !!bs.waitingForMove;
-    state.processingMove = !!bs.processingMove;
     state.gameOver = !!bs.gameOver;
-    state.highlightSquare = bs.highlightSquare ?? null;
     state.started = !!room.started;
 
     if (room.level && room.level !== getTrainLevel()) {
@@ -963,13 +961,14 @@ export function initTrainGame() {
     return (spreads[total] || spreads[1])[i] || [0, 0];
   }
 
-  function renderBoard() {
+  function renderTokens() {
     const activeId = state.started && !state.gameOver ? getCurrentPlayer()?.id : null;
 
     const tokensBySquare = {};
     state.players.forEach((p) => {
-      if (!tokensBySquare[p.position]) tokensBySquare[p.position] = [];
-      tokensBySquare[p.position].push(p);
+      const sq = Math.max(1, Math.min(BOARD_SIZE, Number(p.position) || 1));
+      if (!tokensBySquare[sq]) tokensBySquare[sq] = [];
+      tokensBySquare[sq].push(p);
     });
 
     let tokensHtml = '';
@@ -986,6 +985,10 @@ export function initTrainGame() {
       });
     });
 
+    return tokensHtml;
+  }
+
+  function renderBoard() {
     const hl = state.highlightSquare ? getMapPosition(state.highlightSquare) : null;
     const highlightHtml = hl
       ? `<div class="map-highlight" style="left:${hl.x}%;top:${hl.y}%"></div>`
@@ -996,7 +999,7 @@ export function initTrainGame() {
         <img src="${MAP_IMAGE}" alt="خارطة فلسطين — مسار اللعبة" class="board-map-img" decoding="async" />
         <div class="board-tokens-layer" aria-hidden="false">
           ${highlightHtml}
-          ${tokensHtml}
+          ${renderTokens()}
         </div>
       </div>`;
   }
@@ -1273,8 +1276,11 @@ export function initTrainGame() {
         showModal({
           title: 'تعادل! إعادة القرعة',
           bodyHtml: `<p>تعادل بين ${names} بنتيجة <strong>${best}</strong>.</p><p>يُعاد سؤال لجميع اللاعبين حتى يظهر فائز واحد.</p>`,
-          actions: [{ label: 'إعادة القرعة', className: 'btn-gold', onClick: askRound }],
         });
+        setTimeout(() => {
+          hideModal();
+          askRound();
+        }, 1400);
         return;
       }
 
@@ -1294,6 +1300,13 @@ export function initTrainGame() {
     state.currentIndex = winnerIdx;
     state.started = true;
     state.waitingForMove = true;
+    state.processingMove = false;
+    state.gameOver = false;
+    state.highlightSquare = null;
+    state.players.forEach((p) => {
+      p.position = 1;
+      delete p.startScore;
+    });
     showModal({
       title: 'انطلقت الرحلة!',
       bodyHtml: `<p>يبدأ <strong>${state.players[winnerIdx].name}</strong> 🔑 (نتيجة: ${best}).</p><p>الهدف: الوصول للمربع 100 — القدس 🇵🇸</p>`,
@@ -1323,11 +1336,11 @@ export function initTrainGame() {
     if (!isMyTurn() || !areCardsReady() || !state.waitingForMove || state.processingMove) return;
     const card = pickRandomCard();
     showQuestionCardModal(card, (userWasCorrect, steps) => {
-      handleProgressAnswer(userWasCorrect, steps);
+      moveAfterAnswer(userWasCorrect, steps);
     });
   }
 
-  function handleProgressAnswer(userWasCorrect, steps) {
+  function moveAfterAnswer(userWasCorrect, steps) {
     const actingIndex = state.currentIndex;
     const player = getPlayerByIndex(actingIndex);
     if (!player) return;
@@ -1436,6 +1449,7 @@ export function initTrainGame() {
       active.position = current;
       highlightSquare(current);
       renderBoard();
+      pushOnlineState();
       updateUI(`تحرك ${active.name} — مربع ${current}${current === to ? ' ✓' : '…'}`);
 
       if (current < to) {

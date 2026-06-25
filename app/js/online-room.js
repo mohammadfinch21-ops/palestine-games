@@ -290,6 +290,7 @@ export async function beginOnlineLottery(code) {
   await update(roomRef(code), {
     lotteryPhase: true,
     started: false,
+    currentTurn: 0,
     players,
     boardState: defaultBoardState(),
   });
