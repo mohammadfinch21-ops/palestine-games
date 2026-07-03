@@ -1408,11 +1408,12 @@ button:not(:disabled):hover {
 
 .pt-card-header {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
+  gap: 0.35rem;
   margin-bottom: 0.75rem;
 }
-
-.pt-level-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
@@ -1423,7 +1424,28 @@ button:not(:disabled):hover {
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-.pt-steps-hint {
+.pt-city-badge {
+  display: inline-block;
+  margin-inline-start: 0.5rem;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(22, 163, 74, 0.35);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.pt-city-fact {
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  opacity: 0.92;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.pt-level-badge {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;

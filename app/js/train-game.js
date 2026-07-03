@@ -23,6 +23,7 @@ import {
   LOW_POOL_THRESHOLD,
 } from './questions.js';
 import { showModal, hideModal, showQuestionCardModal } from './modal.js';
+import { pickCityQuestion } from './city-questions.js';
 import {
   onTrainGameOver,
   onTrainTurnComplete,
@@ -1391,19 +1392,47 @@ export function initTrainGame() {
     }).join('');
   }
 
-  function handleCitySquare(player, city, sq) {
-    drawQuestionCard((correct) => {
+  function showCityQuestion(city, sq, onDone) {
+    const card = pickCityQuestion(sq, city.name);
+    if (!card) {
+      drawQuestionCard((correct) => onDone(Boolean(correct)));
+      return;
+    }
+    showQuestionCardModal(
+      card,
+      (userWasCorrect) => onDone(Boolean(userWasCorrect)),
+      { cityBonus: city.move, cityName: city.name, title: `أسئلة عامة — ${city.name}` },
+    );
+  }
+
+  function handleCitySquare(playerIndex, city, sq) {
+    const player = getPlayerByIndex(playerIndex);
+    if (!player) {
+      nextTurn();
+      return;
+    }
+    state.waitingForMove = false;
+    updateUI(`🏙️ وصلت إلى مدينة ${city.name} — أجب على سؤال عام`);
+    showCityQuestion(city, sq, (correct) => {
       if (correct) {
         const delta = city.move;
-        player.position = Math.max(1, Math.min(BOARD_SIZE, sq + delta));
-        renderBoard();
-        pushOnlineState();
-        showModal({
-          title: `مدينة ${city.name}`,
-          bodyHtml: `<p>إجابة صحيحة! ${delta >= 0 ? 'تتقدم' : 'ترتد'} ${Math.abs(delta)} مربعات → المربع ${player.position}</p>`,
-          actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
-        });
-        renderBoard();
+        const from = sq;
+        const to = Math.max(1, Math.min(BOARD_SIZE, sq + delta));
+        if (to !== from) {
+          animateMovePlayer(playerIndex, from, to, () => {
+            showModal({
+              title: `مدينة ${city.name}`,
+              bodyHtml: `<p>إجابة صحيحة! ${delta >= 0 ? 'تتقدم' : 'ترتد'} ${Math.abs(delta)} مربعات → المربع ${player.position}</p>`,
+              actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
+            });
+          });
+        } else {
+          showModal({
+            title: `مدينة ${city.name}`,
+            bodyHtml: '<p>إجابة صحيحة!</p>',
+            actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
+          });
+        }
       } else {
         showModal({
           title: `مدينة ${city.name}`,
@@ -1786,23 +1815,11 @@ export function initTrainGame() {
     }
 
     const to = Math.min(BOARD_SIZE, from + delta);
-
-    if (userWasCorrect) {
-      updateUI(`إجابة صحيحة — تتحرك ${delta} ${stepWord}`);
-      animateMovePlayer(actingIndex, from, to, () => {
-        showModal({
-          title: 'أحسنت! ✓',
-          bodyHtml: `<p>تحرك <strong style="color:${player.color}">${player.name}</strong> من مربع <strong>${from}</strong> إلى مربع <strong>${to}</strong> <span dir="ltr">(+${delta})</span></p>`,
-          actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => processSquare(actingIndex) }],
-        });
-      });
-      return;
-    }
-
-    updateUI(`إجابة خاطئة — تتحرك ${delta} ${stepWord}`);
-    animateMovePlayer(actingIndex, from, to, () => {
-      showTurnChangeModal(player, nextPlayer, delta, () => nextTurn());
-    });
+    const statusMsg = userWasCorrect
+      ? `إجابة صحيحة — تتحرك ${delta} ${stepWord}`
+      : `إجابة خاطئة — تتحرك ${delta} ${stepWord}`;
+    updateUI(statusMsg);
+    animateMovePlayer(actingIndex, from, to, () => processSquare(actingIndex));
   }
 
   function showTurnChangeModal(finishedPlayer, nextPlayer, stepsMoved = 0, onContinue) {
@@ -1911,9 +1928,11 @@ export function initTrainGame() {
     animateMovePlayer(actingIndex, from, to, () => processSquare(actingIndex));
   }
 
-  function processSquare(playerIndex) {
-    const player = typeof playerIndex === 'number' ? getPlayerByIndex(playerIndex) : playerIndex;
-    if (!player) {
+  function processSquare(playerOrIndex) {
+    const playerIndex =
+      typeof playerOrIndex === 'number' ? playerOrIndex : state.players.indexOf(playerOrIndex);
+    const player = getPlayerByIndex(playerIndex);
+    if (!player || playerIndex < 0) {
       state.waitingForMove = true;
       state.processingMove = false;
       return;
@@ -1941,7 +1960,7 @@ export function initTrainGame() {
 
     const city = getCityAtSquare(sq);
     if (city) {
-      handleCitySquare(player, city, sq);
+      handleCitySquare(playerIndex, city, sq);
       return;
     }
 

@@ -3,6 +3,7 @@ import { initTrainGame } from './train-game.js';
 import { initMemoryGame } from './memory-game.js';
 import { initAds, onScreenChange } from './ads/ad-manager.js';
 import { loadCardData } from './questions.js';
+import { loadCityQuestions } from './city-questions.js';
 import { initNativeShell } from './native-app.js';
 
 let currentScreen = 'menu';
@@ -49,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const counts = await loadCardData();
+    const [counts] = await Promise.all([loadCardData(), loadCityQuestions()]);
     console.info(`بطاقات محمّلة: ${counts.questions} سؤال، ${counts.memory} زوج ذاكرة`);
     if (cardsLoadingEl) {
       cardsLoadingEl.textContent = `✓ ${counts.questions} بطاقة سؤال جاهزة`;

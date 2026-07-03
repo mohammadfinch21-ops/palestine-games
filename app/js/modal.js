@@ -137,25 +137,46 @@ function prepareShuffledOptions(card) {
   return { options: shuffle(sourceOptions), correctAnswer };
 }
 
-function buildQuestionCardHtml(card, levelName, stepsCorrect = 3, stepsWrong = 1) {
+function buildQuestionCardHtml(card, levelName, stepsCorrect = 3, stepsWrong = 1, modalOptions = {}) {
   const question = escapeHtml(card.question || '—');
   const theme = getCardTheme(card);
   const hex = LEVEL_HEX[theme] || LEVEL_HEX.yellow;
+  const cityName = modalOptions.cityName || card.cityName || '';
+  const cityBonus = modalOptions.cityBonus;
+  const factHtml = card.fact
+    ? `<p class="pt-city-fact" dir="rtl" lang="ar">${escapeHtml(card.fact)}</p>`
+    : '';
+
+  let stepsHintHtml;
+  if (typeof cityBonus === 'number') {
+    const bonus = Math.abs(cityBonus);
+    const dirLabel = cityBonus >= 0 ? 'تتقدم' : 'ترتد';
+    stepsHintHtml = `
+      <div class="pt-steps-hint pt-steps-hint--city">
+        <span class="pt-step pt-step--correct">✓ صح: ${dirLabel} ${bonus} مربعات</span>
+        <span class="pt-step pt-step--wrong">✗ خطأ: تبقى مكانك</span>
+      </div>`;
+  } else {
+    stepsHintHtml = `
+      <div class="pt-steps-hint">
+        <span class="pt-step pt-step--correct">✓ صح: ${stepsCorrect} خطوات</span>
+        <span class="pt-step pt-step--wrong">✗ خطأ: ${stepsWrong} ${stepsWrong === 1 ? 'خطوة' : 'خطوات'}</span>
+      </div>`;
+  }
 
   return `
     <div class="question-card-wrap">
-      <div class="pt-card pt-card--html pt-card--${theme}" style="--level-color:${hex}">
+      <div class="pt-card pt-card--html pt-card--${theme}${modalOptions.cityBonus != null ? ' pt-card--city' : ''}" style="--level-color:${hex}">
         <div class="pt-card-header">
           <span class="pt-level-badge">${escapeHtml(levelName || '')}</span>
+          ${cityName ? `<span class="pt-city-badge">🏙️ ${escapeHtml(cityName)}</span>` : ''}
         </div>
         <section class="pt-section pt-question">
           <span class="pt-label">السؤال</span>
           <p class="pt-question-text" dir="rtl" lang="ar">${question}</p>
+          ${factHtml}
         </section>
-        <div class="pt-steps-hint">
-          <span class="pt-step pt-step--correct">✓ صح: ${stepsCorrect} خطوات</span>
-          <span class="pt-step pt-step--wrong">✗ خطأ: ${stepsWrong} ${stepsWrong === 1 ? 'خطوة' : 'خطوات'}</span>
-        </div>
+        ${stepsHintHtml}
       </div>
     </div>
   `;
@@ -256,9 +277,15 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
   const theme = getCardTheme(card);
   const levelName = card.levelName || '';
 
+  const modalTitle =
+    modalOptions.title ||
+    (modalOptions.cityBonus != null && (modalOptions.cityName || card.cityName)
+      ? `أسئلة عامة — ${modalOptions.cityName || card.cityName}`
+      : `سؤال — ${levelName}`);
+
   showModal({
-    title: `سؤال — ${levelName}`,
-    bodyHtml: buildQuestionCardHtml(card, levelName, stepsCorrect, stepsWrong),
+    title: modalTitle,
+    bodyHtml: buildQuestionCardHtml(card, levelName, stepsCorrect, stepsWrong, modalOptions),
     actions: [],
     onClose: null,
   });
