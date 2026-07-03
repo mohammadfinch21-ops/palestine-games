@@ -1414,6 +1414,8 @@ button:not(:disabled):hover {
   gap: 0.35rem;
   margin-bottom: 0.75rem;
 }
+
+.pt-level-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 999px;
@@ -1445,7 +1447,7 @@ button:not(:disabled):hover {
   background: rgba(0, 0, 0, 0.12);
 }
 
-.pt-level-badge {
+.pt-steps-hint {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
@@ -1695,8 +1697,10 @@ button:not(:disabled):hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2100;
-  padding: 1rem;
+  z-index: 5000;
+  padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem max(1rem, env(safe-area-inset-bottom, 0px));
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 .modal-overlay.hidden {
@@ -1799,6 +1803,7 @@ button:not(:disabled):hover {
   flex: 1 1 auto;
   min-width: min(100%, 9rem);
   max-width: 100%;
+  min-height: 44px;
   white-space: normal;
   line-height: 1.4;
   padding: 0.75rem 1rem;
@@ -1807,6 +1812,10 @@ button:not(:disabled):hover {
   direction: rtl;
   text-align: center;
   unicode-bidi: plaintext;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  pointer-events: auto;
   background: #fff !important;
   border: 2px solid #94a3b8 !important;
   color: #1e293b !important;
@@ -1957,8 +1966,15 @@ button:not(:disabled):hover {
   pointer-events: auto;
 }
 
-@media (max-width: 900px), html.native-app {
-  body.train-mobile-layout #screen-train.active {
+@media (max-width: 900px) {
+  html:has(#screen-train.active),
+  html:has(#screen-train.active) body {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  #screen-train.active,
+  html.native-app #screen-train.active {
     display: flex;
     flex-direction: column;
     height: 100dvh;
@@ -1968,7 +1984,8 @@ button:not(:disabled):hover {
     padding-bottom: 0;
   }
 
-  body.train-mobile-layout .train-mobile-bar {
+  #screen-train.active .train-mobile-bar,
+  html.native-app #screen-train.active .train-mobile-bar {
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
@@ -1983,7 +2000,7 @@ button:not(:disabled):hover {
     box-shadow: 0 -6px 24px rgba(0, 0, 0, 0.14);
   }
 
-  body.train-mobile-layout .train-mobile-bar-turn {
+  #screen-train.active .train-mobile-bar-turn {
     display: flex;
     align-items: center;
     gap: 0.4rem;
@@ -1991,13 +2008,13 @@ button:not(:disabled):hover {
     padding: 0 0.15rem;
   }
 
-  body.train-mobile-layout .train-mobile-turn-dot {
+  #screen-train.active .train-mobile-turn-dot {
     flex-shrink: 0;
     font-size: 1rem;
     line-height: 1;
   }
 
-  body.train-mobile-layout .train-mobile-turn-label {
+  #screen-train.active .train-mobile-turn-label {
     font-size: 0.78rem;
     font-weight: 800;
     color: var(--green-dark);
@@ -2006,21 +2023,21 @@ button:not(:disabled):hover {
     text-overflow: ellipsis;
   }
 
-  body.train-mobile-layout .train-mobile-bar-row {
+  #screen-train.active .train-mobile-bar-row {
     display: flex;
     align-items: stretch;
     gap: 0.4rem;
     min-height: 2.75rem;
   }
 
-  body.train-mobile-layout .train-mobile-levels {
+  #screen-train.active .train-mobile-levels {
     flex: 1;
     min-width: 0;
     display: flex;
     align-items: center;
   }
 
-  body.train-mobile-layout .train-mobile-levels .level-selector {
+  #screen-train.active .train-mobile-levels .level-selector {
     display: flex;
     flex-wrap: nowrap;
     gap: 0.3rem;
@@ -2031,11 +2048,11 @@ button:not(:disabled):hover {
     grid-template-columns: unset;
   }
 
-  body.train-mobile-layout .train-mobile-levels .level-selector::-webkit-scrollbar {
+  #screen-train.active .train-mobile-levels .level-selector::-webkit-scrollbar {
     display: none;
   }
 
-  body.train-mobile-layout .train-mobile-levels .level-btn {
+  #screen-train.active .train-mobile-levels .level-btn {
     flex: 0 0 auto;
     flex-direction: row;
     align-items: center;
@@ -2046,23 +2063,23 @@ button:not(:disabled):hover {
     min-height: 2.25rem;
   }
 
-  body.train-mobile-layout .train-mobile-levels .level-btn-dot {
+  #screen-train.active .train-mobile-levels .level-btn-dot {
     width: 10px;
     height: 10px;
   }
 
-  body.train-mobile-layout .train-mobile-levels .level-btn-count {
+  #screen-train.active .train-mobile-levels .level-btn-count {
     display: none;
   }
 
-  body.train-mobile-layout .train-mobile-actions {
+  #screen-train.active .train-mobile-actions {
     display: flex;
     flex-shrink: 0;
     gap: 0.35rem;
     align-items: stretch;
   }
 
-  body.train-mobile-layout .train-mbar-btn {
+  #screen-train.active .train-mbar-btn {
     font-family: inherit;
     font-weight: 800;
     font-size: 0.72rem;
@@ -2076,23 +2093,23 @@ button:not(:disabled):hover {
     white-space: nowrap;
   }
 
-  body.train-mobile-layout .train-mbar-btn--gold {
+  #screen-train.active .train-mbar-btn--gold {
     background: linear-gradient(135deg, var(--gold), var(--gold-light));
     color: var(--black);
     border: 2px solid #b8860b;
   }
 
-  body.train-mobile-layout .train-mbar-btn--primary {
+  #screen-train.active .train-mbar-btn--primary {
     background: var(--green);
     color: #fff;
     border: 2px solid var(--green-dark);
   }
 
-  body.train-mobile-layout .train-mbar-btn--primary.btn-pulse-ready {
+  #screen-train.active .train-mbar-btn--primary.btn-pulse-ready {
     animation: btn-pulse-ready 1.2s ease-in-out infinite;
   }
 
-  body.train-mobile-layout .train-mbar-btn--menu {
+  #screen-train.active .train-mbar-btn--menu {
     background: #fff;
     color: var(--green-dark);
     border: 2px solid var(--green);
@@ -2100,25 +2117,25 @@ button:not(:disabled):hover {
     padding: 0.4rem 0.65rem;
   }
 
-  body.train-mobile-layout .train-mbar-btn:disabled {
+  #screen-train.active .train-mbar-btn:disabled {
     opacity: 0.45;
     cursor: not-allowed;
   }
 
-  body.train-mobile-layout .train-mbar-btn[hidden] {
+  #screen-train.active .train-mbar-btn[hidden] {
     display: none;
   }
 
-  body.train-mobile-layout .train-mbar-btn:not(:disabled):active {
+  #screen-train.active .train-mbar-btn:not(:disabled):active {
     transform: scale(0.96);
   }
 
-  body.train-mobile-layout .game-header {
+  #screen-train.active .game-header {
     flex-shrink: 0;
     min-height: var(--game-header-height);
   }
 
-  body.train-mobile-layout .train-layout {
+  #screen-train.active .train-layout {
     flex: 1;
     min-height: 0;
     display: flex;
@@ -2127,7 +2144,7 @@ button:not(:disabled):hover {
     max-height: calc(100dvh - var(--game-header-height));
   }
 
-  body.train-mobile-layout .board-wrap {
+  #screen-train.active .board-wrap {
     flex: 1;
     min-height: 0;
     order: 1;
@@ -2141,7 +2158,7 @@ button:not(:disabled):hover {
     overflow: hidden;
   }
 
-  body.train-mobile-layout .board {
+  #screen-train.active .board {
     flex: 0 1 auto;
     width: 100%;
     max-width: 100%;
@@ -2150,21 +2167,21 @@ button:not(:disabled):hover {
     aspect-ratio: 999 / 1400;
   }
 
-  body.train-mobile-layout .board-map {
+  #screen-train.active .board-map {
     width: 100%;
     height: 100%;
     max-height: 100%;
     aspect-ratio: 999 / 1400;
   }
 
-  body.train-mobile-layout .board-map-img {
+  #screen-train.active .board-map-img {
     width: 100%;
     height: 100%;
     object-fit: contain;
     object-position: center;
   }
 
-  body.train-mobile-layout .train-sidebar {
+  #screen-train.active .train-sidebar {
     position: fixed;
     left: 0;
     right: 0;
@@ -2180,24 +2197,24 @@ button:not(:disabled):hover {
     padding-bottom: 0.5rem;
   }
 
-  body.train-mobile-layout .train-sidebar.is-open {
+  #screen-train.active .train-sidebar.is-open {
     transform: translateY(0);
   }
 
-  body.train-mobile-layout .train-sidebar .panel-level,
-  body.train-mobile-layout .train-sidebar .actions-panel {
+  #screen-train.active .train-sidebar .panel-level,
+  #screen-train.active .train-sidebar .actions-panel {
     display: none;
   }
 
-  body.train-mobile-layout .train-sidebar-backdrop {
+  #screen-train.active .train-sidebar-backdrop {
     display: block;
   }
 
-  body.train-mobile-layout #ad-banner-train {
+  #screen-train.active #ad-banner-train {
     display: none;
   }
 
-  body.train-mobile-layout .online-chat-panel:not(.hidden) {
+  #screen-train.active .online-chat-panel:not(.hidden) {
     position: fixed;
     left: 0.5rem;
     right: 0.5rem;
@@ -2206,21 +2223,21 @@ button:not(:disabled):hover {
     max-width: none;
   }
 
-  body.train-mobile-layout .online-chat-body {
+  #screen-train.active .online-chat-body {
     max-height: min(28vh, 220px);
   }
 
-  body.train-mobile-layout .map-highlight {
+  #screen-train.active .map-highlight {
     width: 17px;
     height: 17px;
     border-width: 2px;
   }
 
-  body.train-mobile-layout .key-token {
+  #screen-train.active .key-token {
     font-size: clamp(0.55rem, 2.6vw, 0.72rem);
   }
 
-  body.train-mobile-layout .key-token-active {
+  #screen-train.active .key-token-active {
     transform: scale(1.12);
   }
 }

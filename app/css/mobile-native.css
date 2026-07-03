@@ -1,39 +1,49 @@
-/* ===== Native Capacitor shell — only when html.native-app ===== */
-/* Layout & navigation match styles.css / Netlify web. Mobile train uses bottom action bar. */
+/* ===== Touch / mobile Safari — web + native shell ===== */
+
+html,
+body {
+  -webkit-tap-highlight-color: transparent;
+}
 
 html.native-app,
 html.native-app body {
   overscroll-behavior: none;
-  -webkit-tap-highlight-color: transparent;
 }
 
-/* Slightly larger tap targets on touch devices */
 @media (pointer: coarse) {
-  html.native-app button:not(.modal-close),
-  html.native-app .menu-card,
-  html.native-app .memory-stage-selector .memory-stage-btn,
-  html.native-app .online-chat-preset-btn,
-  html.native-app .online-chat-send-btn {
+  button:not(.modal-close),
+  .menu-card,
+  .memory-stage-selector .memory-stage-btn,
+  .online-chat-preset-btn,
+  .online-chat-send-btn,
+  .question-card-option-btn,
+  .option-btn,
+  .train-mbar-btn {
     touch-action: manipulation;
   }
 
-  html.native-app .panel .btn-small,
-  html.native-app .panel .btn-primary,
-  html.native-app .panel .btn-gold,
-  html.native-app .panel .btn-outline,
-  html.native-app .panel .btn-rewarded,
-  html.native-app .memory-actions button,
-  html.native-app .memory-play-all-btn,
-  html.native-app .train-mbar-btn {
+  .panel .btn-small,
+  .panel .btn-primary,
+  .panel .btn-gold,
+  .panel .btn-outline,
+  .panel .btn-rewarded,
+  .memory-actions button,
+  .memory-play-all-btn,
+  .train-mbar-btn,
+  .question-card-option-btn {
     min-height: 44px;
   }
 
-  html.native-app .online-chat-input {
+  .online-chat-input {
     min-height: 44px;
     font-size: 16px;
   }
 
-  html.native-app body.train-mobile-layout .key-token {
+  #screen-train.active .key-token {
     font-size: clamp(0.55rem, 2.6vw, 0.72rem);
+  }
+
+  .modal-overlay {
+    -webkit-overflow-scrolling: touch;
   }
 }

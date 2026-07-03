@@ -21,12 +21,15 @@ export function initModal() {
 
   overlay.querySelector('.modal-close').addEventListener('click', hideModal);
   overlay.addEventListener('click', (e) => {
-    if (e.target === overlay) hideModal();
+    if (e.target === overlay && !overlay.classList.contains('modal--question')) hideModal();
   });
 }
 
 export function showModal({ title, bodyHtml, actions = [], onClose = null }) {
   onCloseCallback = onClose;
+  overlay.classList.remove('modal--question');
+  const closeBtn = overlay.querySelector('.modal-close');
+  if (closeBtn) closeBtn.hidden = false;
   titleEl.textContent = title;
   bodyEl.innerHTML = bodyHtml;
   actionsEl.innerHTML = '';
@@ -51,7 +54,10 @@ export function isModalOpen() {
 
 export function hideModal() {
   overlay.classList.add('hidden');
+  overlay.classList.remove('modal--question');
   overlay.setAttribute('aria-hidden', 'true');
+  const closeBtn = overlay.querySelector('.modal-close');
+  if (closeBtn) closeBtn.hidden = false;
   onCloseCallback?.();
   onCloseCallback = null;
 }
@@ -187,6 +193,19 @@ function buildQuestionCardHtml(card, levelName, stepsCorrect = 3, stepsWrong = 1
   `;
 }
 
+function bindOptionButton(btn, opt, btnWrap, onChoice) {
+  const fire = (e) => {
+    if (btn.disabled || btnWrap.dataset.answered === '1') return;
+    if (e?.cancelable) e.preventDefault();
+    e?.stopPropagation?.();
+    btnWrap.dataset.answered = '1';
+    onChoice(opt, btnWrap);
+  };
+  btn.addEventListener('pointerup', fire);
+  btn.addEventListener('click', fire);
+  btn.addEventListener('touchend', fire, { passive: false });
+}
+
 function renderOptionButtons(options, theme, onChoice) {
   actionsEl.innerHTML = '';
   actionsEl.classList.add('question-card-actions');
@@ -209,7 +228,7 @@ function renderOptionButtons(options, theme, onChoice) {
     btn.dir = 'rtl';
     btn.lang = 'ar';
     btn.dataset.choice = opt;
-    btn.addEventListener('click', () => onChoice(opt, btnWrap));
+    bindOptionButton(btn, opt, btnWrap, onChoice);
     btnWrap.appendChild(btn);
   });
 
@@ -300,17 +319,44 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
       ? `أسئلة عامة — ${modalOptions.cityName || card.cityName}`
       : `سؤال — ${levelName}`);
 
+  let resolved = false;
+  const safeComplete = (userWasCorrect, steps, answeredCard = card) => {
+    if (resolved) return;
+    resolved = true;
+    // Close the question modal first so onComplete can open its own modals
+    // and a thrown error can never leave the question modal stuck open.
+    if (!modalOptions.deferClose) hideModal();
+    try {
+      onComplete?.(userWasCorrect, steps, answeredCard);
+    } catch (err) {
+      console.error('showQuestionCardModal onComplete failed', err);
+    }
+  };
+
   showModal({
     title: modalTitle,
     bodyHtml: buildQuestionCardHtml(card, levelName, stepsCorrect, stepsWrong, modalOptions),
     actions: [],
-    onClose: null,
+    onClose: () => {
+      if (!resolved) {
+        const fallbackSteps = modalOptions.cityBonus != null ? 0 : stepsWrong;
+        resolved = true;
+        try {
+          onComplete?.(false, fallbackSteps, card);
+        } catch (err) {
+          console.error('showQuestionCardModal onClose failed', err);
+        }
+      }
+    },
   });
+  overlay.classList.add('modal--question');
+  const closeBtn = overlay.querySelector('.modal-close');
+  if (closeBtn) closeBtn.hidden = true;
 
   const handleChoice = (userChoice, btnWrap) => {
+    if (resolved) return;
     const userWasCorrect = choiceMatches(userChoice, correctAnswer);
     const steps = userWasCorrect ? stepsCorrect : stepsWrong;
-    let completed = false;
 
     btnWrap.querySelectorAll('.question-card-option-btn').forEach((b) => {
       b.disabled = true;
@@ -318,14 +364,10 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
       else if (choiceMatches(b.dataset.choice, userChoice) && !userWasCorrect) b.classList.add('wrong');
     });
 
-    const finish = () => {
-      if (completed) return;
-      completed = true;
-      onComplete?.(userWasCorrect, steps, card);
-      if (!modalOptions.deferClose) hideModal();
-    };
-
-    setTimeout(finish, 450);
+    // Let the correct/wrong highlight paint before advancing.
+    requestAnimationFrame(() => {
+      setTimeout(() => safeComplete(userWasCorrect, steps, card), 380);
+    });
   };
 
   renderOptionButtons(options, theme, handleChoice);
