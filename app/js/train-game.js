@@ -8,7 +8,7 @@ import {
 } from './board-data.js';
 import { MAP_IMAGE, getMapPosition } from './board-path-coords.js';
 import {
-  pickRandomCard,
+  drawQuestion,
   pickTiebreakCard,
   beginMainGameSession,
   resetQuestionSession,
@@ -766,6 +766,8 @@ export function initTrainGame() {
     }
 
     if (!wasStarted && state.started && !online.isHost) {
+      beginMainGameSession();
+      lotteryActive = false;
       const starter = state.players[state.currentIndex];
       showModal({
         title: 'انطلقت الرحلة!',
@@ -1061,6 +1063,7 @@ export function initTrainGame() {
 
     if (onlineStartBtn) onlineStartBtn.disabled = true;
     try {
+      resetQuestionSession();
       await beginOnlineLottery(online.roomCode);
       online.lotteryPhase = true;
       lotteryActive = true;
@@ -1887,7 +1890,7 @@ export function initTrainGame() {
     if (!state.waitingForMove) {
       return;
     }
-    const card = pickRandomCard();
+    const { card } = drawQuestion();
     showQuestionCardModal(card, (userWasCorrect, steps) => {
       moveAfterAnswer(userWasCorrect, steps);
     });
@@ -1935,7 +1938,7 @@ export function initTrainGame() {
   }
 
   function drawQuestionCard(onDone) {
-    const card = pickRandomCard();
+    const { card } = drawQuestion();
     showQuestionCardModal(card, (userWasCorrect, steps) => {
       onDone(userWasCorrect, steps);
     });

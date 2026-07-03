@@ -4,7 +4,7 @@ import {
   isValidQuestion,
   isValidOption,
 } from './card-validation.js';
-import { pickRandomCard, pickTiebreakCard, shuffle } from './questions.js';
+import { drawQuestion, shuffle } from './questions.js';
 import { pickCityQuestion } from './city-questions.js';
 
 let overlay;
@@ -221,10 +221,7 @@ function pickReplacementCard(modalOptions) {
   if (modalOptions.citySquare != null) {
     return pickCityQuestion(modalOptions.citySquare, modalOptions.cityName);
   }
-  if (modalOptions.tiebreak) {
-    return pickTiebreakCard(levelId);
-  }
-  return pickRandomCard(levelId);
+  return drawQuestion(levelId, { tiebreak: Boolean(modalOptions.tiebreak) }).card;
 }
 
 export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
