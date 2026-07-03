@@ -74,6 +74,68 @@ export function initTrainGame() {
   };
 
   let cityModalRetryTimer = null;
+  let squareWatchdogTimer = null;
+  const SQUARE_WATCHDOG_MS = 5000;
+
+  function clearSquareWatchdog() {
+    if (squareWatchdogTimer) {
+      clearTimeout(squareWatchdogTimer);
+      squareWatchdogTimer = null;
+    }
+  }
+
+  function armSquareWatchdog() {
+    clearSquareWatchdog();
+    squareWatchdogTimer = setTimeout(() => {
+      squareWatchdogTimer = null;
+      if (!state.started || state.gameOver || lotteryActive) return;
+      if (isModalOpen()) return;
+      if (state.waitingForMove) return;
+      console.warn('train-game: square watchdog — recovering stuck state');
+      recoverFromStuckSquare('watchdog');
+    }, SQUARE_WATCHDOG_MS);
+  }
+
+  function recoverFromStuckSquare(reason = 'unknown') {
+    clearSquareWatchdog();
+    state.processingMove = false;
+    if (
+      state.cityQuestionPending &&
+      shouldAnswerCityQuestion() &&
+      !isModalOpen() &&
+      reason !== 'city-modal-retry'
+    ) {
+      scheduleCityQuestionModal(0);
+      armSquareWatchdog();
+      return;
+    }
+    clearCityQuestionPending();
+    if (!state.gameOver && state.started) {
+      state.waitingForMove = true;
+      updateUI('↻ استُعيد الدور — اسحب سؤالاً.');
+      pushOnlineState();
+    }
+  }
+
+  function beginSquareProcessing() {
+    state.waitingForMove = false;
+    state.processingMove = true;
+    armSquareWatchdog();
+    updateUI();
+    pushOnlineState();
+  }
+
+  function finishSquareProcessing({ nextTurn: advance = false, resumeTurn = false } = {}) {
+    clearSquareWatchdog();
+    if (advance) {
+      nextTurn();
+      return;
+    }
+    state.processingMove = false;
+    if (resumeTurn) state.waitingForMove = true;
+    updateUI();
+    pushOnlineState();
+  }
 
   const online = {
     mode: false,
@@ -708,7 +770,12 @@ export function initTrainGame() {
     const bs = room.boardState || {};
     const myId = String(online.myId);
     const actingPlayer = state.players[state.currentIndex];
-    const iAmActing = state.processingMove && String(actingPlayer?.id) === myId;
+    const iAmCurrentActor = String(actingPlayer?.id) === myId;
+    const iAmActing =
+      iAmCurrentActor &&
+      (state.processingMove ||
+        state.cityQuestionPending ||
+        (!state.waitingForMove && state.started && !state.gameOver && !room.lotteryPhase));
     const localCityPending = state.cityQuestionPending;
     const iAmCityActor =
       localCityPending &&
@@ -1442,6 +1509,8 @@ export function initTrainGame() {
       if (retry < 16) {
         if (cityModalRetryTimer) clearTimeout(cityModalRetryTimer);
         cityModalRetryTimer = setTimeout(() => scheduleCityQuestionModal(retry + 1), 400);
+      } else {
+        recoverFromStuckSquare('city-modal-retry');
       }
       return;
     }
@@ -1449,6 +1518,8 @@ export function initTrainGame() {
       if (retry < 24) {
         if (cityModalRetryTimer) clearTimeout(cityModalRetryTimer);
         cityModalRetryTimer = setTimeout(() => scheduleCityQuestionModal(retry + 1), 300);
+      } else {
+        recoverFromStuckSquare('city-modal-retry');
       }
       return;
     }
@@ -1505,9 +1576,14 @@ export function initTrainGame() {
     const actor = getPlayerByIndex(pending.playerIndex);
 
     showCityQuestion(city, pending.square, actor?.id, (correct) => {
-      clearCityQuestionPending();
-      pushOnlineState();
-      finishCityQuestion(pending.playerIndex, city, pending.square, correct);
+      try {
+        clearCityQuestionPending();
+        pushOnlineState();
+        finishCityQuestion(pending.playerIndex, city, pending.square, correct);
+      } catch (err) {
+        console.error('finishCityQuestion failed', err);
+        recoverFromStuckSquare('city-callback');
+      }
     });
   }
 
@@ -1551,8 +1627,7 @@ export function initTrainGame() {
       nextTurn();
       return;
     }
-    state.processingMove = false;
-    state.waitingForMove = false;
+    beginSquareProcessing();
     state.cityQuestionPending = {
       playerIndex,
       square: sq,
@@ -1914,6 +1989,7 @@ export function initTrainGame() {
     state.gameOver = false;
     state.highlightSquare = null;
     clearCityQuestionPending();
+    clearSquareWatchdog();
     updateUI();
   }
 
@@ -1977,23 +2053,41 @@ export function initTrainGame() {
   }
 
   function drawQuestionCard(onDone) {
-    const { card } = drawQuestion();
-    showQuestionCardModal(card, (userWasCorrect, steps) => {
-      onDone(userWasCorrect, steps);
-    });
+    try {
+      const { card } = drawQuestion();
+      showQuestionCardModal(card, (userWasCorrect, steps) => {
+        try {
+          onDone(userWasCorrect, steps);
+        } catch (err) {
+          console.error('drawQuestionCard callback failed', err);
+          recoverFromStuckSquare('question-callback');
+        }
+      });
+      armSquareWatchdog();
+    } catch (err) {
+      console.error('drawQuestionCard failed', err);
+      showModal({
+        title: 'تنبيه',
+        bodyHtml: '<p>تعذّر سحب السؤال — يُستأنف الدور.</p>',
+        actions: [
+          {
+            label: 'متابعة',
+            className: 'btn-primary',
+            onClick: () => recoverFromStuckSquare('draw-failed'),
+          },
+        ],
+      });
+    }
   }
 
   function animateMovePlayer(playerIndex, from, to, onDone) {
     const player = getPlayerByIndex(playerIndex);
     const start = normalizePosition(from);
     const end = normalizePosition(to);
-    state.waitingForMove = false;
-    state.processingMove = true;
-    updateUI();
-    pushOnlineState();
+    beginSquareProcessing();
 
     if (!player) {
-      state.processingMove = false;
+      finishSquareProcessing({ resumeTurn: true });
       onDone?.();
       return;
     }
@@ -2001,10 +2095,7 @@ export function initTrainGame() {
     if (start >= end) {
       player.position = end;
       clearHighlight();
-      state.processingMove = false;
       renderBoard();
-      updateUI();
-      pushOnlineState();
       onDone?.();
       return;
     }
@@ -2016,7 +2107,7 @@ export function initTrainGame() {
     const stepForward = () => {
       const active = getPlayerByIndex(playerIndex);
       if (!active) {
-        state.processingMove = false;
+        finishSquareProcessing();
         onDone?.();
         return;
       }
@@ -2031,7 +2122,6 @@ export function initTrainGame() {
       } else {
         setTimeout(() => {
           clearHighlight();
-          state.processingMove = false;
           updateUI();
           pushOnlineState();
           onDone?.();
@@ -2052,90 +2142,102 @@ export function initTrainGame() {
   }
 
   function processSquare(playerOrIndex) {
-    const playerIndex =
-      typeof playerOrIndex === 'number' ? playerOrIndex : state.players.indexOf(playerOrIndex);
-    const player = getPlayerByIndex(playerIndex);
-    if (!player || playerIndex < 0) {
-      state.waitingForMove = true;
-      state.processingMove = false;
-      return;
-    }
-    const sq = player.position;
+    beginSquareProcessing();
+    try {
+      const playerIndex =
+        typeof playerOrIndex === 'number' ? playerOrIndex : state.players.indexOf(playerOrIndex);
+      const player = getPlayerByIndex(playerIndex);
+      if (!player || playerIndex < 0) {
+        state.waitingForMove = true;
+        finishSquareProcessing();
+        return;
+      }
+      const sq = player.position;
 
-    if (sq >= BOARD_SIZE) {
-      winGame(player);
-      return;
-    }
+      if (sq >= BOARD_SIZE) {
+        clearSquareWatchdog();
+        winGame(player);
+        return;
+      }
 
-    const barrier = BARRIERS[sq];
-    if (barrier) {
-      player.position = Math.max(1, sq - 3);
-      renderBoard();
-      pushOnlineState();
-      showModal({
-        title: `⛔ حاجز الكيان الصهيوني — ${barrier.title}`,
-        bodyHtml: `<p>${barrier.text}</p><p>تراجع <strong>3 خطوات</strong> إلى المربع ${player.position}.</p><p class="event-box">ليشعر اللاعب بالظلم الذي يحل بالشعب الفلسطيني.</p>`,
-        actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
-      });
-      renderBoard();
-      return;
-    }
+      const barrier = BARRIERS[sq];
+      if (barrier) {
+        player.position = Math.max(1, sq - 3);
+        renderBoard();
+        pushOnlineState();
+        showModal({
+          title: `⛔ حاجز الكيان الصهيوني — ${barrier.title}`,
+          bodyHtml: `<p>${barrier.text}</p><p>تراجع <strong>3 خطوات</strong> إلى المربع ${player.position}.</p><p class="event-box">ليشعر اللاعب بالظلم الذي يحل بالشعب الفلسطيني.</p>`,
+          actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
+        });
+        renderBoard();
+        armSquareWatchdog();
+        return;
+      }
 
-    const city = getCityAtSquare(sq);
-    if (city) {
-      handleCitySquare(playerIndex, city, sq);
-      return;
-    }
+      const city = getCityAtSquare(sq);
+      if (city) {
+        handleCitySquare(playerIndex, city, sq);
+        return;
+      }
 
-    const blue = BLUE_ARROWS.find((a) => a.start === sq);
-    if (blue) {
-      drawQuestionCard((correct) => {
-        if (!correct) {
-          player.position = blue.end;
-          renderBoard();
-          pushOnlineState();
-          showModal({
-            title: 'سهم أزرق ↓',
-            bodyHtml: `<p>انتقلت من ${sq} إلى ${blue.end}</p>`,
-            actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
-          });
-          renderBoard();
-        } else {
-          showModal({
-            title: 'إجابة صحيحة!',
-            bodyHtml: '<p>تبقى في مكانك.</p>',
-            actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
-          });
-        }
-      });
-      return;
-    }
+      const blue = BLUE_ARROWS.find((a) => a.start === sq);
+      if (blue) {
+        drawQuestionCard((correct) => {
+          if (!correct) {
+            player.position = blue.end;
+            renderBoard();
+            pushOnlineState();
+            showModal({
+              title: 'سهم أزرق ↓',
+              bodyHtml: `<p>انتقلت من ${sq} إلى ${blue.end}</p>`,
+              actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
+            });
+            renderBoard();
+            armSquareWatchdog();
+          } else {
+            showModal({
+              title: 'إجابة صحيحة!',
+              bodyHtml: '<p>تبقى في مكانك.</p>',
+              actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
+            });
+            armSquareWatchdog();
+          }
+        });
+        return;
+      }
 
-    const yellow = YELLOW_ARROWS.find((a) => a.start === sq);
-    if (yellow) {
-      drawQuestionCard((correct) => {
-        if (correct) {
-          player.position = Math.min(BOARD_SIZE, yellow.end);
-          renderBoard();
-          pushOnlineState();
-          showModal({
-            title: 'سهم أصفر ↑',
-            bodyHtml: `<p>إجابة صحيحة! انتقلت من ${sq} إلى ${player.position}</p>`,
-            actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
-          });
-          renderBoard();
-        } else {
-          showModal({
-            title: 'إجابة خاطئة',
-            bodyHtml: '<p>تبقى في مكانك.</p>',
-            actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
-          });
-        }
-      });
-      return;
-    }
+      const yellow = YELLOW_ARROWS.find((a) => a.start === sq);
+      if (yellow) {
+        drawQuestionCard((correct) => {
+          if (correct) {
+            player.position = Math.min(BOARD_SIZE, yellow.end);
+            renderBoard();
+            pushOnlineState();
+            showModal({
+              title: 'سهم أصفر ↑',
+              bodyHtml: `<p>إجابة صحيحة! انتقلت من ${sq} إلى ${player.position}</p>`,
+              actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
+            });
+            renderBoard();
+            armSquareWatchdog();
+          } else {
+            showModal({
+              title: 'إجابة خاطئة',
+              bodyHtml: '<p>تبقى في مكانك.</p>',
+              actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
+            });
+            armSquareWatchdog();
+          }
+        });
+        return;
+      }
 
-    nextTurn();
+      finishSquareProcessing({ nextTurn: true });
+    } catch (err) {
+      console.error('processSquare failed', err);
+      recoverFromStuckSquare('process-square');
+    }
   }
 
   function continueAfterSpecial(player) {
@@ -2147,6 +2249,7 @@ export function initTrainGame() {
   }
 
   function winGame(player) {
+    clearSquareWatchdog();
     state.gameOver = true;
     state.waitingForMove = false;
     onTrainGameOver();
@@ -2161,6 +2264,7 @@ export function initTrainGame() {
 
   function nextTurn(options = {}) {
     if (state.gameOver) return;
+    clearSquareWatchdog();
     onTrainTurnComplete();
     const prevIndex = state.currentIndex;
     state.currentIndex = getNextPlayerIndex();
