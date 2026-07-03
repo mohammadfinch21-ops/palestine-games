@@ -23,7 +23,12 @@ import {
   LOW_POOL_THRESHOLD,
 } from './questions.js';
 import { showModal, hideModal, showQuestionCardModal, isModalOpen } from './modal.js';
-import { pickCityQuestion, resetCityQuestionSession, areCityQuestionsReady } from './city-questions.js';
+import {
+  pickCityQuestion,
+  resetCityQuestionSession,
+  areCityQuestionsReady,
+  loadCityQuestions,
+} from './city-questions.js';
 import {
   onTrainGameOver,
   onTrainTurnComplete,
@@ -197,7 +202,7 @@ export function initTrainGame() {
     mobileMenuBtn?.addEventListener('click', toggleTrainSidebar);
     trainSidebarBackdrop?.addEventListener('click', closeTrainSidebar);
     mobileStartBtn?.addEventListener('click', () => startBtn?.click());
-    mobileDrawBtn?.addEventListener('click', () => drawBtn?.click());
+    mobileDrawBtn?.addEventListener('click', () => handleDrawAction());
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && trainSidebar?.classList.contains('is-open')) {
@@ -228,6 +233,8 @@ export function initTrainGame() {
     if (mobileDrawBtn) {
       mobileDrawBtn.disabled = drawBtn.disabled;
       mobileDrawBtn.classList.toggle('btn-pulse-ready', drawBtn.classList.contains('btn-pulse-ready'));
+      const cityLabel = drawBtn.textContent?.includes('مدينة') ? drawBtn.textContent : null;
+      mobileDrawBtn.textContent = cityLabel || '🃏 سؤال';
     }
     if (mobileTurnLabel) {
       mobileTurnLabel.textContent = currentPlayerName?.textContent || '—';
@@ -1155,7 +1162,7 @@ export function initTrainGame() {
   });
 
   startBtn.addEventListener('click', startGame);
-  drawBtn.addEventListener('click', () => drawProgressQuestion());
+  drawBtn.addEventListener('click', () => handleDrawAction());
 
   rewardHintBtn.addEventListener('click', () => {
     if (!isMyTurn() || !state.started || state.gameOver || !state.waitingForMove || state.processingMove) return;
@@ -1439,13 +1446,34 @@ export function initTrainGame() {
       }
       return;
     }
-    if (isModalOpen()) return;
-    const open = () => presentCityQuestionModal();
+    if (isModalOpen()) {
+      if (retry < 24) {
+        if (cityModalRetryTimer) clearTimeout(cityModalRetryTimer);
+        cityModalRetryTimer = setTimeout(() => scheduleCityQuestionModal(retry + 1), 300);
+      }
+      return;
+    }
+    const open = () => promptCityQuestion();
     if (retry === 0) {
       requestAnimationFrame(() => requestAnimationFrame(open));
     } else {
       open();
     }
+  }
+
+  async function promptCityQuestion() {
+    if (!state.cityQuestionPending || !shouldAnswerCityQuestion()) return;
+    if (!state.started || state.gameOver || lotteryActive) return;
+
+    if (!areCityQuestionsReady()) {
+      try {
+        await loadCityQuestions();
+      } catch (err) {
+        console.warn('فشل تحميل أسئلة المدن', err);
+      }
+    }
+
+    presentCityQuestionModal();
   }
 
   function showCityQuestion(city, sq, onDone) {
@@ -1527,7 +1555,12 @@ export function initTrainGame() {
     };
     pushOnlineState();
     updateUI();
-    scheduleCityQuestionModal();
+    scheduleCityQuestionModal(0);
+    setTimeout(() => {
+      if (state.cityQuestionPending && shouldAnswerCityQuestion() && !isModalOpen()) {
+        promptCityQuestion();
+      }
+    }, 600);
   }
 
   function renderPlayers(flashIndex = null) {
@@ -1591,13 +1624,20 @@ export function initTrainGame() {
     const myTurn = isMyTurn();
     const cityPending = state.cityQuestionPending;
     const cityActorTurn = cityPending && cityPending.playerIndex === state.currentIndex && myTurn;
-    const canActBase =
+    const canActCity =
+      cityActorTurn &&
+      state.started &&
+      !state.gameOver &&
+      !lotteryActive &&
+      (areCityQuestionsReady() || areCardsReady());
+    const canActDraw =
       cardsReady &&
       state.started &&
       !state.gameOver &&
+      !lotteryActive &&
       !state.processingMove &&
-      (state.waitingForMove || cityActorTurn);
-    const canAct = canActBase && myTurn;
+      state.waitingForMove;
+    const canAct = myTurn && (canActCity || canActDraw);
     const levelInfo = getTrainLevelInfo();
 
     if (state.started && !state.gameOver && current) {
@@ -1879,12 +1919,19 @@ export function initTrainGame() {
     updateUI();
   }
 
-  function drawProgressQuestion() {
-    if (lotteryActive || !state.started || !isMyTurn() || !areCardsReady() || state.processingMove) {
+  function handleDrawAction() {
+    if (!state.started || state.gameOver || !isMyTurn()) return;
+
+    if (state.cityQuestionPending && shouldAnswerCityQuestion()) {
+      promptCityQuestion();
       return;
     }
-    if (state.cityQuestionPending && shouldAnswerCityQuestion()) {
-      presentCityQuestionModal();
+
+    drawProgressQuestion();
+  }
+
+  function drawProgressQuestion() {
+    if (lotteryActive || !state.started || !isMyTurn() || !areCardsReady() || state.processingMove) {
       return;
     }
     if (!state.waitingForMove) {
