@@ -4,7 +4,8 @@ import {
   isValidQuestion,
   isValidOption,
 } from './card-validation.js';
-import { pickRandomCard, shuffle } from './questions.js';
+import { pickRandomCard, pickTiebreakCard, shuffle } from './questions.js';
+import { pickCityQuestion } from './city-questions.js';
 
 let overlay;
 let titleEl;
@@ -211,6 +212,17 @@ function renderOptionButtons(options, theme, onChoice) {
   actionsEl.appendChild(btnWrap);
 }
 
+function pickReplacementCard(modalOptions) {
+  const levelId = modalOptions.levelId;
+  if (modalOptions.citySquare != null) {
+    return pickCityQuestion(modalOptions.citySquare, modalOptions.cityName);
+  }
+  if (modalOptions.tiebreak) {
+    return pickTiebreakCard(levelId);
+  }
+  return pickRandomCard(levelId);
+}
+
 export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
   const retries = modalOptions._retries || 0;
   const levelId = modalOptions.levelId;
@@ -226,7 +238,7 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
 
   if (!isValidQuestion(card.question) || !isPlayableCard(card)) {
     if (retries < 8) {
-      const next = pickRandomCard(levelId);
+      const next = pickReplacementCard(modalOptions);
       if (next && next.id !== card.id) {
         return showQuestionCardModal(next, onComplete, { ...modalOptions, _retries: retries + 1 });
       }
@@ -243,7 +255,7 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
   const options = prepared?.options;
   if (!options || options.length < 2 || !options.every(isValidOption)) {
     if (retries < 8) {
-      const next = pickRandomCard(levelId);
+      const next = pickReplacementCard(modalOptions);
       if (next && next.id !== card.id) {
         return showQuestionCardModal(next, onComplete, { ...modalOptions, _retries: retries + 1 });
       }
@@ -258,7 +270,7 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
 
   if (!isPlayableCard({ ...card, options: deriveOptions(card) })) {
     if (retries < 8) {
-      const next = pickRandomCard(levelId);
+      const next = pickReplacementCard(modalOptions);
       if (next && next.id !== card.id) {
         return showQuestionCardModal(next, onComplete, { ...modalOptions, _retries: retries + 1 });
       }

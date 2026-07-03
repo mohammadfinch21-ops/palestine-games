@@ -23,7 +23,7 @@ import {
   LOW_POOL_THRESHOLD,
 } from './questions.js';
 import { showModal, hideModal, showQuestionCardModal } from './modal.js';
-import { pickCityQuestion } from './city-questions.js';
+import { pickCityQuestion, resetCityQuestionSession } from './city-questions.js';
 import {
   onTrainGameOver,
   onTrainTurnComplete,
@@ -562,7 +562,7 @@ export function initTrainGame() {
           updateUI();
         }
       },
-      { deferClose: true },
+      { deferClose: true, tiebreak: true },
     );
   }
 
@@ -1184,7 +1184,10 @@ export function initTrainGame() {
     });
   }
 
-  document.addEventListener('train-level-changed', () => renderLevelSelector());
+  document.addEventListener('train-level-changed', () => {
+    resetCityQuestionSession();
+    renderLevelSelector();
+  });
 
   initMobileTrainBar();
   renderLevelSelector();
@@ -1401,7 +1404,7 @@ export function initTrainGame() {
     showQuestionCardModal(
       card,
       (userWasCorrect) => onDone(Boolean(userWasCorrect)),
-      { cityBonus: city.move, cityName: city.name, title: `أسئلة عامة — ${city.name}` },
+      { cityBonus: city.move, cityName: city.name, citySquare: sq, title: `أسئلة عامة — ${city.name}` },
     );
   }
 
@@ -1483,11 +1486,10 @@ export function initTrainGame() {
       poolWarningEl.hidden = false;
     } else if (state.started && !state.gameOver) {
       const stats = getSessionQuestionStats();
-      if (stats.isLow) {
-        poolWarningEl.textContent = `⚠️ ${stats.remaining} سؤال متبقٍ من ${stats.total}${stats.recycled ? ` — أُعيد خلط المجموعة (${stats.recycled})` : ''}`;
-        poolWarningEl.hidden = false;
-      } else if (stats.recycled > 0) {
-        poolWarningEl.textContent = `↻ أُعيد خلط الأسئلة — ${stats.remaining} متبقٍ`;
+      if (stats.total) {
+        poolWarningEl.textContent = stats.recycled > 0
+          ? `↻ أُعيد خلط الأسئلة — ${stats.remaining} متبقٍ من ${stats.total}`
+          : `${stats.remaining} سؤال متبقٍ من ${stats.total}`;
         poolWarningEl.hidden = false;
       } else {
         poolWarningEl.hidden = true;
@@ -1663,6 +1665,7 @@ export function initTrainGame() {
     normalizePlayerNames();
     renderPlayers();
     resetQuestionSession();
+    resetCityQuestionSession();
 
     const askRound = () => {
       let qIndex = 0;
@@ -1691,7 +1694,7 @@ export function initTrainGame() {
             qIndex++;
             askNext();
           },
-          { deferClose: true },
+          { deferClose: true, tiebreak: true },
         );
       };
 
@@ -1762,6 +1765,7 @@ export function initTrainGame() {
   function resetGame() {
     onTrainReset();
     resetQuestionSession();
+    resetCityQuestionSession();
     lotteryActive = false;
     state.players.forEach((p) => {
       p.position = 1;

@@ -28,6 +28,24 @@ export const MEMORY_STAGES = [
 let QUESTION_CARDS = [];
 let MEMORY_PAIRS = [];
 
+const RECYCLE_EXCLUDE_MIN = 3;
+const RECYCLE_EXCLUDE_MAX = 5;
+
+/** بطاقات مستخدمة لكل مرحلة ونوع مجموعة — main / tiebreak منفصلان تماماً */
+const sessionUsedIds = new Map();
+
+/** ترتيب آخر السحوبات لكل مجموعة — يُستثنى 3–5 عند إعادة الخلط */
+const recentDrawQueues = new Map();
+
+/** مجموعات مخلوطة جاهزة للسحب */
+const sessionDecks = new Map();
+
+/** عدد مرات إعادة الخلط لكل مجموعة */
+const recycleCounts = new Map();
+
+/** Minimum cards before we warn the user that the deck is small. */
+export const LOW_POOL_THRESHOLD = 8;
+
 export function getTrainLevelInfo(levelId = selectedLevelId) {
   return TRAIN_LEVELS.find((l) => l.id === levelId) || TRAIN_LEVELS[0];
 }
@@ -91,7 +109,6 @@ export async function loadCardData() {
     const mData = await mRes.json();
     MEMORY_PAIRS.splice(0, MEMORY_PAIRS.length, ...mData.filter((p) => p.isPlayable !== false));
 
-    // Client-side safety net: drop any card with garbled text
     if (TRAIN_DECK?.levels) {
       for (const level of Object.values(TRAIN_DECK.levels)) {
         if (Array.isArray(level.cards)) {
@@ -148,59 +165,35 @@ export function pickRandom(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-/** Deck per level for the current game session — draw without replacement, then smart recycle. */
-const sessionDecks = new Map();
+function poolKey(levelId, tiebreak) {
+  return `${levelId}:${tiebreak ? 'tiebreak' : 'main'}`;
+}
 
-/** Card ids drawn during main gameplay (المواجهة). */
-const usedQuestionIds = new Set();
-
-/** Card ids drawn during lottery/tiebreak (القرعة) — excluded from main game until pool recycles. */
-const lotteryUsedIds = new Set();
-
-/** Order of recently drawn ids — used to avoid immediate repeats on recycle. */
-const recentDrawOrder = [];
-
-/** How many times the pool was reshuffled this session (per level). */
-const recycleCounts = new Map();
-
-/** Minimum cards before we warn the user that repeats are likely. */
-export const LOW_POOL_THRESHOLD = 8;
-
-function sessionDeckKey(levelId, tiebreak = false) {
-  return tiebreak ? `${levelId}:lottery` : `${levelId}:main`;
+function getUsedSet(levelId, tiebreak) {
+  const key = poolKey(levelId, tiebreak);
+  if (!sessionUsedIds.has(key)) sessionUsedIds.set(key, new Set());
+  return sessionUsedIds.get(key);
 }
 
 function getCardId(card) {
-  return card?.id ?? null;
+  if (card?.id != null && card.id !== '') return String(card.id);
+  const q = (card?.question || '').trim();
+  return q ? `syn:${q}` : null;
 }
 
-function trackRecentDraw(id) {
-  recentDrawOrder.push(id);
-  const poolSize = getValidatedPool().length;
-  const maxRecent = Math.max(2, Math.min(8, Math.floor(poolSize * 0.35) || 2));
-  while (recentDrawOrder.length > maxRecent * 2) {
-    recentDrawOrder.shift();
-  }
+function trackRecentDraw(levelId, tiebreak, id) {
+  const key = poolKey(levelId, tiebreak);
+  const queue = recentDrawQueues.get(key) || [];
+  queue.push(id);
+  while (queue.length > RECYCLE_EXCLUDE_MAX + 2) queue.shift();
+  recentDrawQueues.set(key, queue);
 }
 
-function getRecentDrawIds(levelId = selectedLevelId) {
-  const pool = getValidatedPool(levelId);
-  const cooldown = Math.max(2, Math.min(6, Math.floor(pool.length * 0.25) || 2));
-  return new Set(recentDrawOrder.slice(-cooldown));
-}
-
-function markQuestionUsed(card) {
+function markCardUsed(card, levelId, tiebreak) {
   const id = getCardId(card);
   if (!id) return;
-  usedQuestionIds.add(id);
-  trackRecentDraw(id);
-}
-
-function markLotteryQuestionUsed(card) {
-  const id = getCardId(card);
-  if (!id) return;
-  lotteryUsedIds.add(id);
-  trackRecentDraw(id);
+  getUsedSet(levelId, tiebreak).add(id);
+  trackRecentDraw(levelId, tiebreak, id);
 }
 
 function getValidatedPool(levelId = selectedLevelId) {
@@ -209,90 +202,88 @@ function getValidatedPool(levelId = selectedLevelId) {
   );
 }
 
-function getLotteryUnusedPool(levelId = selectedLevelId) {
+/** بطاقات لم تُسحب بعد في هذه المجموعة — لا تكرار حتى تُستنفد كلها */
+function getUnusedPool(levelId, tiebreak) {
+  const used = getUsedSet(levelId, tiebreak);
   return getValidatedPool(levelId).filter((c) => {
     const id = getCardId(c);
-    return id ? !lotteryUsedIds.has(id) : true;
+    return id && !used.has(id);
   });
 }
 
-/** Main-game pool — skips lottery-used and gameplay-used cards until recycle. */
-function getUnusedPool(levelId = selectedLevelId) {
-  return getValidatedPool(levelId).filter((c) => {
-    const id = getCardId(c);
-    if (!id) return true;
-    return !usedQuestionIds.has(id) && !lotteryUsedIds.has(id);
-  });
+function getRecycleExcludeCount(recentLength) {
+  if (!recentLength) return 0;
+  const want = RECYCLE_EXCLUDE_MIN + Math.floor(Math.random() * (RECYCLE_EXCLUDE_MAX - RECYCLE_EXCLUDE_MIN + 1));
+  return Math.min(want, recentLength);
 }
 
-function buildRecycledPool(levelId = selectedLevelId) {
+function buildRecycledPool(levelId, tiebreak) {
   const pool = getValidatedPool(levelId);
   if (!pool.length) return [];
 
-  const recentIds = getRecentDrawIds(levelId);
-  let recycled = pool.filter((c) => !recentIds.has(getCardId(c)));
+  const key = poolKey(levelId, tiebreak);
+  const recent = recentDrawQueues.get(key) || [];
+  const excludeCount = getRecycleExcludeCount(recent.length);
+  const exclude = new Set(recent.slice(-excludeCount));
+
+  let recycled = pool.filter((c) => !exclude.has(getCardId(c)));
   if (!recycled.length) recycled = [...pool];
 
-  recycleCounts.set(levelId, (recycleCounts.get(levelId) || 0) + 1);
-  usedQuestionIds.clear();
-  lotteryUsedIds.clear();
-  return shuffle(shuffle(recycled));
+  recycleCounts.set(key, (recycleCounts.get(key) || 0) + 1);
+  getUsedSet(levelId, tiebreak).clear();
+  return shuffle(recycled);
 }
 
-function buildRecycledLotteryPool(levelId = selectedLevelId) {
-  const pool = getValidatedPool(levelId);
-  if (!pool.length) return [];
-
-  recycleCounts.set(`${levelId}:lottery`, (recycleCounts.get(`${levelId}:lottery`) || 0) + 1);
-  lotteryUsedIds.clear();
-  return shuffle([...pool]);
-}
-
-function getAvailablePool(levelId = selectedLevelId, tiebreak = false) {
-  const unused = tiebreak ? getLotteryUnusedPool(levelId) : getUnusedPool(levelId);
+function getAvailablePool(levelId, tiebreak) {
+  const unused = getUnusedPool(levelId, tiebreak);
   if (unused.length) return { cards: unused, recycled: false };
-  const recycled = tiebreak ? buildRecycledLotteryPool(levelId) : buildRecycledPool(levelId);
+  const recycled = buildRecycledPool(levelId, tiebreak);
   return { cards: recycled, recycled: recycled.length > 0 };
 }
 
-function refillSessionDeck(levelId, tiebreak = false) {
-  const key = sessionDeckKey(levelId, tiebreak);
+function refillSessionDeck(levelId, tiebreak) {
+  const key = poolKey(levelId, tiebreak);
   const { cards, recycled } = getAvailablePool(levelId, tiebreak);
   if (!cards.length) {
     sessionDecks.delete(key);
     return null;
   }
-  const deck = { remaining: shuffle(shuffle(cards)), recycled };
+  const deck = { remaining: shuffle(cards), recycled };
   sessionDecks.set(key, deck);
   return deck;
 }
 
-/** Clear shuffled session decks (all levels or one). Call on new game or level change. */
+function clearPoolState(levelId, tiebreak) {
+  const key = poolKey(levelId, tiebreak);
+  sessionDecks.delete(key);
+  sessionUsedIds.delete(key);
+  recentDrawQueues.delete(key);
+  recycleCounts.delete(key);
+}
+
+/** Clear session state (all levels or one). Call on new game or level change. */
 export function resetQuestionSession(levelId = null) {
   if (levelId != null) {
-    sessionDecks.delete(sessionDeckKey(levelId, false));
-    sessionDecks.delete(sessionDeckKey(levelId, true));
-    recycleCounts.delete(levelId);
-    recycleCounts.delete(`${levelId}:lottery`);
+    clearPoolState(levelId, false);
+    clearPoolState(levelId, true);
     return;
   }
   sessionDecks.clear();
-  usedQuestionIds.clear();
-  lotteryUsedIds.clear();
-  recentDrawOrder.length = 0;
+  sessionUsedIds.clear();
+  recentDrawQueues.clear();
   recycleCounts.clear();
 }
 
-/** After lottery completes: reset shuffled decks but keep lottery-used ids out of main draws. */
-export function beginMainGameSession() {
-  sessionDecks.clear();
+/** After lottery: fresh main deck only — قرعة منفصلة ولا تُنقص مجموعة اللعب */
+export function beginMainGameSession(levelId = selectedLevelId) {
+  clearPoolState(levelId, false);
 }
 
 export function getSessionQuestionStats(levelId = selectedLevelId) {
   const total = getValidatedPool(levelId).length;
-  const remaining = getUnusedPool(levelId).length;
+  const remaining = getUnusedPool(levelId, false).length;
   const used = Math.max(0, total - remaining);
-  const recycled = recycleCounts.get(levelId) || 0;
+  const recycled = recycleCounts.get(poolKey(levelId, false)) || 0;
   return {
     total,
     remaining,
@@ -306,9 +297,10 @@ export function getSessionQuestionStats(levelId = selectedLevelId) {
 
 export function getLowPoolMessage(levelId = selectedLevelId) {
   const stats = getSessionQuestionStats(levelId);
-  if (stats.isEmpty) return 'لا توجد أسئلة في هذه المرحلة.';
+  const levelName = getTrainLevelInfo(levelId).nameArabic;
+  if (stats.isEmpty) return `لا توجد أسئلة في مرحلة ${levelName}.`;
   if (stats.isLow) {
-    return `⚠️ ${stats.total} سؤالاً فقط في مرحلة ${getTrainLevelInfo(levelId).nameArabic} — قد تتكرر الأسئلة أثناء اللعب.`;
+    return `⚠️ ${stats.total} سؤالاً في مرحلة ${levelName} — لن يتكرر سؤال حتى تُستنفد المجموعة.`;
   }
   return null;
 }
@@ -317,36 +309,19 @@ function drawFromSessionDeck(levelId = selectedLevelId, options = {}) {
   const tiebreak = Boolean(options.tiebreak);
   if (!getValidatedPool(levelId).length) return { card: null, recycled: false };
 
-  const key = sessionDeckKey(levelId, tiebreak);
+  const key = poolKey(levelId, tiebreak);
   let deck = sessionDecks.get(key);
   if (!deck?.remaining.length) {
     deck = refillSessionDeck(levelId, tiebreak);
     if (!deck) return { card: null, recycled: false };
   }
 
-  const recentIds = getRecentDrawIds(levelId);
-  let card = null;
-  if (deck.remaining.length > 1) {
-    for (let i = 0; i < deck.remaining.length; i += 1) {
-      const candidate = deck.remaining[deck.remaining.length - 1 - i];
-      const id = getCardId(candidate);
-      if (!id || !recentIds.has(id) || i === deck.remaining.length - 1) {
-        deck.remaining.splice(deck.remaining.length - 1 - i, 1);
-        card = candidate;
-        break;
-      }
-    }
-  } else {
-    card = deck.remaining.pop() ?? null;
-  }
-  if (card) {
-    if (tiebreak) markLotteryQuestionUsed(card);
-    else markQuestionUsed(card);
-  }
+  const card = deck.remaining.pop() ?? null;
+  if (card) markCardUsed(card, levelId, tiebreak);
   return { card, recycled: Boolean(deck.recycled) };
 }
 
-/** Pick a card for tiebreak (القرعة) or main gameplay — main-game draws mark id as used. */
+/** Pick a card for tiebreak (القرعة) or main gameplay. */
 export function pickRandomCard(levelId = selectedLevelId, options = {}) {
   return drawFromSessionDeck(levelId, options).card;
 }
