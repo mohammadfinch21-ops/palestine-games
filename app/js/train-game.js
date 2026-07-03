@@ -22,8 +22,8 @@ import {
   getLowPoolMessage,
   LOW_POOL_THRESHOLD,
 } from './questions.js';
-import { showModal, hideModal, showQuestionCardModal } from './modal.js';
-import { pickCityQuestion, resetCityQuestionSession } from './city-questions.js';
+import { showModal, hideModal, showQuestionCardModal, isModalOpen } from './modal.js';
+import { pickCityQuestion, resetCityQuestionSession, areCityQuestionsReady } from './city-questions.js';
 import {
   onTrainGameOver,
   onTrainTurnComplete,
@@ -65,7 +65,10 @@ export function initTrainGame() {
     processingMove: false,
     gameOver: false,
     highlightSquare: null,
+    cityQuestionPending: null,
   };
+
+  let cityModalRetryTimer = null;
 
   const online = {
     mode: false,
@@ -439,6 +442,7 @@ export function initTrainGame() {
         processingMove: state.processingMove,
         gameOver: state.gameOver,
         highlightSquare: state.highlightSquare,
+        cityQuestionPending: state.cityQuestionPending,
       },
     };
   }
@@ -699,6 +703,10 @@ export function initTrainGame() {
     const myId = String(online.myId);
     const actingPlayer = state.players[state.currentIndex];
     const iAmActing = state.processingMove && String(actingPlayer?.id) === myId;
+    const localCityPending = state.cityQuestionPending;
+    const iAmCityActor =
+      localCityPending &&
+      String(getPlayerByIndex(localCityPending.playerIndex)?.id) === myId;
     const hostFinishingLottery = online.resolvingLottery && online.isHost;
     const inLottery = room.lotteryPhase && !room.started;
 
@@ -715,8 +723,15 @@ export function initTrainGame() {
       adoptRemoteStateVersion(remoteVersion);
     } else if (!iAmActing) {
       state.players = room.players.map((p) => ({ ...p }));
-      state.waitingForMove = !!bs.waitingForMove;
-      state.processingMove = !!bs.processingMove;
+      if (iAmCityActor && localCityPending) {
+        state.waitingForMove = false;
+        state.processingMove = false;
+        state.cityQuestionPending = localCityPending;
+      } else {
+        state.waitingForMove = !!bs.waitingForMove;
+        state.processingMove = !!bs.processingMove;
+        state.cityQuestionPending = bs.cityQuestionPending ?? null;
+      }
       state.highlightSquare = bs.highlightSquare ?? null;
       state.currentIndex = clampTurnIndex(room.currentTurn, state.players.length);
       state.gameOver = !!bs.gameOver;
@@ -740,6 +755,10 @@ export function initTrainGame() {
     renderOnlineLobby(room);
     online.applyingRemote = false;
     updateUI();
+
+    if (state.cityQuestionPending && shouldAnswerCityQuestion() && !isModalOpen()) {
+      scheduleCityQuestionModal();
+    }
 
     if (inLottery) {
       lotteryActive = true;
@@ -1393,8 +1412,41 @@ export function initTrainGame() {
     }).join('');
   }
 
+  function clearCityQuestionPending() {
+    state.cityQuestionPending = null;
+    if (cityModalRetryTimer) {
+      clearTimeout(cityModalRetryTimer);
+      cityModalRetryTimer = null;
+    }
+  }
+
+  function shouldAnswerCityQuestion() {
+    const pending = state.cityQuestionPending;
+    if (!pending || pending.playerIndex !== state.currentIndex) return false;
+    if (!online.mode || !online.inRoom) return true;
+    return isMyTurn();
+  }
+
+  function scheduleCityQuestionModal(retry = 0) {
+    if (!state.cityQuestionPending || !shouldAnswerCityQuestion()) return;
+    if (online.lotteryPromptOpen || online.lotteryTieModalOpen) {
+      if (retry < 16) {
+        if (cityModalRetryTimer) clearTimeout(cityModalRetryTimer);
+        cityModalRetryTimer = setTimeout(() => scheduleCityQuestionModal(retry + 1), 400);
+      }
+      return;
+    }
+    if (isModalOpen()) return;
+    const open = () => presentCityQuestionModal();
+    if (retry === 0) {
+      requestAnimationFrame(() => requestAnimationFrame(open));
+    } else {
+      open();
+    }
+  }
+
   function showCityQuestion(city, sq, onDone) {
-    const card = pickCityQuestion(sq, city.name);
+    const card = areCityQuestionsReady() ? pickCityQuestion(sq, city.name) : null;
     if (!card) {
       drawQuestionCard((correct) => onDone(Boolean(correct)));
       return;
@@ -1406,42 +1458,73 @@ export function initTrainGame() {
     );
   }
 
+  function presentCityQuestionModal() {
+    const pending = state.cityQuestionPending;
+    if (!pending || !shouldAnswerCityQuestion()) return;
+
+    const city = getCityAtSquare(pending.square) || {
+      name: pending.cityName,
+      move: pending.move,
+    };
+
+    showCityQuestion(city, pending.square, (correct) => {
+      clearCityQuestionPending();
+      pushOnlineState();
+      finishCityQuestion(pending.playerIndex, city, pending.square, correct);
+    });
+  }
+
+  function finishCityQuestion(playerIndex, city, sq, correct) {
+    const player = getPlayerByIndex(playerIndex);
+    if (!player) {
+      nextTurn();
+      return;
+    }
+    if (correct) {
+      const delta = city.move;
+      const from = sq;
+      const to = Math.max(1, Math.min(BOARD_SIZE, sq + delta));
+      if (to !== from) {
+        animateMovePlayer(playerIndex, from, to, () => {
+          showModal({
+            title: `مدينة ${city.name}`,
+            bodyHtml: `<p>إجابة صحيحة! ${delta >= 0 ? 'تتقدم' : 'ترتد'} ${Math.abs(delta)} مربعات → المربع ${player.position}</p>`,
+            actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
+          });
+        });
+      } else {
+        showModal({
+          title: `مدينة ${city.name}`,
+          bodyHtml: '<p>إجابة صحيحة!</p>',
+          actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
+        });
+      }
+    } else {
+      showModal({
+        title: `مدينة ${city.name}`,
+        bodyHtml: '<p>إجابة خاطئة — تبقى في مكانك.</p>',
+        actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
+      });
+    }
+  }
+
   function handleCitySquare(playerIndex, city, sq) {
     const player = getPlayerByIndex(playerIndex);
     if (!player) {
       nextTurn();
       return;
     }
+    state.processingMove = false;
     state.waitingForMove = false;
-    updateUI(`🏙️ وصلت إلى مدينة ${city.name} — أجب على سؤال عام`);
-    showCityQuestion(city, sq, (correct) => {
-      if (correct) {
-        const delta = city.move;
-        const from = sq;
-        const to = Math.max(1, Math.min(BOARD_SIZE, sq + delta));
-        if (to !== from) {
-          animateMovePlayer(playerIndex, from, to, () => {
-            showModal({
-              title: `مدينة ${city.name}`,
-              bodyHtml: `<p>إجابة صحيحة! ${delta >= 0 ? 'تتقدم' : 'ترتد'} ${Math.abs(delta)} مربعات → المربع ${player.position}</p>`,
-              actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
-            });
-          });
-        } else {
-          showModal({
-            title: `مدينة ${city.name}`,
-            bodyHtml: '<p>إجابة صحيحة!</p>',
-            actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
-          });
-        }
-      } else {
-        showModal({
-          title: `مدينة ${city.name}`,
-          bodyHtml: '<p>إجابة خاطئة — تبقى في مكانك.</p>',
-          actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
-        });
-      }
-    });
+    state.cityQuestionPending = {
+      playerIndex,
+      square: sq,
+      cityName: city.name,
+      move: city.move,
+    };
+    pushOnlineState();
+    updateUI();
+    scheduleCityQuestionModal();
   }
 
   function renderPlayers(flashIndex = null) {
@@ -1503,8 +1586,14 @@ export function initTrainGame() {
     const cardsReady = areCardsReady();
     const loadState = getCardsLoadState();
     const myTurn = isMyTurn();
+    const cityPending = state.cityQuestionPending;
+    const cityActorTurn = cityPending && cityPending.playerIndex === state.currentIndex && myTurn;
     const canActBase =
-      cardsReady && state.started && !state.gameOver && state.waitingForMove && !state.processingMove;
+      cardsReady &&
+      state.started &&
+      !state.gameOver &&
+      !state.processingMove &&
+      (state.waitingForMove || cityActorTurn);
     const canAct = canActBase && myTurn;
     const levelInfo = getTrainLevelInfo();
 
@@ -1547,8 +1636,9 @@ export function initTrainGame() {
     }
 
     drawBtn.disabled = !canAct;
-    rewardHintBtn.disabled = !canAct;
+    rewardHintBtn.disabled = !canAct || Boolean(cityActorTurn);
     drawBtn.classList.toggle('btn-pulse-ready', canAct);
+    drawBtn.textContent = cityActorTurn ? 'أجب على سؤال المدينة' : 'اسحب سؤالاً';
 
     const hideLocalStart = online.mode && online.inRoom;
     startBtn.hidden = hideLocalStart;
@@ -1593,6 +1683,13 @@ export function initTrainGame() {
       gameStatus.textContent = `مرحلة ${levelInfo.nameArabic} — اضغط «ابدأ اللعب»`;
     } else if (state.processingMove) {
       gameStatus.textContent = `🔑 ${current?.name || ''} يتحرك على الخارطة…`;
+    } else if (cityPending) {
+      const city = getCityAtSquare(cityPending.square);
+      const cityLabel = city?.name || cityPending.cityName || 'مدينة';
+      const actor = getPlayerByIndex(cityPending.playerIndex);
+      gameStatus.textContent = cityActorTurn
+        ? `🏙️ وصلت إلى مدينة ${cityLabel} — أجب على سؤال عام`
+        : `🏙️ ${actor?.name || current?.name || ''} في مدينة ${cityLabel} — سؤال عام`;
     } else if (state.waitingForMove && online.mode && !myTurn) {
       gameStatus.textContent = `🔑 دور ${current?.name || ''} — انتظر دورك`;
     } else if (state.waitingForMove) {
@@ -1616,6 +1713,7 @@ export function initTrainGame() {
           processingMove: state.processingMove,
           gameOver: state.gameOver,
           highlightSquare: state.highlightSquare,
+          cityQuestionPending: state.cityQuestionPending,
         },
       });
     }
@@ -1774,18 +1872,19 @@ export function initTrainGame() {
     state.processingMove = false;
     state.gameOver = false;
     state.highlightSquare = null;
+    clearCityQuestionPending();
     updateUI();
   }
 
   function drawProgressQuestion() {
-    if (
-      lotteryActive ||
-      !state.started ||
-      !isMyTurn() ||
-      !areCardsReady() ||
-      !state.waitingForMove ||
-      state.processingMove
-    ) {
+    if (lotteryActive || !state.started || !isMyTurn() || !areCardsReady() || state.processingMove) {
+      return;
+    }
+    if (state.cityQuestionPending && shouldAnswerCityQuestion()) {
+      presentCityQuestionModal();
+      return;
+    }
+    if (!state.waitingForMove) {
       return;
     }
     const card = pickRandomCard();
@@ -1853,7 +1952,6 @@ export function initTrainGame() {
 
     if (!player) {
       state.processingMove = false;
-      state.waitingForMove = true;
       onDone?.();
       return;
     }
@@ -1862,7 +1960,6 @@ export function initTrainGame() {
       player.position = end;
       clearHighlight();
       state.processingMove = false;
-      state.waitingForMove = true;
       renderBoard();
       updateUI();
       pushOnlineState();
@@ -1878,7 +1975,6 @@ export function initTrainGame() {
       const active = getPlayerByIndex(playerIndex);
       if (!active) {
         state.processingMove = false;
-        state.waitingForMove = true;
         onDone?.();
         return;
       }
@@ -1894,7 +1990,6 @@ export function initTrainGame() {
         setTimeout(() => {
           clearHighlight();
           state.processingMove = false;
-          state.waitingForMove = true;
           updateUI();
           pushOnlineState();
           onDone?.();

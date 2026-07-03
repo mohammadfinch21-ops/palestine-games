@@ -45,6 +45,10 @@ export function showModal({ title, bodyHtml, actions = [], onClose = null }) {
   overlay.setAttribute('aria-hidden', 'false');
 }
 
+export function isModalOpen() {
+  return Boolean(overlay && !overlay.classList.contains('hidden'));
+}
+
 export function hideModal() {
   overlay.classList.add('hidden');
   overlay.setAttribute('aria-hidden', 'true');
