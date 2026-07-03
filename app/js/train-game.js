@@ -233,8 +233,7 @@ export function initTrainGame() {
     if (mobileDrawBtn) {
       mobileDrawBtn.disabled = drawBtn.disabled;
       mobileDrawBtn.classList.toggle('btn-pulse-ready', drawBtn.classList.contains('btn-pulse-ready'));
-      const cityLabel = drawBtn.textContent?.includes('مدينة') ? drawBtn.textContent : null;
-      mobileDrawBtn.textContent = cityLabel || '🃏 سؤال';
+      mobileDrawBtn.textContent = '🃏 سؤال';
     }
     if (mobileTurnLabel) {
       mobileTurnLabel.textContent = currentPlayerName?.textContent || '—';
@@ -1476,8 +1475,8 @@ export function initTrainGame() {
     presentCityQuestionModal();
   }
 
-  function showCityQuestion(city, sq, onDone) {
-    const card = areCityQuestionsReady() ? pickCityQuestion(sq, city.name) : null;
+  function showCityQuestion(city, sq, playerId, onDone) {
+    const card = areCityQuestionsReady() ? pickCityQuestion(sq, city.name, playerId) : null;
     if (!card) {
       drawQuestionCard((correct) => onDone(Boolean(correct)));
       return;
@@ -1485,7 +1484,13 @@ export function initTrainGame() {
     showQuestionCardModal(
       card,
       (userWasCorrect) => onDone(Boolean(userWasCorrect)),
-      { cityBonus: city.move, cityName: city.name, citySquare: sq, title: `أسئلة عامة — ${city.name}` },
+      {
+        cityBonus: city.move,
+        cityName: city.name,
+        citySquare: sq,
+        cityPlayerId: playerId,
+        title: `أسئلة عامة — ${city.name}`,
+      },
     );
   }
 
@@ -1497,8 +1502,9 @@ export function initTrainGame() {
       name: pending.cityName,
       move: pending.move,
     };
+    const actor = getPlayerByIndex(pending.playerIndex);
 
-    showCityQuestion(city, pending.square, (correct) => {
+    showCityQuestion(city, pending.square, actor?.id, (correct) => {
       clearCityQuestionPending();
       pushOnlineState();
       finishCityQuestion(pending.playerIndex, city, pending.square, correct);
@@ -1623,21 +1629,16 @@ export function initTrainGame() {
     const loadState = getCardsLoadState();
     const myTurn = isMyTurn();
     const cityPending = state.cityQuestionPending;
-    const cityActorTurn = cityPending && cityPending.playerIndex === state.currentIndex && myTurn;
-    const canActCity =
-      cityActorTurn &&
-      state.started &&
-      !state.gameOver &&
-      !lotteryActive &&
-      (areCityQuestionsReady() || areCardsReady());
+    const cityQuestionActive = cityPending && shouldAnswerCityQuestion();
     const canActDraw =
       cardsReady &&
       state.started &&
       !state.gameOver &&
       !lotteryActive &&
       !state.processingMove &&
-      state.waitingForMove;
-    const canAct = myTurn && (canActCity || canActDraw);
+      state.waitingForMove &&
+      !cityQuestionActive;
+    const canAct = myTurn && canActDraw;
     const levelInfo = getTrainLevelInfo();
 
     if (state.started && !state.gameOver && current) {
@@ -1679,9 +1680,9 @@ export function initTrainGame() {
     }
 
     drawBtn.disabled = !canAct;
-    rewardHintBtn.disabled = !canAct || Boolean(cityActorTurn);
+    rewardHintBtn.disabled = !canAct;
     drawBtn.classList.toggle('btn-pulse-ready', canAct);
-    drawBtn.textContent = cityActorTurn ? 'أجب على سؤال المدينة' : 'اسحب سؤالاً';
+    drawBtn.textContent = 'اسحب سؤالاً';
 
     const hideLocalStart = online.mode && online.inRoom;
     startBtn.hidden = hideLocalStart;
@@ -1726,13 +1727,10 @@ export function initTrainGame() {
       gameStatus.textContent = `مرحلة ${levelInfo.nameArabic} — اضغط «ابدأ اللعب»`;
     } else if (state.processingMove) {
       gameStatus.textContent = `🔑 ${current?.name || ''} يتحرك على الخارطة…`;
-    } else if (cityPending) {
+    } else if (cityQuestionActive) {
       const city = getCityAtSquare(cityPending.square);
       const cityLabel = city?.name || cityPending.cityName || 'مدينة';
-      const actor = getPlayerByIndex(cityPending.playerIndex);
-      gameStatus.textContent = cityActorTurn
-        ? `🏙️ وصلت إلى مدينة ${cityLabel} — أجب على سؤال عام`
-        : `🏙️ ${actor?.name || current?.name || ''} في مدينة ${cityLabel} — سؤال عام`;
+      gameStatus.textContent = `🏙️ وصلت إلى مدينة ${cityLabel} — أجب على سؤال عام`;
     } else if (state.waitingForMove && online.mode && !myTurn) {
       gameStatus.textContent = `🔑 دور ${current?.name || ''} — انتظر دورك`;
     } else if (state.waitingForMove) {
@@ -1921,12 +1919,6 @@ export function initTrainGame() {
 
   function handleDrawAction() {
     if (!state.started || state.gameOver || !isMyTurn()) return;
-
-    if (state.cityQuestionPending && shouldAnswerCityQuestion()) {
-      promptCityQuestion();
-      return;
-    }
-
     drawProgressQuestion();
   }
 

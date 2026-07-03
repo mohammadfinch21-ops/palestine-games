@@ -219,7 +219,11 @@ function renderOptionButtons(options, theme, onChoice) {
 function pickReplacementCard(modalOptions) {
   const levelId = modalOptions.levelId;
   if (modalOptions.citySquare != null) {
-    return pickCityQuestion(modalOptions.citySquare, modalOptions.cityName);
+    return pickCityQuestion(
+      modalOptions.citySquare,
+      modalOptions.cityName,
+      modalOptions.cityPlayerId ?? 'local',
+    );
   }
   return drawQuestion(levelId, { tiebreak: Boolean(modalOptions.tiebreak) }).card;
 }
