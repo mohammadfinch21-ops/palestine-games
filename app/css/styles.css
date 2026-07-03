@@ -257,6 +257,116 @@ html, body {
   margin: 0 0.35rem;
 }
 
+.menu-contact {
+  margin-top: 1rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  width: 100%;
+}
+
+.menu-contact-org {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--gold-light, #e6c866);
+  margin: 0 0 0.35rem;
+}
+
+.menu-contact-links {
+  font-size: 0.78rem;
+  line-height: 1.7;
+  margin: 0;
+  color: rgba(245, 240, 232, 0.85);
+}
+
+.menu-contact-links a {
+  color: var(--gold, #c9a227);
+  text-decoration: none;
+}
+
+.menu-contact-links a:hover {
+  text-decoration: underline;
+}
+
+.players-panel-hint {
+  font-size: 0.82rem;
+  color: #555;
+  margin: 0 0 0.65rem;
+  line-height: 1.45;
+}
+
+.player-count-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.player-count-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #444;
+}
+
+.player-count-picker {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.player-count-btn {
+  font-family: inherit;
+  min-width: 2.1rem;
+  height: 2.1rem;
+  padding: 0 0.55rem;
+  border-radius: 8px;
+  border: 2px solid rgba(0, 122, 61, 0.35);
+  background: #fff;
+  color: var(--green-dark);
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.15s;
+}
+
+.player-count-btn.is-active {
+  background: var(--green);
+  border-color: var(--green-dark);
+  color: #fff;
+}
+
+.player-count-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.player-chip .player-name-input {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 6px;
+  padding: 0.3rem 0.45rem;
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  background: #fafafa;
+  color: #222;
+}
+
+.player-chip .player-name-input:focus {
+  outline: 2px solid rgba(201, 162, 39, 0.45);
+  border-color: var(--gold);
+  background: #fff;
+}
+
+.player-chip .player-name-input:disabled {
+  background: transparent;
+  border-color: transparent;
+  color: inherit;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 /* ===== Game Header ===== */
 .game-header {
   display: flex;
@@ -1671,10 +1781,18 @@ button:not(:disabled):hover {
   line-height: 1.4;
   padding: 0.75rem 1rem;
   font-size: 1rem;
-  font-weight: 800;
+  font-weight: 700;
   direction: rtl;
   text-align: center;
   unicode-bidi: plaintext;
+  background: #fff !important;
+  border: 2px solid #94a3b8 !important;
+  color: #1e293b !important;
+}
+
+.modal-actions.question-card-actions .question-card-option-btn:not(:disabled):hover {
+  background: #f8fafc !important;
+  border-color: #64748b !important;
 }
 
 .pt-question-text {

@@ -84,12 +84,49 @@ function getCardTheme(card) {
   return card.color || card.level || 'yellow';
 }
 
-function resolveCorrectAnswer(card, options) {
-  if (card.correctAnswer && isValidOption(card.correctAnswer)) return card.correctAnswer;
-  if (typeof card.correctAnswerIndex === 'number' && options[card.correctAnswerIndex]) {
-    return options[card.correctAnswerIndex];
+function normalizeChoice(text) {
+  return String(text ?? '')
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/[\u064B-\u065F\u0670]/g, '')
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/ى/g, 'ي');
+}
+
+function choiceMatches(a, b) {
+  return normalizeChoice(a) === normalizeChoice(b);
+}
+
+function findMatchingOption(answer, options) {
+  if (!answer || !Array.isArray(options)) return null;
+  return options.find((opt) => choiceMatches(opt, answer)) ?? null;
+}
+
+function resolveCorrectAnswer(card, sourceOptions) {
+  const originalOptions = Array.isArray(card.options)
+    ? card.options.filter(isValidOption)
+    : [...sourceOptions];
+
+  if (card.correctAnswer) {
+    const fromSource = findMatchingOption(card.correctAnswer, sourceOptions);
+    if (fromSource) return fromSource;
+    const fromOriginal = findMatchingOption(card.correctAnswer, originalOptions);
+    if (fromOriginal) {
+      const mapped = findMatchingOption(fromOriginal, sourceOptions);
+      if (mapped) return mapped;
+      if (isTrueFalseQuestion(card.question || '')) return fromOriginal;
+    }
   }
-  return options[0] || 'صح';
+
+  if (typeof card.correctAnswerIndex === 'number' && originalOptions[card.correctAnswerIndex]) {
+    const indexed = originalOptions[card.correctAnswerIndex];
+    const fromSource = findMatchingOption(indexed, sourceOptions);
+    if (fromSource) return fromSource;
+    return indexed;
+  }
+
+  const fallback = findMatchingOption(card.correctAnswer, originalOptions);
+  return fallback || sourceOptions[0] || 'صح';
 }
 
 /** Shuffle display order; resolve correct answer from source options before shuffle. */
@@ -138,12 +175,10 @@ function renderOptionButtons(options, theme, onChoice) {
   btnWrap.className = `question-card-option-btns question-card-option-btns--${theme}`;
   btnWrap.dir = 'rtl';
 
-  options.forEach((opt, i) => {
+  options.forEach((opt) => {
     const btn = document.createElement('button');
     btn.type = 'button';
-    let cls = 'question-card-option-btn';
-    cls += i === 0 ? ' btn-primary' : ' btn-outline';
-    btn.className = cls;
+    btn.className = 'question-card-option-btn btn-outline';
     btn.textContent = opt;
     btn.dir = 'rtl';
     btn.lang = 'ar';
@@ -229,14 +264,14 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
   });
 
   const handleChoice = (userChoice, btnWrap) => {
-    const userWasCorrect = userChoice === correctAnswer;
+    const userWasCorrect = choiceMatches(userChoice, correctAnswer);
     const steps = userWasCorrect ? stepsCorrect : stepsWrong;
     let completed = false;
 
     btnWrap.querySelectorAll('.question-card-option-btn').forEach((b) => {
       b.disabled = true;
-      if (b.dataset.choice === correctAnswer) b.classList.add('correct');
-      else if (b.dataset.choice === userChoice && !userWasCorrect) b.classList.add('wrong');
+      if (choiceMatches(b.dataset.choice, correctAnswer)) b.classList.add('correct');
+      else if (choiceMatches(b.dataset.choice, userChoice) && !userWasCorrect) b.classList.add('wrong');
     });
 
     const finish = () => {

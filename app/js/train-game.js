@@ -1,10 +1,10 @@
 import {
-  CITIES,
   BARRIERS,
   BLUE_ARROWS,
   YELLOW_ARROWS,
   PLAYER_COLORS,
   TRAIN_RULES,
+  getCityAtSquare,
 } from './board-data.js';
 import { MAP_IMAGE, getMapPosition } from './board-path-coords.js';
 import {
@@ -106,6 +106,7 @@ export function initTrainGame() {
   const drawBtn = document.getElementById('draw-question-btn');
   const diceBtn = document.getElementById('roll-dice-btn');
   const addPlayerBtn = document.getElementById('add-player-btn');
+  const playerCountPicker = document.getElementById('player-count-picker');
   const rulesBtn = document.getElementById('train-rules-btn');
   const rewardHintBtn = document.getElementById('train-reward-hint-btn');
   const levelSelectorEl = document.getElementById('train-level-selector');
@@ -1093,17 +1094,33 @@ export function initTrainGame() {
     showModal({ title: 'طريقة اللعب — قطار فلسطين', bodyHtml: TRAIN_RULES });
   });
 
-  addPlayerBtn.addEventListener('click', () => {
-    if (online.mode || state.started || state.players.length >= MAX_PLAYERS) return;
-    const n = state.players.length + 1;
-    state.players.push({
-      id: n,
-      name: `اللاعب ${n}`,
-      position: 1,
-      color: PLAYER_COLORS[(n - 1) % PLAYER_COLORS.length],
-    });
+  addPlayerBtn?.addEventListener('click', () => {
+    if (!canEditPlayers() || state.players.length >= MAX_PLAYERS) return;
+    setPlayerCount(state.players.length + 1);
+  });
+
+  playerCountPicker?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.player-count-btn');
+    if (!btn || btn.disabled) return;
+    setPlayerCount(Number(btn.dataset.count));
+  });
+
+  playersList.addEventListener('input', (e) => {
+    const input = e.target.closest('.player-name-input');
+    if (!input || input.disabled) return;
+    const index = Number(input.dataset.playerIndex);
+    if (index < 0 || index >= state.players.length) return;
+    state.players[index].name = input.value;
+  });
+
+  playersList.addEventListener('change', (e) => {
+    const input = e.target.closest('.player-name-input');
+    if (!input || input.disabled) return;
+    const index = Number(input.dataset.playerIndex);
+    if (index < 0 || index >= state.players.length) return;
+    state.players[index].name = String(input.value || '').trim();
+    input.value = state.players[index].name;
     renderPlayers();
-    renderBoard();
     updateUI();
   });
 
@@ -1170,6 +1187,7 @@ export function initTrainGame() {
 
   initMobileTrainBar();
   renderLevelSelector();
+  renderPlayerCountPicker();
   renderBoard();
   renderPlayers();
   updateUI();
@@ -1304,6 +1322,7 @@ export function initTrainGame() {
       state.currentIndex = Math.min(state.currentIndex, state.players.length - 1);
     }
 
+    renderPlayerCountPicker();
     renderPlayers();
     renderBoard();
 
@@ -1314,17 +1333,99 @@ export function initTrainGame() {
     }
   }
 
+  function escapePlayerName(str) {
+    return String(str ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function displayPlayerName(player, index) {
+    const trimmed = String(player?.name ?? '').trim();
+    return trimmed || `اللاعب ${index + 1}`;
+  }
+
+  function normalizePlayerNames() {
+    state.players.forEach((p, i) => {
+      p.name = displayPlayerName(p, i);
+    });
+  }
+
+  function canEditPlayers() {
+    return !online.mode && (!state.started || state.gameOver);
+  }
+
+  function setPlayerCount(count) {
+    if (!canEditPlayers()) return;
+    const target = Math.max(MIN_PLAYERS, Math.min(MAX_PLAYERS, count));
+    while (state.players.length < target) {
+      const n = state.players.length + 1;
+      state.players.push({
+        id: n,
+        name: '',
+        position: 1,
+        color: PLAYER_COLORS[(n - 1) % PLAYER_COLORS.length],
+      });
+    }
+    while (state.players.length > target) {
+      state.players.pop();
+    }
+    state.players.forEach((p, i) => {
+      p.id = i + 1;
+      p.color = PLAYER_COLORS[i % PLAYER_COLORS.length];
+    });
+    renderPlayerCountPicker();
+    renderPlayers();
+    renderBoard();
+    updateUI();
+  }
+
+  function renderPlayerCountPicker() {
+    if (!playerCountPicker) return;
+    const locked = !canEditPlayers();
+    const count = state.players.length;
+    playerCountPicker.innerHTML = Array.from({ length: MAX_PLAYERS - MIN_PLAYERS + 1 }, (_, i) => {
+      const n = MIN_PLAYERS + i;
+      return `<button type="button" class="player-count-btn${n === count ? ' is-active' : ''}" data-count="${n}" ${locked ? 'disabled' : ''} aria-pressed="${n === count}">${n}</button>`;
+    }).join('');
+  }
+
+  function handleCitySquare(player, city, sq) {
+    drawQuestionCard((correct) => {
+      if (correct) {
+        const delta = city.move;
+        player.position = Math.max(1, Math.min(BOARD_SIZE, sq + delta));
+        renderBoard();
+        pushOnlineState();
+        showModal({
+          title: `مدينة ${city.name}`,
+          bodyHtml: `<p>إجابة صحيحة! ${delta >= 0 ? 'تتقدم' : 'ترتد'} ${Math.abs(delta)} مربعات → المربع ${player.position}</p>`,
+          actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
+        });
+        renderBoard();
+      } else {
+        showModal({
+          title: `مدينة ${city.name}`,
+          bodyHtml: '<p>إجابة خاطئة — تبقى في مكانك.</p>',
+          actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
+        });
+      }
+    });
+  }
+
   function renderPlayers(flashIndex = null) {
     const activeIdx = state.currentIndex;
     const showRemove = canRemovePlayer();
+    const namesLocked = !canEditPlayers();
     playersList.innerHTML = state.players
       .map(
         (p, i) => `
       <div class="player-chip ${i === activeIdx && state.started && !state.gameOver ? 'active' : ''} ${flashIndex === i ? 'turn-flash' : ''}" data-player-index="${i}">
         <span class="player-key" style="--key-color:${p.color}">🔑</span>
-        <span class="player-name">${p.name}</span>
+        <input type="text" class="player-name-input" data-player-index="${i}" value="${escapePlayerName(p.name)}" placeholder="اسم اللاعب ${i + 1}" maxlength="24" dir="rtl" lang="ar" ${namesLocked ? 'disabled' : ''} aria-label="اسم اللاعب ${i + 1}" />
         <span class="player-pos">م${p.position}</span>
-        ${showRemove ? `<button type="button" class="player-remove-btn" aria-label="حذف ${p.name}" title="حذف">×</button>` : ''}
+        ${showRemove ? `<button type="button" class="player-remove-btn" aria-label="حذف ${escapePlayerName(displayPlayerName(p, i))}" title="حذف">×</button>` : ''}
       </div>`,
       )
       .join('');
@@ -1496,6 +1597,7 @@ export function initTrainGame() {
     updatePoolWarning();
     updateChatVisibility();
     syncMobileBar();
+    renderPlayerCountPicker();
   }
 
   function startGame() {
@@ -1529,6 +1631,8 @@ export function initTrainGame() {
     }
     if (state.started) return;
 
+    normalizePlayerNames();
+    renderPlayers();
     resetQuestionSession();
 
     const askRound = () => {
@@ -1835,6 +1939,12 @@ export function initTrainGame() {
       return;
     }
 
+    const city = getCityAtSquare(sq);
+    if (city) {
+      handleCitySquare(player, city, sq);
+      return;
+    }
+
     const blue = BLUE_ARROWS.find((a) => a.start === sq);
     if (blue) {
       drawQuestionCard((correct) => {
@@ -1876,31 +1986,6 @@ export function initTrainGame() {
           showModal({
             title: 'إجابة خاطئة',
             bodyHtml: '<p>تبقى في مكانك.</p>',
-            actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
-          });
-        }
-      });
-      return;
-    }
-
-    const city = CITIES[sq];
-    if (city && !city.finish) {
-      drawQuestionCard((correct) => {
-        if (correct) {
-          const delta = city.move;
-          player.position = Math.max(1, Math.min(BOARD_SIZE, sq + delta));
-          renderBoard();
-          pushOnlineState();
-          showModal({
-            title: `مدينة ${city.name}`,
-            bodyHtml: `<p>إجابة صحيحة! ${delta >= 0 ? 'تتقدم' : 'ترتد'} ${Math.abs(delta)} مربعات → المربع ${player.position}</p>`,
-            actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => continueAfterSpecial(player) }],
-          });
-          renderBoard();
-        } else {
-          showModal({
-            title: `مدينة ${city.name}`,
-            bodyHtml: '<p>إجابة خاطئة — تبقى في مكانك.</p>',
             actions: [{ label: 'متابعة', className: 'btn-primary', onClick: () => nextTurn() }],
           });
         }

@@ -177,10 +177,16 @@ function getCardId(card) {
 function trackRecentDraw(id) {
   recentDrawOrder.push(id);
   const poolSize = getValidatedPool().length;
-  const maxRecent = Math.max(1, Math.min(5, Math.floor(poolSize / 2) || 1));
+  const maxRecent = Math.max(2, Math.min(8, Math.floor(poolSize * 0.35) || 2));
   while (recentDrawOrder.length > maxRecent * 2) {
     recentDrawOrder.shift();
   }
+}
+
+function getRecentDrawIds(levelId = selectedLevelId) {
+  const pool = getValidatedPool(levelId);
+  const cooldown = Math.max(2, Math.min(6, Math.floor(pool.length * 0.25) || 2));
+  return new Set(recentDrawOrder.slice(-cooldown));
 }
 
 function markQuestionUsed(card) {
@@ -223,15 +229,14 @@ function buildRecycledPool(levelId = selectedLevelId) {
   const pool = getValidatedPool(levelId);
   if (!pool.length) return [];
 
-  const cooldown = Math.max(1, Math.min(3, pool.length - 1));
-  const recentIds = new Set(recentDrawOrder.slice(-cooldown));
+  const recentIds = getRecentDrawIds(levelId);
   let recycled = pool.filter((c) => !recentIds.has(getCardId(c)));
   if (!recycled.length) recycled = [...pool];
 
   recycleCounts.set(levelId, (recycleCounts.get(levelId) || 0) + 1);
   usedQuestionIds.clear();
   lotteryUsedIds.clear();
-  return shuffle(recycled);
+  return shuffle(shuffle(recycled));
 }
 
 function buildRecycledLotteryPool(levelId = selectedLevelId) {
@@ -257,7 +262,7 @@ function refillSessionDeck(levelId, tiebreak = false) {
     sessionDecks.delete(key);
     return null;
   }
-  const deck = { remaining: shuffle(cards), recycled };
+  const deck = { remaining: shuffle(shuffle(cards)), recycled };
   sessionDecks.set(key, deck);
   return deck;
 }
@@ -319,7 +324,21 @@ function drawFromSessionDeck(levelId = selectedLevelId, options = {}) {
     if (!deck) return { card: null, recycled: false };
   }
 
-  const card = deck.remaining.pop() ?? null;
+  const recentIds = getRecentDrawIds(levelId);
+  let card = null;
+  if (deck.remaining.length > 1) {
+    for (let i = 0; i < deck.remaining.length; i += 1) {
+      const candidate = deck.remaining[deck.remaining.length - 1 - i];
+      const id = getCardId(candidate);
+      if (!id || !recentIds.has(id) || i === deck.remaining.length - 1) {
+        deck.remaining.splice(deck.remaining.length - 1 - i, 1);
+        card = candidate;
+        break;
+      }
+    }
+  } else {
+    card = deck.remaining.pop() ?? null;
+  }
   if (card) {
     if (tiebreak) markLotteryQuestionUsed(card);
     else markQuestionUsed(card);

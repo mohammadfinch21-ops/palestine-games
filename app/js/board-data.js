@@ -39,6 +39,17 @@ export const CITIES = {
   100: { name: 'القدس', move: 0, finish: true },
 };
 
+export const CITY_SQUARES = new Set(
+  Object.entries(CITIES)
+    .filter(([, city]) => !city.finish)
+    .map(([sq]) => Number(sq)),
+);
+
+export function getCityAtSquare(square) {
+  const city = CITIES[square];
+  return city && !city.finish ? city : null;
+}
+
 /** حواجز الكيان الصهيوني — تراجع 3 خطوات (23، 33، 64، 96) مع أحداث تاريخية */
 export const BARRIERS = {
   23: {
