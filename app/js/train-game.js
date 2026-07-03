@@ -105,7 +105,6 @@ export function initTrainGame() {
   const gameStatus = document.getElementById('game-status');
   const startBtn = document.getElementById('start-game-btn');
   const drawBtn = document.getElementById('draw-question-btn');
-  const diceBtn = document.getElementById('roll-dice-btn');
   const addPlayerBtn = document.getElementById('add-player-btn');
   const playerCountPicker = document.getElementById('player-count-picker');
   const rulesBtn = document.getElementById('train-rules-btn');
@@ -1135,7 +1134,6 @@ export function initTrainGame() {
 
   startBtn.addEventListener('click', startGame);
   drawBtn.addEventListener('click', () => drawProgressQuestion());
-  diceBtn.addEventListener('click', () => rollDiceMove());
 
   rewardHintBtn.addEventListener('click', () => {
     if (!isMyTurn() || !state.started || state.gameOver || !state.waitingForMove || state.processingMove) return;
@@ -1549,7 +1547,6 @@ export function initTrainGame() {
     }
 
     drawBtn.disabled = !canAct;
-    diceBtn.disabled = !canAct;
     rewardHintBtn.disabled = !canAct;
     drawBtn.classList.toggle('btn-pulse-ready', canAct);
 
@@ -1842,21 +1839,6 @@ export function initTrainGame() {
     const card = pickRandomCard();
     showQuestionCardModal(card, (userWasCorrect, steps) => {
       onDone(userWasCorrect, steps);
-    });
-  }
-
-  function rollDiceMove() {
-    if (!isMyTurn() || !state.waitingForMove || state.processingMove) return;
-    const actingIndex = state.currentIndex;
-    const player = getPlayerByIndex(actingIndex);
-    if (!player) return;
-    const steps = Math.floor(Math.random() * 6) + 1;
-    const from = normalizePosition(player.position);
-    const to = Math.min(BOARD_SIZE, from + steps);
-    showModal({
-      title: 'النرد',
-      bodyHtml: `<p style="font-size:2rem;text-align:center;">🎲 ${steps}</p><p>تحرك ${player.name} من مربع ${from} إلى ${to}</p>`,
-      actions: [{ label: 'تحرك', className: 'btn-primary', onClick: () => animateMovePlayer(actingIndex, from, to, () => processSquare(actingIndex)) }],
     });
   }
 
