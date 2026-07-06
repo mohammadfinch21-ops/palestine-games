@@ -9,6 +9,26 @@
   to = "/privacy.html"
   status = 200
 
+[[redirects]]
+  from = "/about"
+  to = "/about.html"
+  status = 200
+
+[[redirects]]
+  from = "/how-to-play"
+  to = "/how-to-play.html"
+  status = 200
+
+[[redirects]]
+  from = "/contact"
+  to = "/contact.html"
+  status = 200
+
+[[redirects]]
+  from = "/articles"
+  to = "/articles/index.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]

@@ -82,10 +82,59 @@ html, body {
 }
 
 .menu-header,
+.menu-intro,
 .menu-cards,
 .menu-footer {
   position: relative;
   z-index: 1;
+}
+
+.menu-intro {
+  max-width: min(720px, 100%);
+  margin: 0 auto 1.75rem;
+  padding: 1.25rem 1.5rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius);
+  color: var(--white);
+  text-align: right;
+  line-height: 1.7;
+}
+
+.menu-intro h2 {
+  font-size: 1.2rem;
+  color: var(--gold-light);
+  margin-bottom: 0.75rem;
+}
+
+.menu-intro h3 {
+  font-size: 1.05rem;
+  color: var(--gold);
+  margin: 1.25rem 0 0.5rem;
+}
+
+.menu-intro p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.88);
+  margin-bottom: 0.65rem;
+}
+
+.menu-intro a {
+  color: var(--gold-light);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.menu-intro a:hover {
+  color: #fff;
+}
+
+.menu-footer-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem 0;
+  margin-bottom: 1rem;
 }
 
 .menu-header {

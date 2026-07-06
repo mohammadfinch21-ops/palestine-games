@@ -20,8 +20,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
-  <!-- AdSense site verification — keep in <head> per Google -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7224635870129371" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="css/content-pages.css" />
   <style>
     .privacy-page { max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem 4rem; line-height: 1.75; }
     .privacy-page h1 { font-size: 1.75rem; margin-bottom: 0.5rem; color: var(--gold, #c9a227); }
@@ -37,9 +36,19 @@
 </head>
 <body>
   <div class="privacy-page">
-    <a class="back-link" href="index.html">← العودة للعبة | Back to game</a>
+    <a class="back-link" href="index.html">← العودة للألعاب</a>
+
+    <nav class="site-nav" aria-label="روابط الموقع">
+      <a href="index.html">الرئيسية</a>
+      <a href="about.html">من نحن</a>
+      <a href="how-to-play.html">طريقة اللعب</a>
+      <a href="articles/index.html">مقالات تعليمية</a>
+      <a href="contact.html">اتصل بنا</a>
+      <a href="privacy.html">سياسة الخصوصية</a>
+    </nav>
+
     <h1>سياسة الخصوصية</h1>
-    <p class="updated">آخر تحديث: يونيو 2026 · Last updated: June 2026</p>
+    <p class="updated">آخر تحديث: يوليو 2026 · Last updated: July 2026</p>
 
     <p>
       مرحباً بك في <strong>ألعاب فلسطين — قطار فلسطين وبطاقات الذاكرة</strong>، تطبيق ويب تعليمي/ترفيهي
@@ -100,15 +109,39 @@
       حسب موقعك الجغرافي، قد يكون لك الحق في الوصول أو التصحيح أو حذف البيانات. لطلبات GDPR/CCPA
       المتعلقة بإعلانات Google، راجع
       <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">How Google uses data</a>.
+      للاستفسارات المباشرة تواصل معنا عبر <a href="contact.html">صفحة التواصل</a>.
     </p>
 
-    <h2>8. الأمان</h2>
+    <h2>8. مدة الاحتفاظ بالبيانات</h2>
+    <ul>
+      <li><strong>البيانات المحلية:</strong> تبقى على جهازك حتى تحذفها أو تمسح ذاكرة المتصفح.</li>
+      <li><strong>غرف اللعب أونلاين:</strong> تُحذف بيانات الغرف غير النشطة تلقائياً من Firebase بعد فترة عدم استخدام.</li>
+      <li><strong>سجلات الاستضافة:</strong> يحتفظ مزود الاستضافة (Netlify) بسجلات الخادم لفترة محدودة لأغراض الأمان وفق سياسته.</li>
+      <li><strong>بيانات الإعلانات:</strong> تخضع لسياسات Google في الاحتفاظ والحذف.</li>
+    </ul>
+
+    <h2>9. الموافقة على الإعلانات والكوكيز</h2>
+    <p>
+      عند تفعيل Google AdSense (بعد موافقة Google على الموقع)، قد تُعرض إعلانات تستخدم ملفات تعريف الارتباط.
+      يمكنك رفض الإعلانات المخصّصة عبر
+      <a href="https://adssettings.google.com" target="_blank" rel="noopener">إعدادات إعلانات Google</a>
+      أو إدارة الكوكيز من متصفحك. قبل الموافقة على AdSense، يعرض الموقع صناديق إعلان تجريبية
+      (Placeholders) لا تجمع بيانات إعلانية.
+    </p>
+
+    <h2>10. النقل الدولي للبيانات</h2>
+    <p>
+      عند استخدام اللعب أونلاين أو الإعلانات، قد تُعالَج بياناتك على خوادم Google (Firebase, AdSense)
+      في دول مختلفة. تخضع هذه المعالجة لسياسات Google واتفاقياتها مع مزودي الخدمة.
+    </p>
+
+    <h2>11. الأمان</h2>
     <p>نستخدم HTTPS عند النشر على الإنترنت. لا نخزّن كلمات مرور أو بيانات دفع — التطبيق مجاني.</p>
 
-    <h2>9. التغييرات</h2>
+    <h2>12. التغييرات</h2>
     <p>قد نحدّث هذه السياسة. سيُعرض تاريخ «آخر تحديث» في أعلى الصفحة.</p>
 
-    <h2>10. التواصل</h2>
+    <h2>13. التواصل</h2>
     <p>
       أسئلة حول الخصوصية:
       <a href="tel:+962788246916">+962788246916</a> /
@@ -169,15 +202,29 @@
       <p>Family-friendly content. Contact us if you believe a child submitted personal data.</p>
 
       <h2>7. Your rights</h2>
-      <p>Depending on your region, you may request access, correction, or deletion. See Google's partner site policy for ad-related requests.</p>
+      <p>Depending on your region, you may request access, correction, or deletion. See Google's partner site policy for ad-related requests. Contact us via <a href="contact.html">contact page</a>.</p>
 
-      <h2>8. Security</h2>
+      <h2>8. Data retention</h2>
+      <ul>
+        <li><strong>Local data:</strong> Stays on your device until cleared.</li>
+        <li><strong>Online rooms:</strong> Inactive room data is removed from Firebase after a period of inactivity.</li>
+        <li><strong>Hosting logs:</strong> Netlify retains server logs for a limited time per its policy.</li>
+        <li><strong>Ad data:</strong> Subject to Google's retention policies.</li>
+      </ul>
+
+      <h2>9. Ad and cookie consent</h2>
+      <p>When AdSense is enabled, advertising cookies may be used. Manage preferences at <a href="https://adssettings.google.com" target="_blank" rel="noopener">Google Ad Settings</a>. Before approval, the site shows placeholder ad boxes that do not collect ad data.</p>
+
+      <h2>10. International transfers</h2>
+      <p>Online play and ads may process data on Google servers in various countries, subject to Google's policies.</p>
+
+      <h2>11. Security</h2>
       <p>HTTPS in production. No passwords or payments — the app is free.</p>
 
-      <h2>9. Changes</h2>
+      <h2>12. Changes</h2>
       <p>We may update this page; the date above reflects the latest version.</p>
 
-      <h2>10. Contact</h2>
+      <h2>13. Contact</h2>
       <p>
         Privacy questions:
         <a href="tel:+962788246916">+962788246916</a> /
@@ -189,8 +236,17 @@
     </div>
 
     <p style="margin-top: 2rem;">
-      <a class="back-link" href="index.html">← العودة للعبة | Back to game</a>
+      <a class="back-link" href="index.html">← العودة للألعاب</a>
     </p>
+
+    <footer class="site-footer">
+      <p>© الائتلاف الكشفي العالمي لنصرة القدس وفلسطين</p>
+      <p>
+        <a href="about.html">من نحن</a> ·
+        <a href="how-to-play.html">طريقة اللعب</a> ·
+        <a href="contact.html">اتصل بنا</a>
+      </p>
+    </footer>
   </div>
 </body>
 </html>
