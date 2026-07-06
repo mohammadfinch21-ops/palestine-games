@@ -47,3 +47,99 @@ html.native-app body {
     -webkit-overflow-scrolling: touch;
   }
 }
+
+/* ===== Homepage — mobile-first layout ===== */
+@media (max-width: 768px) {
+  #screen-menu {
+    padding-top: max(1rem, calc(env(safe-area-inset-top, 0px) + 0.75rem));
+    padding-bottom: max(2rem, calc(env(safe-area-inset-bottom, 0px) + 1rem));
+    scroll-padding-top: 0.75rem;
+  }
+
+  #screen-menu.active {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Show game cards before the SEO intro block */
+  .menu-header { order: 1; }
+  .menu-cards { order: 2; }
+  .menu-intro { order: 3; }
+  .menu-footer { order: 4; }
+  .ad-banner--menu { order: 5; }
+
+  .menu-header {
+    margin-bottom: 1rem;
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+  }
+
+  .brand-lockup {
+    gap: 0.45rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .brand-logo--emblem {
+    width: clamp(72px, 20vw, 96px);
+    max-width: 96px;
+  }
+
+  .game-title {
+    margin-top: 0.35rem;
+    font-size: clamp(1.2rem, 5vw, 1.55rem);
+  }
+
+  .tagline {
+    font-size: 0.95rem;
+    margin-top: 0.45rem;
+  }
+
+  .menu-cards {
+    gap: 0.85rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .menu-card {
+    padding: 1.15rem 1.25rem;
+  }
+
+  .card-icon {
+    font-size: 1.65rem;
+  }
+
+  .card-title {
+    font-size: 1.15rem;
+  }
+
+  .card-desc {
+    font-size: 0.88rem;
+  }
+
+  .menu-intro {
+    margin-bottom: 1.25rem;
+    padding: 1rem 1.1rem;
+  }
+
+  .menu-intro h2 {
+    font-size: 1.05rem;
+  }
+
+  .menu-intro p {
+    font-size: 0.88rem;
+  }
+
+  .menu-footer {
+    margin-top: 1.25rem;
+  }
+
+  .menu-footer-nav {
+    line-height: 1.85;
+  }
+
+  .menu-contact-links {
+    font-size: 0.74rem;
+  }
+
+  .ad-banner--menu {
+    margin-top: 1rem;
+  }
+}
