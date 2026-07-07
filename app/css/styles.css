@@ -1620,6 +1620,8 @@ button:not(:disabled):hover {
   margin: 0;
   padding: 0.35rem 0.25rem 0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Answer options — below card, outside purple border */
@@ -1744,10 +1746,11 @@ button:not(:disabled):hover {
   inset: 0;
   background: rgba(0,0,0,0.65);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
   z-index: 5000;
   padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem max(1rem, env(safe-area-inset-bottom, 0px));
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
 }
@@ -1761,12 +1764,14 @@ button:not(:disabled):hover {
   border-radius: var(--radius);
   max-width: 480px;
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   padding: 1.5rem;
   position: relative;
   box-shadow: var(--shadow);
   animation: modalIn 0.25s ease;
+  margin: auto;
+  flex-shrink: 0;
 }
 
 @keyframes modalIn {
@@ -1861,6 +1866,8 @@ button:not(:disabled):hover {
   direction: rtl;
   text-align: center;
   unicode-bidi: plaintext;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
@@ -1868,6 +1875,34 @@ button:not(:disabled):hover {
   background: #fff !important;
   border: 2px solid #94a3b8 !important;
   color: #1e293b !important;
+}
+
+@media (max-width: 600px) {
+  .modal-overlay.modal--question {
+    padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom, 0px));
+  }
+
+  .modal-overlay.modal--question .modal {
+    padding: 1rem 0.85rem 1.15rem;
+  }
+
+  .modal-overlay.modal--question #modal-title {
+    font-size: 1.05rem;
+    margin-bottom: 0.65rem;
+  }
+
+  .modal-actions.question-card-actions .question-card-option-btns {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .modal-actions.question-card-actions .question-card-option-btn {
+    width: 100%;
+    min-width: 0;
+    font-size: clamp(0.88rem, 3.6vw, 1rem);
+  }
 }
 
 .modal-actions.question-card-actions .question-card-option-btn:not(:disabled):hover {
