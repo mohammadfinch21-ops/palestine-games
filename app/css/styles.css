@@ -172,6 +172,45 @@ html, body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
+.game-learn-panel {
+  margin-top: 0.75rem;
+}
+
+.game-learn-panel h3 {
+  font-size: 0.95rem;
+  margin-bottom: 0.5rem;
+}
+
+.game-learn-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.game-learn-links a {
+  color: var(--gold-light);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.game-learn-links a:hover {
+  color: #fff;
+}
+
+.game-learn-panel--memory {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  background: rgba(0, 92, 46, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  text-align: right;
+}
+
 .menu-footer-nav {
   display: flex;
   flex-wrap: wrap;
