@@ -141,6 +141,35 @@ html, body {
   font-size: 0.95rem;
 }
 
+.article-card .article-meta {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--gold);
+  opacity: 0.9;
+}
+
+.article-list-intro {
+  margin-bottom: 1.75rem;
+}
+
+.related-articles {
+  margin-top: 2.5rem;
+  padding: 1.25rem;
+  background: var(--card-bg);
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.related-articles h2 {
+  margin-top: 0;
+  font-size: 1.15rem;
+}
+
+.related-articles ul {
+  margin-bottom: 0;
+}
+
 .city-section {
   margin-bottom: 2rem;
   padding-bottom: 1.5rem;
