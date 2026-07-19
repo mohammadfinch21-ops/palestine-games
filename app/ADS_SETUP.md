@@ -1,7 +1,8 @@
 # دليل إعداد الإعلانات وتحقيق الأرباح
 # Ad Setup & Monetization Guide
 
-> **للنشر على Netlify + خطوات AdSense خطوة بخطوة:** راجع **`DEPLOY_NETLIFY.md`** أولاً.
+> **للنشر على Netlify + خطوات AdSense خطوة بخطوة:** راجع **`DEPLOY_NETLIFY.md`** أولاً.  
+> **قبل طلب مراجعة AdSense:** اربط النطاق المؤسسي إن أمكن — راجع **`CUSTOM_DOMAIN.md`** (`games.scout4pal.com`).
 
 ---
 
@@ -12,7 +13,7 @@
 | # | أين في AdSense | ماذا تفعل |
 |---|----------------|-----------|
 | 1 | **Get started** | سجّل بحساب Google |
-| 2 | **Sites → Add site** | أدخل `https://your-site.netlify.app` (يجب HTTPS + الموقع منشور) |
+| 2 | **Sites → Add site** | يُفضَّل `https://games.scout4pal.com` بعد نجاح HTTPS (انظر `CUSTOM_DOMAIN.md`). وإلا استخدم `https://palestine-games.netlify.app` مؤقتاً |
 | 3 | **Verification** | Meta tag في `index.html` **أو** سجل DNS TXT → Deploy → Verify |
 | 4 | *(انتظر)* | مراجعة Google — 1–14 يوماً |
 | 5 | **Account → Account information** | انسخ **Publisher ID** → `ca-pub-XXXXXXXXXXXXXXXX` |

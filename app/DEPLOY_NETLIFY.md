@@ -160,11 +160,11 @@ git push -u origin main
    - `robots.txt` → سطر `Sitemap:`
    - `sitemap.xml` → جميع عناوين `<loc>`
 
-3. **(اختياري) نطاق مخصّص** — مثلاً `games.scout4pal.com`:
-   - Netlify → **Add a domain**
-   - عند الم registrar: **CNAME** → `your-site.netlify.app`  
-     أو **A record** → `75.2.60.5`
-   - انتظر التحقق ثم HTTPS تلقائي (Let's Encrypt)
+3. **نطاق مخصّص (مهم لـ AdSense)** — `games.scout4pal.com`:
+   - الدليل التفصيلي خطوة بخطوة (غير تقني): **`CUSTOM_DOMAIN.md`**
+   - ملخص: Netlify → **Domain management → Add domain** → `games.scout4pal.com`
+   - عند DNS لـ scout4pal.com: **CNAME** اسم `games` → `palestine-games.netlify.app`
+   - انتظر HTTPS (Let's Encrypt) ثم أضف النطاق في AdSense وSearch Console
 
 4. **اختبار سريع:**
 
@@ -185,8 +185,9 @@ npx --yes serve .
 
 1. ادخل **[https://www.google.com/adsense](https://www.google.com/adsense)** → **Get started**.
 2. سجّل بحساب Google.
-3. **Sites → Add site** → أدخل رابطك الكامل:  
-   `https://your-site.netlify.app` (أو نطاقك المخصّص).
+3. **Sites → Add site** → أدخل يُفضَّل:  
+   `https://games.scout4pal.com` بعد نجاح القفل (راجع `CUSTOM_DOMAIN.md`).  
+   مؤقتاً إن لم يكتمل الربط: `https://palestine-games.netlify.app`.
 4. **التحقق من الملكية** — اختر إحدى الطريقتين:
    - **Meta tag:** انسخ `<meta name="google-adsense-account" content="ca-pub-...">`  
      الصقه داخل `<head>` في `index.html` (فوق `</head>`) → أعد النشر → **Verify** في AdSense.
