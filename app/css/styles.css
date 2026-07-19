@@ -129,6 +129,49 @@ html, body {
   color: #fff;
 }
 
+.menu-edu-more {
+  margin-top: 1.5rem;
+}
+
+.menu-game-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.menu-game-links,
+.in-game-edu-links {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.82);
+  text-align: right;
+  margin: 0;
+  padding: 0.35rem 0.15rem 0.15rem;
+}
+
+.menu-game-links a,
+.in-game-edu-links a {
+  color: var(--gold-light);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.menu-game-links a:hover,
+.in-game-edu-links a:hover {
+  color: #fff;
+}
+
+.in-game-edu-links {
+  position: relative;
+  z-index: 2;
+  max-width: 1100px;
+  margin: 0.35rem auto 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .menu-footer-nav {
   display: flex;
   flex-wrap: wrap;
@@ -239,6 +282,10 @@ html, body {
   display: grid;
   gap: 1.25rem;
   width: min(520px, 100%);
+}
+
+.menu-cards .menu-card {
+  width: 100%;
 }
 
 .menu-card {

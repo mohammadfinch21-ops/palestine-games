@@ -25,9 +25,31 @@
   status = 200
 
 [[redirects]]
+  from = "/terms"
+  to = "/terms.html"
+  status = 200
+
+[[redirects]]
+  from = "/faq"
+  to = "/faq.html"
+  status = 200
+
+[[redirects]]
+  from = "/sitemap"
+  to = "/sitemap.html"
+  status = 200
+
+[[redirects]]
   from = "/articles"
   to = "/articles/index.html"
   status = 200
+
+[[headers]]
+  for = "/sitemap.xml"
+  [headers.values]
+    Content-Type = "application/xml; charset=utf-8"
+    X-Content-Type-Options = "nosniff"
+    Cache-Control = "public, max-age=3600"
 
 [[headers]]
   for = "/*"

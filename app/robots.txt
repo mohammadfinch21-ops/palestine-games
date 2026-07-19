@@ -2,3 +2,4 @@ User-agent: *
 Allow: /
 
 Sitemap: https://palestine-games.netlify.app/sitemap.xml
+Sitemap: https://palestine-games.netlify.app/sitemap.html
