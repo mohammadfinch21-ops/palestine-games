@@ -141,6 +141,8 @@ function normalizeRoom(snap) {
     currentTurn: typeof data.currentTurn === 'number' ? data.currentTurn : 0,
     started: !!data.started,
     lotteryPhase: !!data.lotteryPhase,
+    lotteryTurnIndex:
+      typeof data.lotteryTurnIndex === 'number' ? data.lotteryTurnIndex : 0,
     level: data.level || 'ashbal',
     stateVersion: typeof data.stateVersion === 'number' ? data.stateVersion : 0,
     boardState: { ...defaultBoardState(), ...(data.boardState || {}) },
@@ -292,6 +294,7 @@ export async function beginOnlineLottery(code) {
 
   await update(roomRef(code), {
     lotteryPhase: true,
+    lotteryTurnIndex: 0,
     started: false,
     currentTurn: 0,
     players,
@@ -305,8 +308,26 @@ export async function beginOnlineLottery(code) {
  */
 export async function syncPlayerLotteryScore(code, playerId, score) {
   if (!getDb() || !code || !playerId) return;
+
+  const snap = await get(roomRef(code));
+  if (!snap.exists()) {
+    throw new Error('الغرفة غير موجودة');
+  }
+
+  const room = snap.val();
+  const players = playersToArray(room.players);
+  const currentTurn =
+    typeof room.lotteryTurnIndex === 'number' ? room.lotteryTurnIndex : 0;
+  const activePlayer = players[currentTurn];
+  if (!activePlayer || String(activePlayer.id) !== String(playerId)) {
+    throw new Error('ليس دورك في القرعة بعد');
+  }
+
+  const nextTurn = currentTurn + 1;
+
   await update(roomRef(code), {
     [`players/${playerId}/startScore`]: Math.max(0, Number(score) || 0),
+    lotteryTurnIndex: nextTurn,
     stateVersion: Date.now(),
   });
 }

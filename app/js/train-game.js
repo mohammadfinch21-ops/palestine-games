@@ -156,6 +156,7 @@ export function initTrainGame() {
     resolvingLottery: false,
     lotteryTieModalOpen: false,
     lotteryPromptRetryTimer: null,
+    lotteryTurnIndex: 0,
     localStateVersion: 0,
     lastAppliedStateVersion: 0,
   };
@@ -530,6 +531,35 @@ export function initTrainGame() {
     return Math.min(Math.max(0, turn), Math.max(0, playerCount - 1));
   }
 
+  function getLotteryTurnIndex() {
+    const raw = online.lotteryTurnIndex ?? 0;
+    return Math.max(0, Math.min(raw, Math.max(0, state.players.length - 1)));
+  }
+
+  function getLotteryActivePlayer() {
+    return getPlayerByIndex(getLotteryTurnIndex());
+  }
+
+  function isMyLotteryTurn() {
+    if (!online.mode || !online.inRoom) return true;
+    const turnIdx = online.lotteryTurnIndex ?? 0;
+    if (turnIdx >= state.players.length) return false;
+    const active = getLotteryActivePlayer();
+    return Boolean(active && String(active.id) === String(online.myId));
+  }
+
+  function getLotteryWaitingLabel() {
+    const me = state.players.find((p) => String(p.id) === String(online.myId));
+    if (typeof me?.startScore === 'number') {
+      return 'انتظر انتهاء القرعة…';
+    }
+    const active = getLotteryActivePlayer();
+    if (active && !isMyLotteryTurn()) {
+      return `انتظر دور ${active.name}…`;
+    }
+    return 'أجب على سؤال القرعة في النافذة';
+  }
+
   function adoptRemoteStateVersion(remoteVersion) {
     if (typeof remoteVersion !== 'number' || remoteVersion <= 0) return;
     online.lastAppliedStateVersion = Math.max(online.lastAppliedStateVersion || 0, remoteVersion);
@@ -538,6 +568,12 @@ export function initTrainGame() {
 
   function hasNewLotteryProgress(room) {
     if (!room?.lotteryPhase || room.started) return false;
+    if (
+      typeof room.lotteryTurnIndex === 'number' &&
+      room.lotteryTurnIndex !== (online.lotteryTurnIndex ?? 0)
+    ) {
+      return true;
+    }
     return room.players.some((rp) => {
       const local = state.players.find((p) => String(p.id) === String(rp.id));
       if (!local) return typeof rp.startScore === 'number';
@@ -581,6 +617,8 @@ export function initTrainGame() {
 
   function finalizeLotteryRoomSync(room, hadLotteryScores = false) {
     lotteryActive = true;
+    online.lotteryTurnIndex =
+      typeof room.lotteryTurnIndex === 'number' ? room.lotteryTurnIndex : 0;
     const hasScores = room.players.some((p) => typeof p.startScore === 'number');
     if (hadLotteryScores && !hasScores) {
       online.lotteryTieModalOpen = false;
@@ -606,6 +644,7 @@ export function initTrainGame() {
     if (!online.lotteryPhase || state.started || online.lotteryPromptOpen) return;
     const me = state.players.find((p) => String(p.id) === String(online.myId));
     if (!me || typeof me.startScore === 'number') return;
+    if (!isMyLotteryTurn()) return;
     if (!areCardsReady()) {
       scheduleLotteryPromptRetry();
       return;
@@ -633,7 +672,7 @@ export function initTrainGame() {
           updateUI();
         }
       },
-      { deferClose: true, tiebreak: true },
+      { deferClose: true, tiebreak: true, title: `قرعة — ${me.name}` },
     );
   }
 
@@ -748,6 +787,8 @@ export function initTrainGame() {
 
     if (versionStale && lotteryProgress) {
       online.lotteryPhase = true;
+      online.lotteryTurnIndex =
+        typeof room.lotteryTurnIndex === 'number' ? room.lotteryTurnIndex : 0;
       mergeLotteryPlayerScores(room.players);
       lotteryActive = true;
       renderOnlineLobby({
@@ -766,6 +807,8 @@ export function initTrainGame() {
     online.isHost = isHostOf(room);
     online.hostId = room.hostId;
     online.lotteryPhase = !!room.lotteryPhase;
+    online.lotteryTurnIndex =
+      typeof room.lotteryTurnIndex === 'number' ? room.lotteryTurnIndex : 0;
 
     const bs = room.boardState || {};
     const myId = String(online.myId);
@@ -862,12 +905,19 @@ export function initTrainGame() {
     if (room.lotteryPhase && !room.started) {
       const answered = room.players.filter((p) => typeof p.startScore === 'number').length;
       const me = room.players.find((p) => String(p.id) === String(online.myId));
+      const activeIdx =
+        typeof room.lotteryTurnIndex === 'number'
+          ? Math.max(0, Math.min(room.lotteryTurnIndex, room.players.length - 1))
+          : getLotteryTurnIndex();
+      const active = room.players[activeIdx] || room.players[0];
       if (online.isHost) {
         onlineRoomStatus.textContent = `${hostLabel} — جاري القرعة (${answered}/${room.players.length})`;
       } else if (typeof me?.startScore === 'number') {
         onlineRoomStatus.textContent = `${hostLabel} — انتظر انتهاء القرعة…`;
+      } else if (active && String(active.id) !== String(online.myId)) {
+        onlineRoomStatus.textContent = `${hostLabel} — انتظر دور ${active.name}…`;
       } else {
-        onlineRoomStatus.textContent = `${hostLabel} — أجب على سؤال القرعة في النافذة المنبثقة`;
+        onlineRoomStatus.textContent = `${hostLabel} — أجب على سؤال القرعة في النافذة`;
       }
       onlineLobbyPlayers.innerHTML = room.players
         .map(
@@ -948,6 +998,7 @@ export function initTrainGame() {
     online.resolvingLottery = false;
     online.lotteryTieModalOpen = false;
     clearLotteryPromptRetry();
+    online.lotteryTurnIndex = 0;
     online.localStateVersion = 0;
     online.lastAppliedStateVersion = 0;
     onlineAuth?.classList.remove('hidden');
@@ -1140,12 +1191,13 @@ export function initTrainGame() {
       await beginOnlineLottery(online.roomCode);
       online.lotteryPhase = true;
       lotteryActive = true;
+      online.lotteryTurnIndex = 0;
       hideModal();
       promptOnlineLotteryIfNeeded();
-      if (!online.lotteryPromptOpen) {
+      if (!online.lotteryPromptOpen && isMyLotteryTurn()) {
         showModal({
           title: 'تحديد من يبدأ',
-          bodyHtml: `<p>كل لاعب يجيب سؤالاً من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong> على جهازه. من يحصل على أعلى نتيجة يبدأ.</p>`,
+          bodyHtml: `<p>كل لاعب يجيب سؤالاً بالترتيب من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong>. من يحصل على أعلى نتيجة يبدأ.</p>`,
           actions: [
             {
               label: 'ابدأ سؤالي',
@@ -1153,6 +1205,12 @@ export function initTrainGame() {
               onClick: () => promptOnlineLotteryIfNeeded(),
             },
           ],
+        });
+      } else if (!online.lotteryPromptOpen) {
+        showModal({
+          title: 'تحديد من يبدأ',
+          bodyHtml: `<p>كل لاعب يجيب سؤالاً بالترتيب من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong>.</p><p>انتظر دورك — يبدأ <strong>${getLotteryActivePlayer()?.name || 'اللاعب الأول'}</strong>.</p>`,
+          actions: [{ label: 'حسناً', className: 'btn-primary' }],
         });
       }
     } catch (err) {
@@ -1733,11 +1791,7 @@ export function initTrainGame() {
     } else if (online.mode && online.inRoom && online.lotteryPhase && !state.started) {
       currentTurnDisplay.classList.remove('is-live');
       currentPlayerDot.hidden = true;
-      const me = state.players.find((p) => String(p.id) === String(online.myId));
-      currentPlayerName.textContent =
-        typeof me?.startScore === 'number'
-          ? 'انتظر انتهاء القرعة…'
-          : 'أجب على سؤال القرعة في النافذة';
+      currentPlayerName.textContent = getLotteryWaitingLabel();
       currentPlayerName.style.color = '';
       currentPlayerName.classList.add('is-waiting');
     } else if (online.mode && online.inRoom && !state.started) {
@@ -1793,7 +1847,14 @@ export function initTrainGame() {
     } else if (online.mode && online.inRoom && online.lotteryPhase && !state.started) {
       const answered = state.players.filter((p) => typeof p.startScore === 'number').length;
       const total = state.players.length;
-      gameStatus.textContent = `مرحلة ${levelInfo.nameArabic} — القرعة (${answered}/${total} أجابوا)`;
+      const active = getLotteryActivePlayer();
+      if (isMyLotteryTurn()) {
+        gameStatus.textContent = `مرحلة ${levelInfo.nameArabic} — دورك في القرعة (${answered}/${total} أجابوا)`;
+      } else if (active) {
+        gameStatus.textContent = `مرحلة ${levelInfo.nameArabic} — انتظر دور ${active.name} (${answered}/${total})`;
+      } else {
+        gameStatus.textContent = `مرحلة ${levelInfo.nameArabic} — القرعة (${answered}/${total} أجابوا)`;
+      }
     } else if (online.mode && online.inRoom && !state.started) {
       gameStatus.textContent = online.isHost
         ? `مرحلة ${levelInfo.nameArabic} — شارك الرمز ثم اضغط «ابدأ»`
@@ -1823,6 +1884,7 @@ export function initTrainGame() {
         currentTurn: state.currentIndex,
         started: state.started,
         lotteryPhase: online.lotteryPhase,
+        lotteryTurnIndex: online.lotteryTurnIndex,
         level: getTrainLevel(),
         boardState: {
           waitingForMove: state.waitingForMove,
@@ -1879,7 +1941,6 @@ export function initTrainGame() {
     resetCityQuestionSession();
 
     const askRound = () => {
-      let qIndex = 0;
       lotteryActive = true;
       state.started = false;
       state.waitingForMove = false;
@@ -1891,25 +1952,44 @@ export function initTrainGame() {
         delete p.startScore;
       });
 
-      const askNext = () => {
-        if (qIndex >= state.players.length) {
+      const showLocalLotteryQuestion = (playerIndex) => {
+        const player = state.players[playerIndex];
+        if (!player) {
           resolveStartWinner();
           return;
         }
-        const player = state.players[qIndex];
+        updateUI(`🔑 قرعة — دور ${player.name}`);
         const card = pickTiebreakCard();
         showQuestionCardModal(
           card,
           (userWasCorrect, steps) => {
             player.startScore = userWasCorrect ? steps : 0;
-            qIndex++;
-            askNext();
+            const nextIndex = playerIndex + 1;
+            if (nextIndex >= state.players.length) {
+              hideModal();
+              resolveStartWinner();
+              return;
+            }
+            const nextPlayer = state.players[nextIndex];
+            hideModal();
+            showModal({
+              title: 'انتظر دور اللاعب التالي',
+              bodyHtml: `<p>أجاب <strong>${player.name}</strong> ✓</p><p>الآن دور <strong>${nextPlayer.name}</strong>.</p><p class="lottery-handoff-hint">مرّر الجهاز إن لزم، ثم اضغط للمتابعة.</p>`,
+              actions: [
+                {
+                  label: `سؤال ${nextPlayer.name}`,
+                  className: 'btn-gold',
+                  onClick: () => showLocalLotteryQuestion(nextIndex),
+                },
+              ],
+            });
+            updateUI(`⏳ انتظر — الآن دور ${nextPlayer.name}`);
           },
-          { deferClose: true, tiebreak: true },
+          { deferClose: true, tiebreak: true, title: `قرعة — ${player.name}` },
         );
       };
 
-      askNext();
+      showLocalLotteryQuestion(0);
     };
 
     const resolveStartWinner = () => {
@@ -1937,7 +2017,7 @@ export function initTrainGame() {
 
     showModal({
       title: 'تحديد من يبدأ',
-      bodyHtml: `<p>كل لاعب يجيب سؤالاً من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong>. من يحصل على أعلى نتيجة يبدأ.</p><p>عند التعادل في أعلى نتيجة تُعاد القرعة.</p>${lowPoolNote}`,
+      bodyHtml: `<p>كل لاعب يجيب سؤالاً بالترتيب من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong>. من يحصل على أعلى نتيجة يبدأ.</p><p>عند التعادل في أعلى نتيجة تُعاد القرعة.</p>${lowPoolNote}`,
       actions: [{ label: 'ابدأ الأسئلة', className: 'btn-gold', onClick: askRound, keepOpen: true }],
     });
   }
