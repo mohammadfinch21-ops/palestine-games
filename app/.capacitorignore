@@ -1,0 +1,27 @@
+# Exclude dev/build artifacts from Capacitor sync (reduces APK size + WebView memory)
+node_modules/
+netlify-deploy/
+__pycache__/
+.pytest_cache/
+*.py
+*.md
+*.bat
+*.ps1
+*.mjs
+_test_*
+google*.html
+scripts/
+prepare-netlify-deploy.*
+
+# PDF extraction previews (game uses map-board.jpg + card JPEGs)
+assets/pdf-page-*-preview.png
+assets/pdf-img-*.png
+assets/_*.png
+assets/*-log.txt
+assets/*-debug.txt
+assets/question-cards-ocr-cache.json
+assets/pdf-analysis.json
+assets/map-rules-text.txt
+assets/images/memory/cards-meta.json
+assets/images/memory/cards-classified.json
+assets/images/questions/map-*.png

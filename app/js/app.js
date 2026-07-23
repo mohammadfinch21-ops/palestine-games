@@ -51,21 +51,8 @@ function initNavigation() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
-  // Navigation first — must work even if native plugins or game modules are slow
-  initModal();
-  initNavigation();
-
-  initNativeShell().catch((err) => {
-    console.warn('[Native] shell init failed — continuing', err);
-  });
-
-  try {
-    await initAds();
-  } catch (err) {
-    console.warn('[Ads] startup init failed — continuing without ads', err);
-  }
-
+/** Load games + card data sequentially — avoids WebView OOM on low-RAM emulators */
+async function runDeferredStartup() {
   const cardsLoadingEl = document.getElementById('cards-loading-status');
   if (cardsLoadingEl) {
     cardsLoadingEl.classList.remove('hidden');
@@ -73,7 +60,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const [counts] = await Promise.all([loadCardData(), loadCityQuestions()]);
+    const counts = await loadCardData();
+    await loadCityQuestions();
     console.info(`بطاقات محمّلة: ${counts.questions} سؤال، ${counts.memory} زوج ذاكرة`);
     if (cardsLoadingEl) {
       cardsLoadingEl.textContent = `✓ ${counts.questions} بطاقة سؤال جاهزة`;
@@ -88,15 +76,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const [{ initTrainGame }, { initMemoryGame }] = await Promise.all([
-      import('./train-game.js'),
-      import('./memory-game.js'),
-    ]);
+    const { initTrainGame } = await import('./train-game.js');
     initTrainGame();
+    const { initMemoryGame } = await import('./memory-game.js');
     initMemoryGame();
   } catch (err) {
     console.error('فشل تحميل وحدات الألعاب', err);
   }
 
-  showScreen('menu');
+  // Ads last — after menu is interactive and first paint complete
+  try {
+    await initAds();
+  } catch (err) {
+    console.warn('[Ads] startup init failed — continuing without ads', err);
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Navigation first — must work even if native plugins or game modules are slow
+  initModal();
+  initNavigation();
+
+  initNativeShell().catch((err) => {
+    console.warn('[Native] shell init failed — continuing', err);
+  });
+
+  // Menu is already active in HTML — defer heavy JSON/modules to reduce startup peak memory
+  const deferMs = isNativeApp() ? 400 : 0;
+  setTimeout(() => {
+    runDeferredStartup().catch((err) => {
+      console.error('[Startup] deferred init failed', err);
+    });
+  }, deferMs);
 });

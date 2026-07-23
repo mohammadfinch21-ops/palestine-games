@@ -58,8 +58,16 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/styles.css" />
   <link rel="stylesheet" href="css/mobile-native.css" />
-  <!-- AdSense site verification — keep in <head> per Google -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7224635870129371" crossorigin="anonymous"></script>
+  <!-- AdSense site verification — web only; native uses AdMob (saves WebView memory) -->
+  <script>
+    if (!window.Capacitor?.isNativePlatform?.()) {
+      var s = document.createElement('script');
+      s.async = true;
+      s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7224635870129371';
+      s.crossOrigin = 'anonymous';
+      document.head.appendChild(s);
+    }
+  </script>
 </head>
 <body>
   <div id="app">

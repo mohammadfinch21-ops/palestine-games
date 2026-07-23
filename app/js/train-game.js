@@ -1343,9 +1343,54 @@ export function initTrainGame() {
   initMobileTrainBar();
   renderLevelSelector();
   renderPlayerCountPicker();
-  renderBoard();
   renderPlayers();
   updateUI();
+
+  let mapDomReady = false;
+  let mapImageLoaded = false;
+
+  function ensureMapDom() {
+    if (mapDomReady || !boardEl) return;
+    boardEl.innerHTML = `
+      <div class="board-map" id="board-map">
+        <div class="board-map-placeholder" aria-hidden="true"></div>
+        <div class="board-tokens-layer" aria-hidden="false"></div>
+      </div>`;
+    mapDomReady = true;
+  }
+
+  function loadMapImageOnce() {
+    if (mapImageLoaded || !boardEl) return;
+    ensureMapDom();
+    const mapRoot = boardEl.querySelector('#board-map');
+    if (!mapRoot) return;
+    if (mapRoot.querySelector('.board-map-img')) {
+      mapImageLoaded = true;
+      return;
+    }
+    const img = document.createElement('img');
+    img.src = MAP_IMAGE;
+    img.alt = 'map';
+    img.className = 'board-map-img';
+    img.decoding = 'async';
+    img.loading = 'lazy';
+    mapRoot.querySelector('.board-map-placeholder')?.remove();
+    mapRoot.insertBefore(img, mapRoot.firstChild);
+    mapImageLoaded = true;
+  }
+
+  function onTrainScreenVisible() {
+    loadMapImageOnce();
+    renderBoard();
+  }
+
+  document.addEventListener('native-screen-change', (e) => {
+    if (e.detail?.screen === 'train') onTrainScreenVisible();
+  });
+
+  if (document.getElementById('screen-train')?.classList.contains('active')) {
+    onTrainScreenVisible();
+  }
 
   function getPlayerByIndex(index) {
     return state.players[index] ?? null;
@@ -1423,6 +1468,8 @@ export function initTrainGame() {
   }
 
   function renderBoard() {
+    if (!mapDomReady || !boardEl) return;
+
     state.players.forEach((p) => {
       p.position = normalizePosition(p.position);
     });
@@ -1433,18 +1480,8 @@ export function initTrainGame() {
       : '';
     const tokensHtml = renderTokens();
 
-    let mapRoot = boardEl.querySelector('#board-map');
-    if (!mapRoot) {
-      boardEl.innerHTML = `
-      <div class="board-map" id="board-map">
-        <img src="${MAP_IMAGE}" alt="map" class="board-map-img" decoding="async" />
-        <div class="board-tokens-layer" aria-hidden="false">
-          ${highlightHtml}
-          ${tokensHtml}
-        </div>
-      </div>`;
-      return;
-    }
+    const mapRoot = boardEl.querySelector('#board-map');
+    if (!mapRoot) return;
 
     let tokensLayer = mapRoot.querySelector('.board-tokens-layer');
     if (!tokensLayer) {

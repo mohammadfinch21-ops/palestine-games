@@ -1,7 +1,7 @@
 {
   "appId": "com.scout4pal.palestinetrain",
   "appName": "لعبة قطار فلسطين",
-  "webDir": "../app",
+  "webDir": "www",
   "server": {
     "androidScheme": "https",
     "iosScheme": "capacitor"
@@ -30,7 +30,8 @@
   },
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#1a3d2e"
+    "backgroundColor": "#1a3d2e",
+    "webContentsDebuggingEnabled": false
   },
   "ios": {
     "contentInset": "automatic",

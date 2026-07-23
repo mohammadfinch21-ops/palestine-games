@@ -108,6 +108,28 @@ npx cap sync
 
 ### 2) اختبار على محاكي Android / جهاز
 
+> **⚠️ تعطل WebView (OOM) — «Renderer process crash» / «kill (OOM)»**
+>
+> إذا ظهر الشعار ثم أُغلق التطبيق فوراً، السبب غالباً **نفاد ذاكرة WebView** وليس AdMob.
+> التطبيق يحمل ~136 MB صور بطاقات + JSON كبير داخل WebView.
+>
+> **إصلاحات مدمجة في المشروع:**
+> - `android:largeHeap="true"` في `AndroidManifest.xml`
+> - `mobile/scripts/stage-web.mjs` + `webDir: www` — يستبعد `node_modules/` و`netlify-deploy/` وملفات Python (~20 MB+)
+> - `app/.capacitorignore` — مرجع أنماط الاستبعاد (Capacitor 6 لا يطبّقه تلقائياً)
+> - تحميل متتابع (ليس متوازياً) في `app.js` + تأخير AdMob
+> - خارطة القطار `map-board.jpg` تُحمّل فقط عند فتح شاشة اللعبة
+> - AdSense لا يُحمّل على الجوال (AdMob فقط)
+>
+> **إعدادات المحاكي (مهم):**
+> 1. **Android Studio → Device Manager → Edit AVD**
+> 2. **Show Advanced Settings → RAM: 4096 MB** (أو أكثر — لا تستخدم 2 GB)
+> 3. **Graphics: Hardware - GLES 2.0** (أو Automatic)
+> 4. أعد تشغيل المحاكي بعد تغيير RAM
+>
+> **حجم APK:** ~180–200 MB بسبب ~784 صورة JPEG للأسئلة + ~175 لبطاقات الذاكرة.
+> `map-board.jpg` صغير (~0.2 MB). لا تكرر `netlify-deploy/` — `.capacitorignore` يمنع ذلك.
+
 ```bash
 cd mobile
 npx cap sync android

@@ -4,7 +4,8 @@
   "description": "Capacitor wrapper — لعبة قطار فلسطين (Android + iOS)",
   "private": true,
   "scripts": {
-    "cap:sync": "npx cap sync",
+    "stage:web": "node scripts/stage-web.mjs",
+    "cap:sync": "npm run stage:web && npx cap sync",
     "cap:open:android": "npx cap open android",
     "cap:open:ios": "npx cap open ios",
     "android:debug": "cd android && gradlew assembleDebug",
