@@ -8,9 +8,9 @@
   },
   "plugins": {
     "AdMob": {
-      "appIdAndroid": "ca-app-pub-3940256099942544~3347511713",
+      "appIdAndroid": "ca-app-pub-7224635870129371~4121582526",
       "appIdIOS": "ca-app-pub-3940256099942544~1458002511",
-      "initializeForTesting": true
+      "initializeForTesting": false
     },
     "SplashScreen": {
       "launchShowDuration": 1800,

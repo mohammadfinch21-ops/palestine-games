@@ -25,22 +25,21 @@ export const ADMOB_CONFIG = {
    *
    * Flip to false ONLY after pasting your real App ID + ad unit IDs from AdMob console.
    */
-  USE_TEST_ADS: true,
+  USE_TEST_ADS: false,
 
   // ─── PRODUCTION — paste your IDs from admob.google.com ───────────
-  // TODO: Replace every TODO_* placeholder before store release.
 
   /** App IDs — AdMob → Apps → [your app] → App settings */
-  appIdAndroid: 'TODO_REPLACE_ANDROID_APP_ID', // ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
+  appIdAndroid: 'ca-app-pub-7224635870129371~4121582526',
   appIdIOS: 'TODO_REPLACE_IOS_APP_ID', // ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
 
   /** Ad unit IDs — AdMob → Apps → Ad units (Banner, Interstitial, Rewarded) */
   adUnits: {
-    bannerAndroid: 'TODO_REPLACE_BANNER_ANDROID', // ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY
+    bannerAndroid: 'ca-app-pub-7224635870129371/8655009895',
     bannerIOS: 'TODO_REPLACE_BANNER_IOS',
-    interstitialAndroid: 'TODO_REPLACE_INTERSTITIAL_ANDROID',
+    interstitialAndroid: 'ca-app-pub-7224635870129371/4417095995',
     interstitialIOS: 'TODO_REPLACE_INTERSTITIAL_IOS',
-    rewardedAndroid: 'TODO_REPLACE_REWARDED_ANDROID',
+    rewardedAndroid: 'ca-app-pub-7224635870129371/8783002404',
     rewardedIOS: 'TODO_REPLACE_REWARDED_IOS',
   },
 
