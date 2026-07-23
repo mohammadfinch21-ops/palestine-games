@@ -36,10 +36,14 @@ export async function initNativeAds() {
       requestTrackingAuthorization: true,
     });
     nativeReady = true;
-    await showNativeBanner();
+    // Banner is best-effort — never block app startup if it fails
+    showNativeBanner().catch((err) => {
+      console.warn('[NativeAds] banner on init failed', err);
+    });
     return true;
   } catch (err) {
-    console.warn('[NativeAds] init failed', err);
+    console.warn('[NativeAds] init failed — app continues without ads', err);
+    nativeReady = false;
     return false;
   }
 }

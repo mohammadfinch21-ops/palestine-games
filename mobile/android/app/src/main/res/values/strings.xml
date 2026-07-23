@@ -4,4 +4,6 @@
     <string name="title_activity_main">لعبة قطار فلسطين</string>
     <string name="package_name">com.scout4pal.palestinetrain</string>
     <string name="custom_url_scheme">com.scout4pal.palestinetrain</string>
+    <!-- AdMob App ID — must match mobile/capacitor.config.json plugins.AdMob.appIdAndroid -->
+    <string name="admob_app_id">ca-app-pub-7224635870129371~4121582526</string>
 </resources>

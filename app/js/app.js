@@ -41,7 +41,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   await initNativeShell();
   initModal();
   initNavigation();
-  await initAds();
+  try {
+    await initAds();
+  } catch (err) {
+    console.warn('[Ads] startup init failed — continuing without ads', err);
+  }
 
   const cardsLoadingEl = document.getElementById('cards-loading-status');
   if (cardsLoadingEl) {
