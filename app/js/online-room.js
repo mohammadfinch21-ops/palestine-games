@@ -1,18 +1,7 @@
 /**
  * Online multiplayer rooms — Firebase Realtime Database (Phase 2–4, with chat).
+ * Firebase SDK is loaded lazily so local/offline play works in Capacitor WebView.
  */
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import {
-  getDatabase,
-  ref,
-  set,
-  get,
-  update,
-  onValue,
-  off,
-  remove,
-  runTransaction,
-} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 import { firebaseConfig, isFirebaseConfigured } from './firebase-config.js';
 import { PLAYER_COLORS } from './board-data.js';
 
@@ -22,6 +11,9 @@ const MAX_PLAYERS = 6;
 const MAX_MESSAGES = 50;
 const MAX_MESSAGE_LENGTH = 200;
 const PLAYER_ID_KEY = 'pal-train-player-id';
+
+const FIREBASE_APP_URL = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+const FIREBASE_DB_URL = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 
 /** @type {readonly string[]} */
 export const PRESET_MESSAGES = [
@@ -51,22 +43,69 @@ const BAD_WORDS = [
 
 let firebaseApp = null;
 let db = null;
+/** @type {null | { initializeApp: Function, getDatabase: Function, ref: Function, set: Function, get: Function, update: Function, onValue: Function, off: Function, remove: Function, runTransaction: Function }} */
+let firebaseApi = null;
+let firebaseLoadPromise = null;
 
-function getDb() {
-  if (!isFirebaseConfigured()) return null;
+async function loadFirebaseApi() {
+  if (firebaseApi) return firebaseApi;
+  if (firebaseLoadPromise) return firebaseLoadPromise;
+
+  firebaseLoadPromise = (async () => {
+    if (!isFirebaseConfigured()) return null;
+    try {
+      const [appMod, dbMod] = await Promise.all([
+        import(FIREBASE_APP_URL),
+        import(FIREBASE_DB_URL),
+      ]);
+      firebaseApi = {
+        initializeApp: appMod.initializeApp,
+        getDatabase: dbMod.getDatabase,
+        ref: dbMod.ref,
+        set: dbMod.set,
+        get: dbMod.get,
+        update: dbMod.update,
+        onValue: dbMod.onValue,
+        off: dbMod.off,
+        remove: dbMod.remove,
+        runTransaction: dbMod.runTransaction,
+      };
+      return firebaseApi;
+    } catch (err) {
+      console.warn('[Online] Firebase SDK failed to load — online play disabled', err);
+      firebaseLoadPromise = null;
+      return null;
+    }
+  })();
+
+  return firebaseLoadPromise;
+}
+
+async function getDbAsync() {
+  const api = await loadFirebaseApi();
+  if (!api || !isFirebaseConfigured()) return null;
   if (!db) {
-    firebaseApp = initializeApp(firebaseConfig);
-    db = getDatabase(firebaseApp);
+    firebaseApp = api.initializeApp(firebaseConfig);
+    db = api.getDatabase(firebaseApp);
   }
+  return { api, db };
+}
+
+/** Sync accessor — returns db only after async init completed */
+function getDb() {
   return db;
 }
 
-function roomRef(code) {
-  return ref(getDb(), `rooms/${code}`);
+async function roomRef(code) {
+  const loaded = await getDbAsync();
+  if (!loaded) return null;
+  return loaded.api.ref(loaded.db, `rooms/${code}`);
 }
 
-function messagesRef(code) {
-  return ref(getDb(), `rooms/${code}/messages`);
+async function messagesRef(code) {
+  const loaded = await getDbAsync();
+  if (!loaded) return null;
+  return loaded.api.ref(loaded.db, `rooms/${code}/messages`);
 }
 
 function generateRoomCode() {
@@ -150,10 +189,12 @@ function normalizeRoom(snap) {
 }
 
 async function findUniqueRoomCode(maxAttempts = 12) {
-  const database = getDb();
   for (let i = 0; i < maxAttempts; i += 1) {
     const code = generateRoomCode();
-    const snap = await get(roomRef(code));
+    const rRef = await roomRef(code);
+    if (!rRef) throw new Error('FIREBASE_NOT_CONFIGURED');
+    const loaded = await getDbAsync();
+    const snap = await loaded.api.get(rRef);
     if (!snap.exists()) return code;
   }
   throw new Error('تعذّر إنشاء رمز غرفة فريد — حاول مجدداً');
@@ -163,7 +204,8 @@ async function findUniqueRoomCode(maxAttempts = 12) {
  * @returns {Promise<{code:string, hostId:string, player:object}>}
  */
 export async function createRoom(hostName, level = 'ashbal') {
-  if (!getDb()) {
+  const loaded = await getDbAsync();
+  if (!loaded) {
     throw new Error('FIREBASE_NOT_CONFIGURED');
   }
 
@@ -191,7 +233,8 @@ export async function createRoom(hostName, level = 'ashbal') {
     createdAt: Date.now(),
   };
 
-  await set(roomRef(code), room);
+  const rRef = await roomRef(code);
+  await loaded.api.set(rRef, room);
   return { code, hostId, player: room.players[hostId] };
 }
 
@@ -199,7 +242,8 @@ export async function createRoom(hostName, level = 'ashbal') {
  * @returns {Promise<{code:string, player:object, room:object}>}
  */
 export async function joinRoom(code, playerName) {
-  if (!getDb()) {
+  const loaded = await getDbAsync();
+  if (!loaded) {
     throw new Error('FIREBASE_NOT_CONFIGURED');
   }
 
@@ -210,9 +254,10 @@ export async function joinRoom(code, playerName) {
 
   const playerId = getPlayerId();
   const name = (playerName || 'لاعب').trim().slice(0, 24) || 'لاعب';
-  const rRef = roomRef(normalized);
+  const rRef = await roomRef(normalized);
+  if (!rRef) throw new Error('FIREBASE_NOT_CONFIGURED');
 
-  const result = await runTransaction(rRef, (room) => {
+  const result = await loaded.api.runTransaction(rRef, (room) => {
     if (!room) return room;
 
     const players = room.players || {};
@@ -255,7 +300,8 @@ export async function joinRoom(code, playerName) {
  * @param {object} gameState
  */
 export async function syncGameState(code, gameState) {
-  if (!getDb() || !code) return;
+  const loaded = await getDbAsync();
+  if (!loaded || !code) return;
 
   const payload = {
     players: playersToMap(gameState.players || []),
@@ -271,16 +317,20 @@ export async function syncGameState(code, gameState) {
 
   if (typeof gameState.started === 'boolean') payload.started = gameState.started;
   if (typeof gameState.lotteryPhase === 'boolean') payload.lotteryPhase = gameState.lotteryPhase;
-  await update(roomRef(code), payload);
+  const rRef = await roomRef(code);
+  if (rRef) await loaded.api.update(rRef, payload);
 }
 
 /**
  * Host starts the online lottery (each player answers one tiebreak question).
  */
 export async function beginOnlineLottery(code) {
-  if (!getDb() || !code) return;
+  const loaded = await getDbAsync();
+  if (!loaded || !code) return;
 
-  const snap = await get(roomRef(code));
+  const rRef = await roomRef(code);
+  if (!rRef) return;
+  const snap = await loaded.api.get(rRef);
   if (!snap.exists()) {
     throw new Error('الغرفة غير موجودة');
   }
@@ -292,7 +342,7 @@ export async function beginOnlineLottery(code) {
     players[id] = rest;
   });
 
-  await update(roomRef(code), {
+  await loaded.api.update(rRef, {
     lotteryPhase: true,
     lotteryTurnIndex: 0,
     started: false,
@@ -307,9 +357,12 @@ export async function beginOnlineLottery(code) {
  * Save one player's lottery score during the tiebreak phase.
  */
 export async function syncPlayerLotteryScore(code, playerId, score) {
-  if (!getDb() || !code || !playerId) return;
+  const loaded = await getDbAsync();
+  if (!loaded || !code || !playerId) return;
 
-  const snap = await get(roomRef(code));
+  const rRef = await roomRef(code);
+  if (!rRef) return;
+  const snap = await loaded.api.get(rRef);
   if (!snap.exists()) {
     throw new Error('الغرفة غير موجودة');
   }
@@ -325,7 +378,7 @@ export async function syncPlayerLotteryScore(code, playerId, score) {
 
   const nextTurn = currentTurn + 1;
 
-  await update(roomRef(code), {
+  await loaded.api.update(rRef, {
     [`players/${playerId}/startScore`]: Math.max(0, Number(score) || 0),
     lotteryTurnIndex: nextTurn,
     stateVersion: Date.now(),
@@ -336,9 +389,12 @@ export async function syncPlayerLotteryScore(code, playerId, score) {
  * Host starts the online game.
  */
 export async function startOnlineGame(code, { currentTurn, level, players }) {
-  if (!getDb() || !code) return;
+  const loaded = await getDbAsync();
+  if (!loaded || !code) return;
 
-  await update(roomRef(code), {
+  const rRef = await roomRef(code);
+  if (!rRef) return;
+  await loaded.api.update(rRef, {
     started: true,
     lotteryPhase: false,
     currentTurn: currentTurn ?? 0,
@@ -363,8 +419,10 @@ export async function startOnlineGame(code, { currentTurn, level, players }) {
  * Update lobby level (host only, before start).
  */
 export async function updateRoomLevel(code, level) {
-  if (!getDb() || !code) return;
-  await update(roomRef(code), { level });
+  const loaded = await getDbAsync();
+  if (!loaded || !code) return;
+  const rRef = await roomRef(code);
+  if (rRef) await loaded.api.update(rRef, { level });
 }
 
 /**
@@ -373,37 +431,59 @@ export async function updateRoomLevel(code, level) {
  * @returns {() => void} unsubscribe
  */
 export function listenToRoom(code, callback) {
-  if (!getDb() || !code) {
+  if (!code) {
     callback(null);
     return () => {};
   }
 
-  const rRef = roomRef(code);
-  const handler = (snap) => callback(normalizeRoom(snap));
-  onValue(rRef, handler);
+  let unsub = () => {};
+  let cancelled = false;
 
-  return () => off(rRef, 'value', handler);
+  getDbAsync().then(async (loaded) => {
+    if (cancelled) return;
+    if (!loaded) {
+      callback(null);
+      return;
+    }
+    const rRef = await roomRef(code);
+    if (!rRef || cancelled) {
+      callback(null);
+      return;
+    }
+    const handler = (snap) => callback(normalizeRoom(snap));
+    loaded.api.onValue(rRef, handler);
+    unsub = () => loaded.api.off(rRef, 'value', handler);
+  }).catch(() => {
+    if (!cancelled) callback(null);
+  });
+
+  return () => {
+    cancelled = true;
+    unsub();
+  };
 }
 
 /**
  * Remove player from room; delete room if host leaves.
  */
 export async function leaveRoom(code, playerId) {
-  if (!getDb() || !code) return;
+  const loaded = await getDbAsync();
+  if (!loaded || !code) return;
 
-  const rRef = roomRef(code);
-  const snap = await get(rRef);
+  const rRef = await roomRef(code);
+  if (!rRef) return;
+  const snap = await loaded.api.get(rRef);
   if (!snap.exists()) return;
 
   const room = snap.val();
   if (room.hostId === playerId) {
-    await remove(rRef);
+    await loaded.api.remove(rRef);
     return;
   }
 
   const players = { ...(room.players || {}) };
   delete players[playerId];
-  await update(rRef, { players });
+  await loaded.api.update(rRef, { players });
 }
 
 /**
@@ -466,7 +546,8 @@ export function sanitizeChatText(text) {
 }
 
 async function appendMessage(code, playerId, playerName, text, type) {
-  if (!getDb() || !code) {
+  const loaded = await getDbAsync();
+  if (!loaded || !code) {
     throw new Error('FIREBASE_NOT_CONFIGURED');
   }
 
@@ -484,10 +565,11 @@ async function appendMessage(code, playerId, playerName, text, type) {
     type: type === 'preset' ? 'preset' : 'chat',
   };
 
-  const mRef = messagesRef(code);
-  const snap = await get(mRef);
+  const mRef = await messagesRef(code);
+  if (!mRef) throw new Error('FIREBASE_NOT_CONFIGURED');
+  const snap = await loaded.api.get(mRef);
   const messages = pruneMessages([...normalizeMessages(snap.val()), message]);
-  await set(mRef, messages);
+  await loaded.api.set(mRef, messages);
   return message;
 }
 
@@ -516,16 +598,36 @@ export async function sendChatMessage(code, playerId, playerName, text) {
  * @returns {() => void} unsubscribe
  */
 export function listenToMessages(code, callback) {
-  if (!getDb() || !code) {
+  if (!code) {
     callback([]);
     return () => {};
   }
 
-  const mRef = messagesRef(code);
-  const handler = (snap) => callback(normalizeMessages(snap.val()));
-  onValue(mRef, handler);
+  let unsub = () => {};
+  let cancelled = false;
 
-  return () => off(mRef, 'value', handler);
+  getDbAsync().then(async (loaded) => {
+    if (cancelled) return;
+    if (!loaded) {
+      callback([]);
+      return;
+    }
+    const mRef = await messagesRef(code);
+    if (!mRef || cancelled) {
+      callback([]);
+      return;
+    }
+    const handler = (snap) => callback(normalizeMessages(snap.val()));
+    loaded.api.onValue(mRef, handler);
+    unsub = () => loaded.api.off(mRef, 'value', handler);
+  }).catch(() => {
+    if (!cancelled) callback([]);
+  });
+
+  return () => {
+    cancelled = true;
+    unsub();
+  };
 }
 
 export { isFirebaseConfigured, getDb, MAX_MESSAGE_LENGTH };

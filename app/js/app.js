@@ -1,10 +1,8 @@
 import { initModal } from './modal.js';
-import { initTrainGame } from './train-game.js';
-import { initMemoryGame } from './memory-game.js';
 import { initAds, onScreenChange } from './ads/ad-manager.js';
 import { loadCardData } from './questions.js';
 import { loadCityQuestions } from './city-questions.js';
-import { initNativeShell } from './native-app.js';
+import { initNativeShell, isNativeApp } from './native-app.js';
 
 let currentScreen = 'menu';
 
@@ -25,11 +23,27 @@ function showScreen(id) {
   onScreenChange(previous, id);
 }
 
+function navigateToScreen(el) {
+  const target = el?.dataset?.screen;
+  if (target) showScreen(target);
+}
+
 function initNavigation() {
   document.querySelectorAll('[data-screen]').forEach((el) => {
-    el.addEventListener('click', () => {
-      showScreen(el.dataset.screen);
-    });
+    const handleNavigate = (e) => {
+      e.preventDefault();
+      navigateToScreen(el);
+    };
+
+    // Capacitor Android WebView: pointerup is more reliable than click alone
+    if (isNativeApp()) {
+      el.addEventListener('pointerup', (e) => {
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+        handleNavigate(e);
+      });
+    } else {
+      el.addEventListener('click', handleNavigate);
+    }
   });
 
   document.addEventListener('native-navigate', (e) => {
@@ -38,9 +52,14 @@ function initNavigation() {
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
-  await initNativeShell();
+  // Navigation first — must work even if native plugins or game modules are slow
   initModal();
   initNavigation();
+
+  initNativeShell().catch((err) => {
+    console.warn('[Native] shell init failed — continuing', err);
+  });
+
   try {
     await initAds();
   } catch (err) {
@@ -68,7 +87,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  initTrainGame();
-  initMemoryGame();
+  try {
+    const [{ initTrainGame }, { initMemoryGame }] = await Promise.all([
+      import('./train-game.js'),
+      import('./memory-game.js'),
+    ]);
+    initTrainGame();
+    initMemoryGame();
+  } catch (err) {
+    console.error('فشل تحميل وحدات الألعاب', err);
+  }
+
   showScreen('menu');
 });

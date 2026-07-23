@@ -61,6 +61,7 @@ html, body {
 .menu-bg {
   position: absolute;
   inset: 0;
+  pointer-events: none;
   background:
     linear-gradient(135deg, rgba(0, 122, 61, 0.92), rgba(0, 92, 46, 0.88)),
     repeating-linear-gradient(
@@ -336,6 +337,12 @@ html, body {
   border: none;
   border-radius: var(--radius);
   cursor: pointer;
+  position: relative;
+  z-index: 2;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
   text-align: right;
   transition: transform 0.2s, box-shadow 0.2s;
   box-shadow: var(--shadow);
