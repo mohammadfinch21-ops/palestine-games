@@ -2171,6 +2171,8 @@ button:not(:disabled):hover {
     right: 0;
     bottom: 0;
     z-index: 300;
+    touch-action: manipulation;
+    pointer-events: auto;
     padding: 0.45rem 0.55rem calc(0.45rem + env(safe-area-inset-bottom, 0px));
     background: linear-gradient(180deg, #fffef8 0%, #f5f0e4 100%);
     border-top: 3px solid var(--gold);

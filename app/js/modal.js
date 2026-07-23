@@ -6,6 +6,7 @@ import {
 } from './card-validation.js';
 import { drawQuestion, shuffle } from './questions.js';
 import { pickCityQuestion } from './city-questions.js';
+import { bindTap } from './native-app.js';
 
 let overlay;
 let titleEl;
@@ -36,9 +37,10 @@ export function showModal({ title, bodyHtml, actions = [], onClose = null }) {
   actionsEl.classList.remove('question-card-actions');
   actions.forEach(({ label, className = 'btn-primary', onClick, keepOpen = false }) => {
     const btn = document.createElement('button');
+    btn.type = 'button';
     btn.textContent = label;
     btn.className = className;
-    btn.addEventListener('click', () => {
+    bindTap(btn, () => {
       onClick?.();
       if (!keepOpen) hideModal();
     });

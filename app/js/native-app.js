@@ -12,6 +12,32 @@ export function isNativeApp() {
   );
 }
 
+/** Reliable tap on Capacitor Android WebView — click alone often fails on real devices. */
+export function bindTap(el, handler) {
+  if (!el || typeof handler !== 'function') return;
+
+  let lastAt = 0;
+  const TAP_DEDUPE_MS = 450;
+
+  const fire = (e) => {
+    if (el.disabled || el.hidden) return;
+    if (e?.pointerType === 'mouse' && e?.button !== 0 && e?.button !== undefined) return;
+    const now = Date.now();
+    if (now - lastAt < TAP_DEDUPE_MS) return;
+    lastAt = now;
+    if (e?.cancelable) e.preventDefault();
+    e?.stopPropagation?.();
+    handler(e);
+  };
+
+  if (isNativeApp()) {
+    el.addEventListener('pointerup', fire);
+    el.addEventListener('touchend', fire, { passive: false });
+  } else {
+    el.addEventListener('click', fire);
+  }
+}
+
 async function callPlugin(pluginName, method, ...args) {
   const plugin = window.Capacitor?.Plugins?.[pluginName];
   if (!plugin?.[method]) return;

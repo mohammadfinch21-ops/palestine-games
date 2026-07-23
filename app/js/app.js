@@ -51,9 +51,19 @@ function initNavigation() {
   });
 }
 
-/** Load games + card data sequentially — avoids WebView OOM on low-RAM emulators */
+/** Load game modules first (tap handlers), then card JSON — avoids WebView OOM on low-RAM emulators */
 async function runDeferredStartup() {
   const cardsLoadingEl = document.getElementById('cards-loading-status');
+
+  try {
+    const { initTrainGame } = await import('./train-game.js');
+    initTrainGame();
+    const { initMemoryGame } = await import('./memory-game.js');
+    initMemoryGame();
+  } catch (err) {
+    console.error('فشل تحميل وحدات الألعاب', err);
+  }
+
   if (cardsLoadingEl) {
     cardsLoadingEl.classList.remove('hidden');
     cardsLoadingEl.textContent = 'جاري تحميل بطاقات الأسئلة…';
@@ -73,15 +83,6 @@ async function runDeferredStartup() {
       cardsLoadingEl.textContent = '⚠ فشل تحميل البطاقات — أعد تحميل الصفحة';
       cardsLoadingEl.classList.add('cards-loading-status--error');
     }
-  }
-
-  try {
-    const { initTrainGame } = await import('./train-game.js');
-    initTrainGame();
-    const { initMemoryGame } = await import('./memory-game.js');
-    initMemoryGame();
-  } catch (err) {
-    console.error('فشل تحميل وحدات الألعاب', err);
   }
 
   // Ads last — after menu is interactive and first paint complete

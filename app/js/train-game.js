@@ -36,6 +36,7 @@ import {
   showRewardedAd,
 } from './ads/ad-manager.js';
 import { isFirebaseConfigured } from './firebase-config.js';
+import { bindTap } from './native-app.js';
 import {
   getPlayerId,
   createRoom,
@@ -264,8 +265,8 @@ export function initTrainGame() {
     trainSidebarToggle?.addEventListener('click', toggleTrainSidebar);
     mobileMenuBtn?.addEventListener('click', toggleTrainSidebar);
     trainSidebarBackdrop?.addEventListener('click', closeTrainSidebar);
-    mobileStartBtn?.addEventListener('click', () => startBtn?.click());
-    mobileDrawBtn?.addEventListener('click', () => handleDrawAction());
+    bindTap(mobileStartBtn, () => startGame());
+    bindTap(mobileDrawBtn, () => handleDrawAction());
 
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && trainSidebar?.classList.contains('is-open')) {
@@ -1285,8 +1286,8 @@ export function initTrainGame() {
     removePlayer(Number(chip.dataset.playerIndex));
   });
 
-  startBtn.addEventListener('click', startGame);
-  drawBtn.addEventListener('click', () => handleDrawAction());
+  bindTap(startBtn, startGame);
+  bindTap(drawBtn, () => handleDrawAction());
 
   rewardHintBtn.addEventListener('click', () => {
     if (!isMyTurn() || !state.started || state.gameOver || !state.waitingForMove || state.processingMove) return;
