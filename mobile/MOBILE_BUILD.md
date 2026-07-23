@@ -171,6 +171,8 @@ keytool -genkey -v -keystore palestine-train-release.keystore -alias palestine-t
 
 #### ب) إعداد Gradle
 
+> قالب جاهز: `mobile/android/key.properties.example` — انسخه إلى `key.properties`.
+
 أنشئ `mobile/android/key.properties` (غير مُتتبّع في Git):
 
 ```properties
@@ -219,6 +221,9 @@ npx cap open ios
 | Publisher `ca-pub-...` | App ID `ca-app-pub-...~...` |
 
 #### خطوات AdMob
+
+> **قائمة النشر الكاملة:** [`STORE_RELEASE.md`](STORE_RELEASE.md)  
+> **خطوات AdMob بالتفصيل:** [`../app/js/ads/ADMOB_SETUP.md`](../app/js/ads/ADMOB_SETUP.md)
 
 1. [admob.google.com](https://admob.google.com) → إنشاء تطبيق Android + iOS
 2. أنشئ وحدات: Banner، Interstitial، Rewarded

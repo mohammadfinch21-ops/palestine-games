@@ -1,39 +1,55 @@
 /**
  * Google AdMob — Mobile app ad IDs (Android / iOS)
- * NOT the same as AdSense — see ADS_SETUP.md and mobile/MOBILE_BUILD.md
+ * NOT the same as AdSense — see app/js/ads/ADMOB_SETUP.md and mobile/STORE_RELEASE.md
  *
- * ⚠️ Replace placeholders before production release.
- * While developing, USE_TEST_ADS: true uses Google's official test ad units.
+ * ═══════════════════════════════════════════════════════════════════
+ * 🔴 قبل النشر في المتجر | BEFORE STORE RELEASE
+ * ═══════════════════════════════════════════════════════════════════
+ * 1. أنشئ تطبيق AdMob + 3 وحدات إعلان (راجع ADMOB_SETUP.md)
+ * 2. الصق App ID + ad unit IDs في القسم PRODUCTION أدناه
+ * 3. USE_TEST_ADS → false
+ * 4. mobile/capacitor.config.json → initializeForTesting → false + App IDs
+ * 5. npx cap sync && بناء release — تحقق أن الإعلانات ليست «Test Ad»
+ *
+ * ⚠️ لا تنشر في Play/App Store و USE_TEST_ADS: true — لن تحصل على أرباح.
  */
 export const ADMOB_CONFIG = {
-  /** Master switch for native AdMob (Capacitor app only) */
+  /** Master switch — keep true for release (monetization ON) */
   enabled: true,
 
   /**
-   * true = Google test ad units (safe for debug APK / TestFlight)
-   * false = your real AdMob ad unit IDs from admob.google.com
+   * ═══ TEST vs PRODUCTION toggle ═══
+   *
+   * true  → Google official test ad units (debug APK, emulator, internal testing)
+   * false → PRODUCTION IDs below (required for store release + real revenue)
+   *
+   * Flip to false ONLY after pasting your real App ID + ad unit IDs from AdMob console.
    */
   USE_TEST_ADS: true,
 
-  /**
-   * AdMob App IDs (Dashboard → Apps → App settings)
-   * Format: ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
-   * Also set in mobile/capacitor.config.json → plugins.AdMob
-   */
-  appIdAndroid: 'ca-app-pub-3940256099942544~3347511713',
-  appIdIOS: 'ca-app-pub-3940256099942544~1458002511',
+  // ─── PRODUCTION — paste your IDs from admob.google.com ───────────
+  // TODO: Replace every TODO_* placeholder before store release.
 
-  /** Production ad unit IDs — replace after creating units in AdMob */
+  /** App IDs — AdMob → Apps → [your app] → App settings */
+  appIdAndroid: 'TODO_REPLACE_ANDROID_APP_ID', // ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
+  appIdIOS: 'TODO_REPLACE_IOS_APP_ID', // ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
+
+  /** Ad unit IDs — AdMob → Apps → Ad units (Banner, Interstitial, Rewarded) */
   adUnits: {
-    bannerAndroid: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
-    bannerIOS: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
-    interstitialAndroid: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
-    interstitialIOS: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
-    rewardedAndroid: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
-    rewardedIOS: 'ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY',
+    bannerAndroid: 'TODO_REPLACE_BANNER_ANDROID', // ca-app-pub-XXXXXXXXXXXXXXXX/YYYYYYYYYY
+    bannerIOS: 'TODO_REPLACE_BANNER_IOS',
+    interstitialAndroid: 'TODO_REPLACE_INTERSTITIAL_ANDROID',
+    interstitialIOS: 'TODO_REPLACE_INTERSTITIAL_IOS',
+    rewardedAndroid: 'TODO_REPLACE_REWARDED_ANDROID',
+    rewardedIOS: 'TODO_REPLACE_REWARDED_IOS',
   },
 
-  /** Google official test IDs (do not change unless Google updates them) */
+  // ─── TEST — Google's official sample IDs (safe for development) ────
+  // Do NOT change unless Google updates documentation.
+
+  testAppIdAndroid: 'ca-app-pub-3940256099942544~3347511713',
+  testAppIdIOS: 'ca-app-pub-3940256099942544~1458002511',
+
   testIds: {
     bannerAndroid: 'ca-app-pub-3940256099942544/6300978111',
     bannerIOS: 'ca-app-pub-3940256099942544/2934735716',
@@ -43,6 +59,15 @@ export const ADMOB_CONFIG = {
     rewardedIOS: 'ca-app-pub-3940256099942544/1712485313',
   },
 };
+
+/** Resolve AdMob App ID for Capacitor native config sync */
+export function getAdMobAppId(platform) {
+  const isIOS = platform === 'ios';
+  if (ADMOB_CONFIG.USE_TEST_ADS) {
+    return isIOS ? ADMOB_CONFIG.testAppIdIOS : ADMOB_CONFIG.testAppIdAndroid;
+  }
+  return isIOS ? ADMOB_CONFIG.appIdIOS : ADMOB_CONFIG.appIdAndroid;
+}
 
 /** Resolve ad unit ID for current platform */
 export function getAdMobUnitId(type) {

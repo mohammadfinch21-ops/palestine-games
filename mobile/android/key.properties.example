@@ -1,0 +1,11 @@
+# Example release signing — copy to key.properties and fill in values
+# NEVER commit key.properties or *.keystore to Git
+#
+# Steps: mobile/STORE_RELEASE.md → Phase 4
+# Create keystore:
+#   keytool -genkey -v -keystore palestine-train-release.keystore -alias palestine-train -keyalg RSA -keysize 2048 -validity 10000
+
+storeFile=../palestine-train-release.keystore
+storePassword=YOUR_STORE_PASSWORD
+keyAlias=palestine-train
+keyPassword=YOUR_KEY_PASSWORD

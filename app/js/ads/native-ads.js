@@ -1,6 +1,10 @@
 /**
  * AdMob bridge for Capacitor native apps (Android / iOS).
  * Uses Capacitor plugin bridge — no AdSense on mobile.
+ *
+ * Production checklist: app/js/ads/ADMOB_SETUP.md
+ * USE_TEST_ADS in admob-config.js must be false before Play/App Store release.
+ * Rewarded flow: train-reward-hint-btn (+2 steps), memory-reward-hint-btn (reveal pair).
  */
 import { ADMOB_CONFIG, getAdMobUnitId } from './admob-config.js';
 
