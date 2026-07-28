@@ -6,13 +6,66 @@ import {
 } from './card-validation.js';
 import { drawQuestion, shuffle } from './questions.js';
 import { pickCityQuestion } from './city-questions.js';
-import { bindTap } from './native-app.js';
+import { bindTap, isNativeApp, registerNativeTap, unregisterNativeTap } from './native-app.js';
 
 let overlay;
 let titleEl;
 let bodyEl;
 let actionsEl;
 let onCloseCallback = null;
+const modalButtonHandlers = new WeakMap();
+let modalTapSeq = 0;
+
+function resolveModalTapTarget(e) {
+  const touch = e.changedTouches?.[0];
+  if (touch) {
+    const hit = document.elementFromPoint(touch.clientX, touch.clientY);
+    return hit?.closest?.('.modal-close, #modal-actions button, .question-card-option-btn') ?? null;
+  }
+  return e.target?.closest?.('.modal-close, #modal-actions button, .question-card-option-btn') ?? null;
+}
+
+function unbindModalButton(btn) {
+  if (!btn) return;
+  const key = btn.getAttribute('data-native-tap');
+  if (key?.startsWith('modal-')) unregisterNativeTap(key);
+  modalButtonHandlers.delete(btn);
+  btn.removeAttribute('data-native-tap');
+  btn.onclick = null;
+}
+
+function unbindModalButtons(root) {
+  root?.querySelectorAll?.('button')?.forEach?.((btn) => unbindModalButton(btn));
+}
+
+function bindModalButton(btn, handler) {
+  if (!btn || typeof handler !== 'function') return;
+  unbindModalButton(btn);
+  modalButtonHandlers.set(btn, handler);
+
+  if (isNativeApp()) {
+    const key = `modal-${++modalTapSeq}`;
+    btn.setAttribute('data-native-tap', key);
+    registerNativeTap(key, handler);
+    btn.style.touchAction = 'manipulation';
+    btn.style.cursor = 'pointer';
+    btn.onclick = (e) => {
+      e?.preventDefault?.();
+      handler(e);
+    };
+    return;
+  }
+
+  bindTap(btn, handler);
+}
+
+function restoreAdsAfterModal() {
+  if (!isNativeApp()) return;
+  const screen = document.querySelector('.screen.active')?.id?.replace('screen-', '') ?? 'menu';
+  import('./ads/ad-manager.js')
+    .then(({ refreshBannerAds }) => refreshBannerAds(screen))
+    .catch(() => {});
+}
 
 export function initModal() {
   overlay = document.getElementById('modal-overlay');
@@ -20,10 +73,29 @@ export function initModal() {
   bodyEl = document.getElementById('modal-body');
   actionsEl = document.getElementById('modal-actions');
 
-  overlay.querySelector('.modal-close').addEventListener('click', hideModal);
+  const closeBtn = overlay.querySelector('.modal-close');
+  if (closeBtn) bindModalButton(closeBtn, hideModal);
+
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay && !overlay.classList.contains('modal--question')) hideModal();
   });
+
+  if (isNativeApp()) {
+    overlay.addEventListener(
+      'touchend',
+      (e) => {
+        if (overlay.classList.contains('hidden')) return;
+        const btn = resolveModalTapTarget(e);
+        if (!btn || btn.disabled) return;
+        const handler = modalButtonHandlers.get(btn);
+        if (!handler) return;
+        e.preventDefault();
+        e.stopPropagation();
+        handler(e);
+      },
+      { passive: false, capture: true },
+    );
+  }
 }
 
 export function showModal({ title, bodyHtml, actions = [], onClose = null }) {
@@ -33,6 +105,7 @@ export function showModal({ title, bodyHtml, actions = [], onClose = null }) {
   if (closeBtn) closeBtn.hidden = false;
   titleEl.textContent = title;
   bodyEl.innerHTML = bodyHtml;
+  unbindModalButtons(actionsEl);
   actionsEl.innerHTML = '';
   actionsEl.classList.remove('question-card-actions');
   actions.forEach(({ label, className = 'btn-primary', onClick, keepOpen = false }) => {
@@ -40,14 +113,28 @@ export function showModal({ title, bodyHtml, actions = [], onClose = null }) {
     btn.type = 'button';
     btn.textContent = label;
     btn.className = className;
-    bindTap(btn, () => {
-      onClick?.();
+    const runAction = () => {
+      try {
+        onClick?.();
+      } catch (err) {
+        console.error('modal action failed', err);
+      }
       if (!keepOpen) hideModal();
-    });
+    };
+    bindModalButton(btn, runAction);
     actionsEl.appendChild(btn);
   });
   overlay.classList.remove('hidden');
   overlay.setAttribute('aria-hidden', 'false');
+
+  if (isNativeApp()) {
+    import('./ads/ad-manager.js')
+      .then(({ refreshBannerAds, hideNativeBannerImmediate }) => {
+        hideNativeBannerImmediate?.();
+        refreshBannerAds('modal');
+      })
+      .catch(() => {});
+  }
 }
 
 export function isModalOpen() {
@@ -62,6 +149,7 @@ export function hideModal() {
   if (closeBtn) closeBtn.hidden = false;
   onCloseCallback?.();
   onCloseCallback = null;
+  restoreAdsAfterModal();
 }
 
 function escapeHtml(str) {
@@ -101,72 +189,35 @@ function normalizeChoice(text) {
   return String(text ?? '')
     .trim()
     .replace(/\s+/g, ' ')
-    .replace(/[\u064B-\u065F\u0670]/g, '')
-    .replace(/[أإآ]/g, 'ا')
-    .replace(/ى/g, 'ي');
+    .toLowerCase();
 }
 
 function choiceMatches(a, b) {
   return normalizeChoice(a) === normalizeChoice(b);
 }
 
-function findMatchingOption(answer, options) {
-  if (!answer || !Array.isArray(options)) return null;
-  return options.find((opt) => choiceMatches(opt, answer)) ?? null;
-}
-
-function resolveCorrectAnswer(card, sourceOptions) {
-  const originalOptions = Array.isArray(card.options)
-    ? card.options.filter(isValidOption)
-    : [...sourceOptions];
-
-  if (card.correctAnswer) {
-    const fromSource = findMatchingOption(card.correctAnswer, sourceOptions);
-    if (fromSource) return fromSource;
-    const fromOriginal = findMatchingOption(card.correctAnswer, originalOptions);
-    if (fromOriginal) {
-      const mapped = findMatchingOption(fromOriginal, sourceOptions);
-      if (mapped) return mapped;
-      if (isTrueFalseQuestion(card.question || '')) return fromOriginal;
-    }
-  }
-
-  if (typeof card.correctAnswerIndex === 'number' && originalOptions[card.correctAnswerIndex]) {
-    const indexed = originalOptions[card.correctAnswerIndex];
-    const fromSource = findMatchingOption(indexed, sourceOptions);
-    if (fromSource) return fromSource;
-    return indexed;
-  }
-
-  const fallback = findMatchingOption(card.correctAnswer, originalOptions);
-  return fallback || sourceOptions[0] || 'صح';
-}
-
-/** Shuffle display order; resolve correct answer from source options before shuffle. */
 function prepareShuffledOptions(card) {
-  const sourceOptions = deriveOptions(card);
-  if (!sourceOptions) return null;
-  const correctAnswer = resolveCorrectAnswer(card, sourceOptions);
-  return { options: shuffle(sourceOptions), correctAnswer };
+  const options = deriveOptions(card);
+  if (!options) return null;
+  const correctAnswer = card.correctAnswer ?? card.answer ?? options[0];
+  const shuffled = shuffle([...options]);
+  return { options: shuffled, correctAnswer };
 }
 
-function buildQuestionCardHtml(card, levelName, stepsCorrect = 3, stepsWrong = 1, modalOptions = {}) {
-  const question = escapeHtml(card.question || '—');
+function buildQuestionCardHtml(card, levelName, stepsCorrect, stepsWrong, modalOptions) {
   const theme = getCardTheme(card);
   const hex = LEVEL_HEX[theme] || LEVEL_HEX.yellow;
+  const question = escapeHtml(card.question);
   const cityName = modalOptions.cityName || card.cityName || '';
-  const cityBonus = modalOptions.cityBonus;
   const factHtml = card.fact
-    ? `<p class="pt-city-fact" dir="rtl" lang="ar">${escapeHtml(card.fact)}</p>`
+    ? `<p class="pt-fact" dir="rtl" lang="ar">${escapeHtml(card.fact)}</p>`
     : '';
 
   let stepsHintHtml;
-  if (typeof cityBonus === 'number') {
-    const bonus = Math.abs(cityBonus);
-    const dirLabel = cityBonus >= 0 ? 'تتقدم' : 'ترتد';
+  if (modalOptions.cityBonus != null) {
     stepsHintHtml = `
-      <div class="pt-steps-hint pt-steps-hint--city">
-        <span class="pt-step pt-step--correct">✓ صح: ${dirLabel} ${bonus} مربعات</span>
+      <div class="pt-steps-hint">
+        <span class="pt-step pt-step--correct">✓ صح: +${modalOptions.cityBonus} للمدينة</span>
         <span class="pt-step pt-step--wrong">✗ خطأ: تبقى مكانك</span>
       </div>`;
   } else {
@@ -196,19 +247,15 @@ function buildQuestionCardHtml(card, levelName, stepsCorrect = 3, stepsWrong = 1
 }
 
 function bindOptionButton(btn, opt, btnWrap, onChoice) {
-  const fire = (e) => {
+  bindModalButton(btn, () => {
     if (btn.disabled || btnWrap.dataset.answered === '1') return;
-    if (e?.cancelable) e.preventDefault();
-    e?.stopPropagation?.();
     btnWrap.dataset.answered = '1';
     onChoice(opt, btnWrap);
-  };
-  btn.addEventListener('pointerup', fire);
-  btn.addEventListener('click', fire);
-  btn.addEventListener('touchend', fire, { passive: false });
+  });
 }
 
 function renderOptionButtons(options, theme, onChoice) {
+  unbindModalButtons(actionsEl);
   actionsEl.innerHTML = '';
   actionsEl.classList.add('question-card-actions');
 
@@ -325,8 +372,6 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
   const safeComplete = (userWasCorrect, steps, answeredCard = card) => {
     if (resolved) return;
     resolved = true;
-    // Close the question modal first so onComplete can open its own modals
-    // and a thrown error can never leave the question modal stuck open.
     if (!modalOptions.deferClose) hideModal();
     try {
       onComplete?.(userWasCorrect, steps, answeredCard);
@@ -366,7 +411,6 @@ export function showQuestionCardModal(card, onComplete, modalOptions = {}) {
       else if (choiceMatches(b.dataset.choice, userChoice) && !userWasCorrect) b.classList.add('wrong');
     });
 
-    // Let the correct/wrong highlight paint before advancing.
     requestAnimationFrame(() => {
       setTimeout(() => safeComplete(userWasCorrect, steps, card), 380);
     });
