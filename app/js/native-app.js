@@ -14,35 +14,29 @@ export function isNativeApp() {
   );
 }
 
-/** Resolve relative asset paths for Capacitor file:// / https://localhost WebView. */
+/** Resolve relative asset paths (images) for Capacitor https://localhost WebView. */
 export function resolveAssetUrl(path) {
   if (!path || /^https?:\/\//i.test(path) || path.startsWith('data:')) return path;
-  const Cap = window.Capacitor;
-  if (Cap?.convertFileSrc && Cap.isNativePlatform?.()) {
-    try {
-      const absolute = new URL(path, window.location.href).pathname;
-      return Cap.convertFileSrc(absolute);
-    } catch {
-      /* fall through */
-    }
+  try {
+    return new URL(path, window.location.href).href;
+  } catch {
+    return path;
   }
-  return path;
 }
 
-/** Absolute fetch URL for JSON/assets — relative paths fail on some Capacitor WebViews. */
+/**
+ * Absolute fetch URL for bundled www assets (JSON, etc.).
+ * Do NOT use convertFileSrc here — that API is for device file:// paths from
+ * Filesystem, not for files served by Capacitor at https://localhost/...
+ */
 export function resolveFetchUrl(path) {
   if (!path || /^https?:\/\//i.test(path)) return path;
   try {
-    const absolute = new URL(path, window.location.href).href;
-    const Cap = window.Capacitor;
-    if (Cap?.convertFileSrc && Cap.isNativePlatform?.()) {
-      try {
-        return Cap.convertFileSrc(new URL(path, window.location.href).pathname);
-      } catch {
-        /* fall through */
-      }
+    const url = new URL(path, window.location.href).href;
+    if (isNativeApp()) {
+      console.info('[native-app] resolveFetchUrl', { path, url, origin: window.location.origin });
     }
-    return absolute;
+    return url;
   } catch {
     return path;
   }

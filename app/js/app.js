@@ -80,7 +80,8 @@ async function runDeferredStartup() {
   } catch (err) {
     console.error('فشل تحميل بطاقات PDF', err);
     if (cardsLoadingEl) {
-      cardsLoadingEl.textContent = '⚠ فشل تحميل البطاقات — أعد تحميل الصفحة';
+      const detail = err?.message ? ` (${err.message})` : '';
+      cardsLoadingEl.textContent = `⚠ فشل تحميل البطاقات${detail} — اضغط «ابدأ» لإعادة المحاولة`;
       cardsLoadingEl.classList.add('cards-loading-status--error');
     }
     refreshTrainUI?.();

@@ -17,16 +17,58 @@ const cityDecks = new Map();
 const cityRecentQueues = new Map();
 const cityRecycleCounts = new Map();
 
+const CITY_FETCH_TIMEOUT_MS = 15000;
+
+function fetchJsonWithTimeout(url, ms = CITY_FETCH_TIMEOUT_MS) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    let settled = false;
+    const timer = setTimeout(() => {
+      try {
+        xhr.abort();
+      } catch {
+        /* ignore */
+      }
+      if (!settled) {
+        settled = true;
+        reject(new Error(`انتهت مهلة تحميل (${ms / 1000}ث): ${url}`));
+      }
+    }, ms);
+
+    xhr.open('GET', url, true);
+    xhr.responseType = 'text';
+    xhr.onload = () => {
+      clearTimeout(timer);
+      if (settled) return;
+      settled = true;
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText));
+        } catch {
+          reject(new Error(`JSON غير صالح: ${url}`));
+        }
+        return;
+      }
+      reject(new Error(`HTTP ${xhr.status}: ${url}`));
+    };
+    xhr.onerror = () => {
+      clearTimeout(timer);
+      if (!settled) {
+        settled = true;
+        reject(new Error(`خطأ شبكة: ${url}`));
+      }
+    };
+    xhr.send();
+  });
+}
+
 export async function loadCityQuestions() {
   if (cityDeck) return cityDeck;
   if (loadPromise) return loadPromise;
 
   loadPromise = (async () => {
-    const res = await fetch(resolveFetchUrl('js/city-questions.json'));
-    if (!res.ok) {
-      throw new Error(`city-questions.json — HTTP ${res.status}`);
-    }
-    cityDeck = await res.json();
+    const url = resolveFetchUrl('js/city-questions.json');
+    cityDeck = await fetchJsonWithTimeout(url);
     return cityDeck;
   })();
 

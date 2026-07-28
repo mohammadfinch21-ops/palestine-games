@@ -16,6 +16,10 @@ import {
   ensureCardsReady,
   loadCardData,
   getCardsLoadState,
+  forceCardsLoadTimeout,
+  CARDS_LOAD_STUCK_MS,
+  CARDS_LOAD_WATCHDOG_INTERVAL_MS,
+  isQuestionDebugEnabled,
   getTrainLevel,
   setTrainLevel,
   getTrainLevelInfo,
@@ -291,6 +295,11 @@ export function initTrainGame() {
       e?.preventDefault?.();
       console.log('train-game: handleMobileStart');
       if (gameStatus) gameStatus.textContent = '...';
+      const loadState = getCardsLoadState();
+      if (loadState.state === 'error') {
+        loadCardData().finally(() => startGame());
+        return;
+      }
       await startGame();
     };
     mobileStartDefaultHandler = handleMobileStart;
@@ -324,18 +333,26 @@ export function initTrainGame() {
       document.body.classList.contains('train-mobile-layout')
       || document.documentElement.classList.contains('native-app');
     if (!mobileBarActive) return;
+    const loadState = getCardsLoadState();
     const cardsReady = areCardsReady();
+    const loadFailed = loadState.state === 'error';
     const hideLocalStart = online.mode && online.inRoom;
     const startLocked =
       hideLocalStart ||
-      !cardsReady ||
+      (!cardsReady && !loadFailed) ||
       (state.started && !state.gameOver) ||
       state.players.length < MIN_PLAYERS;
     if (mobileStartBtn) {
       mobileStartBtn.disabled = startLocked;
       mobileStartBtn.hidden = startBtn.hidden;
-      mobileStartBtn.textContent = cardsReady ? MOBILE_START_LABEL : '⏳ تحميل…';
-      mobileStartBtn.classList.toggle('is-loading', !cardsReady);
+      if (cardsReady) {
+        mobileStartBtn.textContent = MOBILE_START_LABEL;
+      } else if (loadFailed) {
+        mobileStartBtn.textContent = '⚠ فشل — اضغط لإعادة المحاولة';
+      } else {
+        mobileStartBtn.textContent = '⏳ تحميل…';
+      }
+      mobileStartBtn.classList.toggle('is-loading', !cardsReady && !loadFailed);
       mobileStartBtn.classList.remove('train-mbar-btn--lottery', 'btn-pulse-ready');
     }
     if (mobileDrawBtn) {
@@ -1423,6 +1440,46 @@ export function initTrainGame() {
   }
 
   initMobileTrainBar();
+
+  let cardsLoadWatchdogTimer = null;
+  let cardsLoadDebugModalShown = false;
+
+  function stopCardsLoadWatchdog() {
+    if (cardsLoadWatchdogTimer) {
+      clearInterval(cardsLoadWatchdogTimer);
+      cardsLoadWatchdogTimer = null;
+    }
+  }
+
+  function startCardsLoadWatchdog() {
+    if (cardsLoadWatchdogTimer) return;
+    cardsLoadWatchdogTimer = setInterval(() => {
+      const loadState = getCardsLoadState();
+      if (loadState.rawState === 'ready' || loadState.state === 'ready') {
+        stopCardsLoadWatchdog();
+        return;
+      }
+      if (loadState.state === 'error' && loadState.rawState !== 'loading') {
+        stopCardsLoadWatchdog();
+        updateUI();
+        return;
+      }
+      if (loadState.stuck || (loadState.rawState === 'loading' && loadState.elapsedMs >= CARDS_LOAD_STUCK_MS)) {
+        forceCardsLoadTimeout(loadState.error?.message);
+        updateUI();
+        stopCardsLoadWatchdog();
+        return;
+      }
+      if (isQuestionDebugEnabled() && !cardsLoadDebugModalShown && loadState.rawState === 'loading') {
+        cardsLoadDebugModalShown = true;
+        console.info('[train-game] cards load watchdog', loadState);
+      }
+      syncMobileBar();
+    }, CARDS_LOAD_WATCHDOG_INTERVAL_MS);
+  }
+
+  startCardsLoadWatchdog();
+
   renderLevelSelector();
   renderPlayerCountPicker();
   renderPlayers();
@@ -1953,7 +2010,8 @@ export function initTrainGame() {
     }
     cardsLoadingStatusEl.classList.remove('hidden');
     if (loadState.state === 'error') {
-      cardsLoadingStatusEl.textContent = '⚠ فشل تحميل البطاقات — أعد تحميل التطبيق';
+      const detail = loadState.error?.message ? ` (${loadState.error.message})` : '';
+      cardsLoadingStatusEl.textContent = `⚠ فشل تحميل البطاقات${detail} — اضغط «ابدأ» لإعادة المحاولة`;
       cardsLoadingStatusEl.classList.add('cards-loading-status--error');
     } else if (loadState.state === 'loading') {
       cardsLoadingStatusEl.textContent = 'جاري تحميل البطاقات…';
@@ -2044,10 +2102,11 @@ export function initTrainGame() {
     drawBtn.textContent = 'اسحب سؤالاً';
 
     const hideLocalStart = online.mode && online.inRoom;
+    const loadFailed = loadState.state === 'error';
     startBtn.hidden = hideLocalStart;
     startBtn.disabled =
       hideLocalStart ||
-      !cardsReady ||
+      (!cardsReady && !loadFailed) ||
       (state.started && !state.gameOver) ||
       state.players.length < MIN_PLAYERS;
     addPlayerBtn.disabled =

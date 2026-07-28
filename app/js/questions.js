@@ -3,13 +3,74 @@
  * إدارة جلسة السحب: mainDeck / tiebreakDeck منفصلان لكل مرحلة
  */
 import { filterPlayableCards, isPlayableCard, isValidOption, isValidQuestion } from './card-validation.js';
-import { resolveFetchUrl } from './native-app.js';
+import { isNativeApp, resolveFetchUrl } from './native-app.js';
 
 let TRAIN_DECK = null;
 let selectedLevelId = 'ashbal';
 let cardsLoadState = 'idle';
 let loadError = null;
 let loadPromise = null;
+let loadStartedAt = 0;
+
+export const CARD_FETCH_TIMEOUT_MS = 15000;
+export const CARDS_LOAD_STUCK_MS = 20000;
+export const CARDS_LOAD_WATCHDOG_INTERVAL_MS = 2000;
+
+/** @type {XMLHttpRequest[]} */
+const activeCardXhrs = [];
+
+/** Minimal playable deck when bundled JSON fetch fails on native WebView. */
+const FALLBACK_TRAIN_DECK = {
+  stats: { fallback: true },
+  levels: {
+    ashbal: {
+      cards: [
+        {
+          id: 'fb-ash-1',
+          question: 'القدس عاصمة فلسطين؟ صح أم خطأ',
+          options: ['صح', 'خطأ'],
+          correctAnswer: 'صح',
+        },
+        {
+          id: 'fb-ash-2',
+          question: 'غزة مدينة فلسطينية على البحر؟ صح أم خطأ',
+          options: ['صح', 'خطأ'],
+          correctAnswer: 'صح',
+        },
+      ],
+    },
+    scout: {
+      cards: [
+        {
+          id: 'fb-sco-1',
+          question: 'نابلس مدينة فلسطينية؟ صح أم خطأ',
+          options: ['صح', 'خطأ'],
+          correctAnswer: 'صح',
+        },
+      ],
+    },
+    rover: {
+      cards: [
+        {
+          id: 'fb-rov-1',
+          question: 'الخليل مدينة فلسطينية؟ صح أم خطأ',
+          options: ['صح', 'خطأ'],
+          correctAnswer: 'صح',
+        },
+      ],
+    },
+    advanced: {
+      cards: [
+        {
+          id: 'fb-adv-1',
+          question: 'يافا مدينة ساحلية فلسطينية؟ صح أم خطأ',
+          options: ['صح', 'خطأ'],
+          correctAnswer: 'صح',
+        },
+      ],
+    },
+  },
+};
 
 /** المراحل الأربع — ألوان من كرت PDF */
 export const TRAIN_LEVELS = [
@@ -101,7 +162,6 @@ export function areCardsReady() {
 /** Wait for card JSON — retries load after native fetch path fix or slow startup. */
 export async function ensureCardsReady() {
   if (areCardsReady()) return true;
-  if (cardsLoadState === 'error') return false;
   try {
     await loadCardData();
     return areCardsReady();
@@ -112,13 +172,44 @@ export async function ensureCardsReady() {
 }
 
 export function getCardsLoadState() {
+  const elapsedMs = loadStartedAt ? Date.now() - loadStartedAt : 0;
+  const stuck = cardsLoadState === 'loading' && elapsedMs >= CARDS_LOAD_STUCK_MS;
+  let state = cardsLoadState;
+  let error = loadError;
+  if (stuck) {
+    state = 'error';
+    error = error || new Error(`انتهت مهلة تحميل البطاقات (${CARDS_LOAD_STUCK_MS / 1000}ث)`);
+  }
   return {
-    state: cardsLoadState,
-    error: loadError,
+    state,
+    error,
+    rawState: cardsLoadState,
+    stuck,
+    elapsedMs,
     count: getPlayableCards().length,
     level: selectedLevelId,
     stats: TRAIN_DECK?.stats || {},
   };
+}
+
+/** Abort hung XHR and force error — called by UI watchdog when promise never settles. */
+export function forceCardsLoadTimeout(reason) {
+  if (cardsLoadState !== 'loading') return false;
+  for (const xhr of activeCardXhrs) {
+    try {
+      xhr.abort();
+    } catch {
+      /* ignore */
+    }
+  }
+  activeCardXhrs.length = 0;
+  cardsLoadState = 'error';
+  loadError = new Error(reason || `انتهت مهلة تحميل البطاقات (${CARDS_LOAD_STUCK_MS / 1000}ث)`);
+  loadPromise = null;
+  loadStartedAt = 0;
+  notifyCardsLoadSettled();
+  console.warn('[questions] forceCardsLoadTimeout', loadError.message);
+  return true;
 }
 
 function notifyCardsLoadSettled() {
@@ -126,6 +217,101 @@ function notifyCardsLoadSettled() {
     document.dispatchEvent(new CustomEvent('train-cards-load-settled'));
   } catch {
     /* non-browser */
+  }
+}
+
+function fetchJsonWithTimeout(url, ms = CARD_FETCH_TIMEOUT_MS) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    activeCardXhrs.push(xhr);
+    let settled = false;
+
+    const finish = (fn, value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      const idx = activeCardXhrs.indexOf(xhr);
+      if (idx >= 0) activeCardXhrs.splice(idx, 1);
+      fn(value);
+    };
+
+    const timer = setTimeout(() => {
+      try {
+        xhr.abort();
+      } catch {
+        /* ignore */
+      }
+      finish(reject, new Error(`انتهت مهلة تحميل (${ms / 1000}ث): ${url}`));
+    }, ms);
+
+    xhr.open('GET', url, true);
+    xhr.responseType = 'text';
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          finish(resolve, JSON.parse(xhr.responseText));
+        } catch {
+          finish(reject, new Error(`JSON غير صالح: ${url}`));
+        }
+        return;
+      }
+      finish(reject, new Error(`HTTP ${xhr.status}: ${url}`));
+    };
+
+    xhr.onerror = () => {
+      finish(reject, new Error(`خطأ شبكة: ${url}`));
+    };
+
+    xhr.onabort = () => {
+      if (!settled) {
+        finish(reject, new Error(`أُلغي التحميل: ${url}`));
+      }
+    };
+
+    try {
+      xhr.send();
+    } catch (err) {
+      finish(reject, err);
+    }
+  });
+}
+
+function applyFallbackDeck() {
+  TRAIN_DECK = {
+    ...FALLBACK_TRAIN_DECK,
+    levels: Object.fromEntries(
+      Object.entries(FALLBACK_TRAIN_DECK.levels).map(([id, level]) => [
+        id,
+        { cards: filterPlayableCards(level.cards) },
+      ]),
+    ),
+  };
+  MEMORY_PAIRS.splice(0, MEMORY_PAIRS.length);
+  if (!getCardsForLevel(selectedLevelId).length) {
+    selectedLevelId = TRAIN_LEVELS.find((l) => getCardsForLevel(l.id).length)?.id || 'ashbal';
+  }
+  console.warn('[questions] using inline fallback deck');
+}
+
+function finalizeLoadedDeck(trainData, memoryData) {
+  TRAIN_DECK = trainData;
+  MEMORY_PAIRS.splice(0, MEMORY_PAIRS.length, ...(memoryData || []).filter((p) => p.isPlayable !== false));
+
+  if (TRAIN_DECK?.levels) {
+    for (const level of Object.values(TRAIN_DECK.levels)) {
+      if (Array.isArray(level.cards)) {
+        level.cards = filterPlayableCards(level.cards);
+      }
+    }
+  }
+
+  if (!TRAIN_LEVELS.some((l) => getCardsForLevel(l.id).length)) {
+    throw new Error('لا توجد بطاقات — شغّل build_train_questions.py');
+  }
+
+  if (!getCardsForLevel(selectedLevelId).length) {
+    selectedLevelId = TRAIN_LEVELS.find((l) => getCardsForLevel(l.id).length)?.id || 'ashbal';
   }
 }
 
@@ -137,41 +323,42 @@ export async function loadCardData() {
 
   cardsLoadState = 'loading';
   loadError = null;
+  loadStartedAt = Date.now();
 
   loadPromise = (async () => {
     const trainUrl = resolveFetchUrl('js/train-questions-by-level.json');
     const memoryUrl = resolveFetchUrl('js/memory-pairs-data.json');
-    const [trainRes, mRes] = await Promise.all([
-      fetch(trainUrl),
-      fetch(memoryUrl),
-    ]);
-    if (!trainRes.ok) {
-      throw new Error(`train-questions-by-level.json — HTTP ${trainRes.status}`);
-    }
-    if (!mRes.ok) {
-      throw new Error(`memory-pairs-data.json — HTTP ${mRes.status}`);
-    }
-    TRAIN_DECK = await trainRes.json();
-    const mData = await mRes.json();
-    MEMORY_PAIRS.splice(0, MEMORY_PAIRS.length, ...mData.filter((p) => p.isPlayable !== false));
+    console.info('[questions] loading cards', {
+      trainUrl,
+      memoryUrl,
+      origin: globalThis.location?.origin,
+      native: isNativeApp(),
+    });
 
-    if (TRAIN_DECK?.levels) {
-      for (const level of Object.values(TRAIN_DECK.levels)) {
-        if (Array.isArray(level.cards)) {
-          level.cards = filterPlayableCards(level.cards);
-        }
+    try {
+      const [trainData, memoryData] = await Promise.all([
+        fetchJsonWithTimeout(trainUrl),
+        fetchJsonWithTimeout(memoryUrl),
+      ]);
+      finalizeLoadedDeck(trainData, memoryData);
+    } catch (err) {
+      console.error('[questions] card fetch failed', err);
+      if (cardsLoadState !== 'loading') {
+        throw loadError || err;
+      }
+      try {
+        applyFallbackDeck();
+      } catch (fallbackErr) {
+        throw err?.message ? err : fallbackErr;
       }
     }
 
-    if (!TRAIN_LEVELS.some((l) => getCardsForLevel(l.id).length)) {
-      throw new Error('لا توجد بطاقات — شغّل build_train_questions.py');
-    }
-
-    if (!getCardsForLevel(selectedLevelId).length) {
-      selectedLevelId = TRAIN_LEVELS.find((l) => getCardsForLevel(l.id).length)?.id || 'ashbal';
+    if (cardsLoadState !== 'loading') {
+      throw loadError || new Error('أُلغي تحميل البطاقات');
     }
 
     cardsLoadState = 'ready';
+    loadStartedAt = 0;
     notifyCardsLoadSettled();
     return { questions: getPlayableCards().length, memory: MEMORY_PAIRS.length };
   })();
@@ -182,6 +369,7 @@ export async function loadCardData() {
     cardsLoadState = 'error';
     loadError = err;
     loadPromise = null;
+    loadStartedAt = 0;
     notifyCardsLoadSettled();
     throw err;
   }
