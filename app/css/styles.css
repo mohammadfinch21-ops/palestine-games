@@ -945,31 +945,68 @@ button:not(:disabled):hover {
 .board-map {
   position: relative;
   width: 100%;
-  line-height: 0;
   aspect-ratio: 999 / 1400;
-  background: #1a472a;
+  container-type: inline-size;
+  background: #1a472a url('../assets/map-board.jpg') center / contain no-repeat;
+  overflow: visible;
 }
 
 .board-map-img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   display: block;
   user-select: none;
   pointer-events: none;
   object-fit: contain;
+  object-position: center;
+  z-index: 1;
 }
 
 .board-tokens-layer {
   position: absolute;
   inset: 0;
+  z-index: 10;
+  visibility: visible;
   pointer-events: none;
+  overflow: visible;
 }
 
 .map-token {
   position: absolute;
   transform: translate(-50%, -50%);
-  z-index: 2;
+  z-index: 10;
   pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.board-tokens-layer .map-token {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.board-tokens-layer .key-token--map {
+  font-size: clamp(7px, 2.5cqi, 12px);
+  line-height: 1;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 1px rgba(0, 0, 0, 0.75));
+}
+
+.board-tokens-layer .key-token--map .key-token-icon {
+  font-size: 1em;
+  line-height: 1;
+}
+
+.board-tokens-layer .key-token--map.key-token-active {
+  transform: scale(1.08);
+  animation: key-glow 1.2s ease-in-out infinite;
 }
 
 .map-highlight {
@@ -991,11 +1028,27 @@ button:not(:disabled):hover {
 }
 
 .key-token {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
   font-size: 1.35rem;
   line-height: 1;
+  font-weight: 800;
+  color: var(--key-color, #333);
   filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
-  text-shadow: 0 0 6px var(--key-color, #fff);
+}
+
+.key-token-icon {
+  font-size: 1.25em;
+  line-height: 1;
+}
+
+.key-token-num {
+  font-size: 0.75em;
+  font-weight: 900;
+  min-width: 1.1em;
+  text-align: center;
 }
 
 .key-token-active {
@@ -1260,6 +1313,8 @@ button:not(:disabled):hover {
 
 .memory-stage-selector {
   margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
 }
 
 .memory-stage-selector .memory-stage-btn {
@@ -1285,9 +1340,13 @@ button:not(:disabled):hover {
   display: block;
   width: 100%;
   max-width: 360px;
-  margin: 0 auto;
+  margin: 0 auto 1rem;
   padding: 0.85rem 1.25rem;
   font-size: 0.95rem;
+  position: relative;
+  z-index: 20;
+  touch-action: manipulation;
+  pointer-events: auto;
 }
 
 .memory-game-area[hidden] {
@@ -1839,12 +1898,12 @@ button:not(:disabled):hover {
   inset: 0;
   background: rgba(0,0,0,0.65);
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
-  z-index: 5000;
+  z-index: 99999;
   padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem max(1rem, env(safe-area-inset-bottom, 0px));
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  overflow: hidden;
+  touch-action: manipulation;
   overscroll-behavior: contain;
 }
 
@@ -1852,13 +1911,21 @@ button:not(:disabled):hover {
   display: none;
 }
 
+.modal-overlay .modal {
+  pointer-events: auto;
+  touch-action: manipulation;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
 .modal {
   background: #fff;
   border-radius: var(--radius);
   max-width: 480px;
   width: 100%;
-  max-height: none;
-  overflow: visible;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
   padding: 1.5rem;
   position: relative;
   box-shadow: var(--shadow);
@@ -2056,6 +2123,27 @@ button:not(:disabled):hover {
 .modal-actions button {
   flex: 1;
   min-width: 120px;
+  min-height: 48px;
+  touch-action: manipulation;
+  pointer-events: auto;
+  position: relative;
+  z-index: 3;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+.modal-close {
+  touch-action: manipulation;
+  pointer-events: auto;
+  z-index: 3;
+  cursor: pointer;
+}
+
+html.native-app .modal-actions button,
+html.native-app .modal-close {
+  touch-action: manipulation;
+  min-height: 44px;
 }
 
 .rules-list {
@@ -2097,13 +2185,26 @@ button:not(:disabled):hover {
   --game-header-height: 3.5rem;
   --train-mobile-bar-height: 7.25rem;
   --train-board-available-height: calc(
-    100dvh
+    100vh
     - var(--game-header-height)
     - var(--train-mobile-bar-height)
     - env(safe-area-inset-top, 0px)
     - env(safe-area-inset-bottom, 0px)
     - 0.7rem
   );
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --train-board-available-height: calc(
+      100dvh
+      - var(--game-header-height)
+      - var(--train-mobile-bar-height)
+      - env(safe-area-inset-top, 0px)
+      - env(safe-area-inset-bottom, 0px)
+      - 0.7rem
+    );
+  }
 }
 
 .train-mobile-bar {
@@ -2154,6 +2255,8 @@ button:not(:disabled):hover {
   html.native-app #screen-train.active {
     display: flex;
     flex-direction: column;
+    height: 100vh;
+    max-height: 100vh;
     height: 100dvh;
     max-height: 100dvh;
     overflow: hidden;
@@ -2259,12 +2362,14 @@ button:not(:disabled):hover {
   }
 
   #screen-train.active .train-mbar-btn {
+    pointer-events: auto;
+    touch-action: manipulation;
+    cursor: pointer;
     font-family: inherit;
     font-weight: 800;
     font-size: 0.72rem;
     border: none;
     border-radius: 10px;
-    cursor: pointer;
     padding: 0.4rem 0.55rem;
     min-height: 2.75rem;
     min-width: 2.75rem;
@@ -2305,6 +2410,10 @@ button:not(:disabled):hover {
     display: none;
   }
 
+  #screen-train.active .train-mbar-btn.is-action-muted {
+    opacity: 1;
+  }
+
   #screen-train.active .train-mbar-btn:not(:disabled):active {
     transform: scale(0.96);
   }
@@ -2320,12 +2429,14 @@ button:not(:disabled):hover {
     display: flex;
     flex-direction: column;
     grid-template-columns: none;
+    max-height: calc(100vh - var(--game-header-height));
     max-height: calc(100dvh - var(--game-header-height));
   }
 
-  #screen-train.active .board-wrap {
+  #screen-train.active .board-wrap,
+  body.train-mobile-layout #screen-train.active .board-wrap {
     flex: 1;
-    min-height: 0;
+    min-height: 12rem;
     order: 1;
     display: flex;
     align-items: center;
@@ -2412,12 +2523,17 @@ button:not(:disabled):hover {
     border-width: 2px;
   }
 
-  #screen-train.active .key-token {
-    font-size: clamp(0.55rem, 2.6vw, 0.72rem);
+  #screen-train.active .board-tokens-layer .key-token--map {
+    font-size: clamp(7px, 2.5cqi, 11px);
   }
 
-  #screen-train.active .key-token-active {
-    transform: scale(1.12);
+  #screen-train.active .board-tokens-layer .map-token {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  #screen-train.active .board-tokens-layer .key-token--map.key-token-active {
+    transform: scale(1.08);
   }
 }
 
