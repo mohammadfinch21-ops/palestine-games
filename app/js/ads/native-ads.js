@@ -36,10 +36,6 @@ export async function initNativeAds() {
       requestTrackingAuthorization: true,
     });
     nativeReady = true;
-    // Banner is best-effort — never block app startup if it fails
-    showNativeBanner().catch((err) => {
-      console.warn('[NativeAds] banner on init failed', err);
-    });
     return true;
   } catch (err) {
     console.warn('[NativeAds] init failed — app continues without ads', err);
@@ -83,11 +79,13 @@ export async function showNativeBanner() {
 
 export async function hideNativeBanner() {
   const AdMob = getAdMobPlugin();
-  if (!AdMob || !bannerVisible) return;
+  if (!AdMob) return;
   try {
     await AdMob.hideBanner();
   } catch (err) {
     console.warn('[NativeAds] hide banner', err);
+  } finally {
+    bannerVisible = false;
   }
 }
 
