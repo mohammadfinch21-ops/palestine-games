@@ -69,7 +69,11 @@ async function runDeferredStartup() {
     console.info(`بطاقات محمّلة: ${counts.questions} سؤال، ${counts.memory} زوج ذاكرة`);
     if (cardsLoadingEl) {
       cardsLoadingEl.textContent = `✓ ${counts.questions} بطاقة سؤال جاهزة`;
-      setTimeout(() => cardsLoadingEl.classList.add('hidden'), 2500);
+      cardsLoadingEl.classList.remove('cards-loading-status--error');
+      const onTrain = document.getElementById('screen-train')?.classList.contains('active');
+      if (!onTrain) {
+        setTimeout(() => cardsLoadingEl.classList.add('hidden'), 2500);
+      }
     }
     refreshTrainUI?.();
     refreshMemoryUI?.();

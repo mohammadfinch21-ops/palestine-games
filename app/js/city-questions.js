@@ -3,6 +3,7 @@
  * مجموعة منفصلة عن أسئلة المراحل — تتبع مستخدمة لكل لاعب لكل مربع
  */
 import { shuffle } from './questions.js';
+import { resolveFetchUrl } from './native-app.js';
 
 let cityDeck = null;
 let loadPromise = null;
@@ -21,7 +22,7 @@ export async function loadCityQuestions() {
   if (loadPromise) return loadPromise;
 
   loadPromise = (async () => {
-    const res = await fetch('js/city-questions.json');
+    const res = await fetch(resolveFetchUrl('js/city-questions.json'));
     if (!res.ok) {
       throw new Error(`city-questions.json — HTTP ${res.status}`);
     }

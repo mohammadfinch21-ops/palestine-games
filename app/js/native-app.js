@@ -29,6 +29,25 @@ export function resolveAssetUrl(path) {
   return path;
 }
 
+/** Absolute fetch URL for JSON/assets — relative paths fail on some Capacitor WebViews. */
+export function resolveFetchUrl(path) {
+  if (!path || /^https?:\/\//i.test(path)) return path;
+  try {
+    const absolute = new URL(path, window.location.href).href;
+    const Cap = window.Capacitor;
+    if (Cap?.convertFileSrc && Cap.isNativePlatform?.()) {
+      try {
+        return Cap.convertFileSrc(new URL(path, window.location.href).pathname);
+      } catch {
+        /* fall through */
+      }
+    }
+    return absolute;
+  } catch {
+    return path;
+  }
+}
+
 function isTapBlocked(el) {
   return Boolean(
     el.disabled

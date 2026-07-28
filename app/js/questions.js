@@ -3,6 +3,7 @@
  * إدارة جلسة السحب: mainDeck / tiebreakDeck منفصلان لكل مرحلة
  */
 import { filterPlayableCards, isPlayableCard, isValidOption, isValidQuestion } from './card-validation.js';
+import { resolveFetchUrl } from './native-app.js';
 
 let TRAIN_DECK = null;
 let selectedLevelId = 'ashbal';
@@ -97,6 +98,19 @@ export function areCardsReady() {
   return cardsLoadState === 'ready' && TRAIN_LEVELS.some((l) => getCardsForLevel(l.id).length > 0);
 }
 
+/** Wait for card JSON — retries load after native fetch path fix or slow startup. */
+export async function ensureCardsReady() {
+  if (areCardsReady()) return true;
+  if (cardsLoadState === 'error') return false;
+  try {
+    await loadCardData();
+    return areCardsReady();
+  } catch (err) {
+    console.error('[questions] ensureCardsReady failed', err);
+    return false;
+  }
+}
+
 export function getCardsLoadState() {
   return {
     state: cardsLoadState,
@@ -125,9 +139,11 @@ export async function loadCardData() {
   loadError = null;
 
   loadPromise = (async () => {
+    const trainUrl = resolveFetchUrl('js/train-questions-by-level.json');
+    const memoryUrl = resolveFetchUrl('js/memory-pairs-data.json');
     const [trainRes, mRes] = await Promise.all([
-      fetch('js/train-questions-by-level.json'),
-      fetch('js/memory-pairs-data.json'),
+      fetch(trainUrl),
+      fetch(memoryUrl),
     ]);
     if (!trainRes.ok) {
       throw new Error(`train-questions-by-level.json — HTTP ${trainRes.status}`);
