@@ -53,13 +53,13 @@ function unbindModalButtons(root) {
   root?.querySelectorAll?.('button')?.forEach?.((btn) => unbindModalButton(btn));
 }
 
-function bindModalButton(btn, handler) {
+function bindModalButton(btn, handler, tapKey) {
   if (!btn || typeof handler !== 'function') return;
   unbindModalButton(btn);
   modalButtonHandlers.set(btn, handler);
 
   if (isNativeApp()) {
-    const key = `modal-${++modalTapSeq}`;
+    const key = tapKey || `modal-${++modalTapSeq}`;
     btn.setAttribute('data-native-tap', key);
     registerNativeTap(key, handler);
     btn.style.touchAction = 'manipulation';
@@ -291,12 +291,16 @@ function buildQuestionCardHtml(card, levelName, stepsCorrect, stepsWrong, modalO
   `;
 }
 
-function bindOptionButton(btn, opt, btnWrap, onChoice) {
-  bindModalButton(btn, () => {
-    if (btn.disabled || btnWrap.dataset.answered === '1') return;
-    btnWrap.dataset.answered = '1';
-    onChoice(opt, btnWrap);
-  });
+function bindOptionButton(btn, opt, btnWrap, onChoice, optionIndex) {
+  bindModalButton(
+    btn,
+    () => {
+      if (btn.disabled || btnWrap.dataset.answered === '1') return;
+      btnWrap.dataset.answered = '1';
+      onChoice(opt, btnWrap);
+    },
+    isNativeApp() ? `question-option-${optionIndex}` : undefined,
+  );
 }
 
 function renderOptionButtons(options, theme, onChoice) {
@@ -314,7 +318,7 @@ function renderOptionButtons(options, theme, onChoice) {
   btnWrap.className = `question-card-option-btns question-card-option-btns--${theme}`;
   btnWrap.dir = 'rtl';
 
-  options.forEach((opt) => {
+  options.forEach((opt, optionIndex) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'question-card-option-btn btn-outline';
@@ -322,7 +326,7 @@ function renderOptionButtons(options, theme, onChoice) {
     btn.dir = 'rtl';
     btn.lang = 'ar';
     btn.dataset.choice = opt;
-    bindOptionButton(btn, opt, btnWrap, onChoice);
+    bindOptionButton(btn, opt, btnWrap, onChoice, optionIndex);
     btnWrap.appendChild(btn);
   });
 

@@ -36,7 +36,7 @@ import {
   showRewardedAd,
 } from './ads/ad-manager.js';
 import { isFirebaseConfigured } from './firebase-config.js';
-import { bindTap, isNativeApp, registerNativeTap, resolveAssetUrl } from './native-app.js';
+import { bindTap, isNativeApp, resolveAssetUrl } from './native-app.js';
 import {
   getPlayerId,
   createRoom,
@@ -165,7 +165,6 @@ export function initTrainGame() {
   let lotteryActive = false;
   const MOBILE_START_LABEL = '▶ ابدأ';
   let mobileStartDefaultHandler = null;
-  let lotteryIntroOpen = false;
 
   const DEFAULT_LOCAL_PLAYERS = () => [
     { id: 1, name: 'اللاعب 1', position: 1, color: PLAYER_COLORS[0] },
@@ -308,31 +307,6 @@ export function initTrainGame() {
     });
   }
 
-  function restoreMobileStartBar() {
-    if (!isNativeApp() || !mobileStartBtn) return;
-    lotteryIntroOpen = false;
-    mobileStartBtn.textContent = MOBILE_START_LABEL;
-    mobileStartBtn.classList.remove('train-mbar-btn--lottery');
-    mobileStartBtn.classList.remove('btn-pulse-ready');
-    if (mobileStartDefaultHandler) {
-      registerNativeTap('train-mobile-start', mobileStartDefaultHandler);
-    }
-  }
-
-  function hijackMobileStartForLottery(askRoundFn) {
-    if (!isNativeApp() || !mobileStartBtn) return;
-    mobileStartBtn.textContent = 'ابدأ الأسئلة';
-    mobileStartBtn.classList.add('train-mbar-btn--lottery');
-    mobileStartBtn.classList.add('btn-pulse-ready');
-    registerNativeTap('train-mobile-start', () => {
-      if (!lotteryIntroOpen) return;
-      lotteryIntroOpen = false;
-      restoreMobileStartBar();
-      if (isModalOpen()) hideModal();
-      askRoundFn();
-    });
-  }
-
   function syncMobileBar() {
     const mobileBarActive =
       document.body.classList.contains('train-mobile-layout')
@@ -341,9 +315,7 @@ export function initTrainGame() {
     if (mobileStartBtn) {
       mobileStartBtn.disabled = false;
       mobileStartBtn.hidden = startBtn.hidden;
-      if (lotteryIntroOpen && isNativeApp()) {
-        mobileStartBtn.textContent = 'ابدأ الأسئلة';
-      }
+      mobileStartBtn.textContent = MOBILE_START_LABEL;
     }
     if (mobileDrawBtn) {
       mobileDrawBtn.disabled = drawBtn.disabled;
@@ -2226,31 +2198,22 @@ export function initTrainGame() {
       setTimeout(() => finishStart(tied[0]), 0);
     };
 
-    const beginLotteryIntro = () => {
-      if (!lotteryIntroOpen) return;
-      lotteryIntroOpen = false;
-      restoreMobileStartBar();
-      askRound();
-    };
+    if (isNativeApp()) {
+      updateUI('🔑 بدء قرعة تحديد من يبدأ...');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => askRound());
+      });
+      return;
+    }
 
-    lotteryIntroOpen = true;
     showModal({
       title: 'تحديد من يبدأ',
-      bodyHtml: `<p>كل لاعب يجيب سؤالاً بالترتيب من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong>. من يحصل على أعلى نتيجة يبدأ.</p><p>عند التعادل في أعلى نتيجة تُعاد القرعة.</p>${lowPoolNote}${isNativeApp() ? '<p class="lottery-handoff-hint"><strong>على الجوال:</strong> اضغط «ابدأ الأسئلة» في الشريط السفلي ↓</p>' : ''}`,
-      actions: [{ label: 'ابدأ الأسئلة', className: 'btn-gold', onClick: beginLotteryIntro, keepOpen: true }],
-      onClose: () => {
-        if (lotteryIntroOpen) restoreMobileStartBar();
-      },
+      bodyHtml: `<p>كل لاعب يجيب سؤالاً بالترتيب من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong>. من يحصل على أعلى نتيجة يبدأ.</p><p>عند التعادل في أعلى نتيجة تُعاد القرعة.</p>${lowPoolNote}`,
+      actions: [{ label: 'ابدأ الأسئلة', className: 'btn-gold', onClick: () => askRound() }],
     });
-
-    if (isNativeApp()) {
-      hijackMobileStartForLottery(beginLotteryIntro);
-      updateUI('🔑 قرعة — اضغط «ابدأ الأسئلة» في الشريط السفلي');
-    }
   }
 
   function finishStart(winnerIdx) {
-    restoreMobileStartBar();
     hideModal();
     beginMainGameSession();
     lotteryActive = false;
@@ -2283,7 +2246,6 @@ export function initTrainGame() {
 
   function resetGame() {
     onTrainReset();
-    restoreMobileStartBar();
     resetQuestionSession();
     resetCityQuestionSession();
     lotteryActive = false;
