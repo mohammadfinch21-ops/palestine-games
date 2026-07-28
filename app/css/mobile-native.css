@@ -359,3 +359,9 @@ html.native-app #screen-memory.active .memory-board.memory-board--loading {
   color: var(--gold-light);
   font-weight: 700;
 }
+html.native-app #screen-train.active .train-mobile-bar,
+html.native-app #train-mobile-start-btn {
+  z-index: 9999;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+}

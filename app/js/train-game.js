@@ -171,6 +171,17 @@ export function initTrainGame() {
     bindTap(mobileStartBtn, mobileStartDefaultHandler, 'train-mobile-start');
   }
 
+  function installMobileStartBridge() {
+    window.__ptStartGame = (e) => {
+      e?.preventDefault?.();
+      console.log('train-game: __ptStartGame');
+      const statusEl = document.getElementById('game-status');
+      if (statusEl) statusEl.textContent = '...';
+      mobileStartDefaultHandler?.(e);
+    };
+    bindMobileStartTap();
+  }
+
   const DEFAULT_LOCAL_PLAYERS = () => [
     { id: 1, name: 'اللاعب 1', position: 1, color: PLAYER_COLORS[0] },
     { id: 2, name: 'اللاعب 2', position: 1, color: PLAYER_COLORS[1] },
@@ -273,12 +284,15 @@ export function initTrainGame() {
     bindTap(mobileMenuBtn, toggleTrainSidebar);
     bindTap(trainSidebarBackdrop, closeTrainSidebar);
 
-    const handleMobileStart = () => {
+    const handleMobileStart = (e) => {
+      e?.preventDefault?.();
+      console.log('train-game: handleMobileStart');
+      if (gameStatus) gameStatus.textContent = '...';
       startGame();
     };
     mobileStartDefaultHandler = handleMobileStart;
 
-    bindMobileStartTap();
+    installMobileStartBridge();
 
     bindTap(mobileDrawBtn, () => handleDrawAction());
 
@@ -1374,11 +1388,11 @@ export function initTrainGame() {
     loadMapImageOnce();
     renderBoard();
     updateUI();
-    bindMobileStartTap();
+    installMobileStartBridge();
   }, { once: true });
 
   if (document.documentElement.classList.contains('native-app')) {
-    requestAnimationFrame(() => bindMobileStartTap());
+    requestAnimationFrame(() => installMobileStartBridge());
   }
 
   initMobileTrainBar();
@@ -1453,7 +1467,10 @@ export function initTrainGame() {
   }
 
   document.addEventListener('native-screen-change', (e) => {
-    if (e.detail?.screen === 'train') onTrainScreenVisible();
+    if (e.detail?.screen === 'train') {
+      onTrainScreenVisible();
+      installMobileStartBridge();
+    }
   });
 
   if (document.getElementById('screen-train')?.classList.contains('active')) {
@@ -2235,7 +2252,20 @@ export function initTrainGame() {
           });
         }
       };
-      setTimeout(runNativeAskRound, 100);
+      runNativeAskRound();
+      setTimeout(() => {
+        if (!isModalOpen() && !lotteryActive) {
+          showModal({
+            title: 'تنبيه',
+            bodyHtml: '<p>تعذّر بدء القرعة. تحقق من تحميل بطاقات الأسئلة ثم اضغط «ابدأ» مجدداً.</p>',
+            actions: [{
+              label: 'إعادة المحاولة',
+              className: 'btn-gold',
+              onClick: runNativeAskRound,
+            }],
+          });
+        }
+      }, 200);
       return;
     }
 
