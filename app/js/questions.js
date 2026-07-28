@@ -107,6 +107,14 @@ export function getCardsLoadState() {
   };
 }
 
+function notifyCardsLoadSettled() {
+  try {
+    document.dispatchEvent(new CustomEvent('train-cards-load-settled'));
+  } catch {
+    /* non-browser */
+  }
+}
+
 export async function loadCardData() {
   if (cardsLoadState === 'ready') {
     return { questions: getPlayableCards().length, memory: MEMORY_PAIRS.length };
@@ -148,6 +156,7 @@ export async function loadCardData() {
     }
 
     cardsLoadState = 'ready';
+    notifyCardsLoadSettled();
     return { questions: getPlayableCards().length, memory: MEMORY_PAIRS.length };
   })();
 
@@ -157,6 +166,7 @@ export async function loadCardData() {
     cardsLoadState = 'error';
     loadError = err;
     loadPromise = null;
+    notifyCardsLoadSettled();
     throw err;
   }
 }
