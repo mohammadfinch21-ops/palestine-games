@@ -2,7 +2,7 @@ import { initModal } from './modal.js';
 import { initAds, onScreenChange } from './ads/ad-manager.js';
 import { loadCardData } from './questions.js';
 import { loadCityQuestions } from './city-questions.js';
-import { initNativeShell, isNativeApp } from './native-app.js';
+import { bindTap, initNativeShell, isNativeApp } from './native-app.js';
 
 let currentScreen = 'menu';
 
@@ -35,15 +35,7 @@ function initNavigation() {
       navigateToScreen(el);
     };
 
-    // Capacitor Android WebView: pointerup is more reliable than click alone
-    if (isNativeApp()) {
-      el.addEventListener('pointerup', (e) => {
-        if (e.pointerType === 'mouse' && e.button !== 0) return;
-        handleNavigate(e);
-      });
-    } else {
-      el.addEventListener('click', handleNavigate);
-    }
+    bindTap(el, handleNavigate);
   });
 
   document.addEventListener('native-navigate', (e) => {
@@ -54,12 +46,14 @@ function initNavigation() {
 /** Load game modules first (tap handlers), then card JSON — avoids WebView OOM on low-RAM emulators */
 async function runDeferredStartup() {
   const cardsLoadingEl = document.getElementById('cards-loading-status');
+  let refreshTrainUI = null;
+  let refreshMemoryUI = null;
 
   try {
     const { initTrainGame } = await import('./train-game.js');
-    initTrainGame();
+    ({ refreshUI: refreshTrainUI } = initTrainGame());
     const { initMemoryGame } = await import('./memory-game.js');
-    initMemoryGame();
+    ({ refreshUI: refreshMemoryUI } = initMemoryGame());
   } catch (err) {
     console.error('فشل تحميل وحدات الألعاب', err);
   }
@@ -77,12 +71,16 @@ async function runDeferredStartup() {
       cardsLoadingEl.textContent = `✓ ${counts.questions} بطاقة سؤال جاهزة`;
       setTimeout(() => cardsLoadingEl.classList.add('hidden'), 2500);
     }
+    refreshTrainUI?.();
+    refreshMemoryUI?.();
   } catch (err) {
     console.error('فشل تحميل بطاقات PDF', err);
     if (cardsLoadingEl) {
       cardsLoadingEl.textContent = '⚠ فشل تحميل البطاقات — أعد تحميل الصفحة';
       cardsLoadingEl.classList.add('cards-loading-status--error');
     }
+    refreshTrainUI?.();
+    refreshMemoryUI?.();
   }
 
   // Ads last — after menu is interactive and first paint complete
