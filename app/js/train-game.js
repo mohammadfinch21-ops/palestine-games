@@ -36,7 +36,7 @@ import {
   showRewardedAd,
 } from './ads/ad-manager.js';
 import { isFirebaseConfigured } from './firebase-config.js';
-import { bindTap, isNativeApp, resolveAssetUrl } from './native-app.js';
+import { bindTap, isNativeApp, registerNativeTap, resolveAssetUrl } from './native-app.js';
 import {
   getPlayerId,
   createRoom,
@@ -163,6 +163,9 @@ export function initTrainGame() {
   };
 
   let lotteryActive = false;
+  const MOBILE_START_LABEL = '▶ ابدأ';
+  let mobileStartDefaultHandler = null;
+  let lotteryIntroOpen = false;
 
   const DEFAULT_LOCAL_PLAYERS = () => [
     { id: 1, name: 'اللاعب 1', position: 1, color: PLAYER_COLORS[0] },
@@ -278,6 +281,7 @@ export function initTrainGame() {
       }
       startGame();
     };
+    mobileStartDefaultHandler = handleMobileStart;
     if (mobileStartBtn) {
       bindTap(mobileStartBtn, handleMobileStart, 'train-mobile-start');
     }
@@ -304,6 +308,31 @@ export function initTrainGame() {
     });
   }
 
+  function restoreMobileStartBar() {
+    if (!isNativeApp() || !mobileStartBtn) return;
+    lotteryIntroOpen = false;
+    mobileStartBtn.textContent = MOBILE_START_LABEL;
+    mobileStartBtn.classList.remove('train-mbar-btn--lottery');
+    mobileStartBtn.classList.remove('btn-pulse-ready');
+    if (mobileStartDefaultHandler) {
+      registerNativeTap('train-mobile-start', mobileStartDefaultHandler);
+    }
+  }
+
+  function hijackMobileStartForLottery(askRoundFn) {
+    if (!isNativeApp() || !mobileStartBtn) return;
+    mobileStartBtn.textContent = 'ابدأ الأسئلة';
+    mobileStartBtn.classList.add('train-mbar-btn--lottery');
+    mobileStartBtn.classList.add('btn-pulse-ready');
+    registerNativeTap('train-mobile-start', () => {
+      if (!lotteryIntroOpen) return;
+      lotteryIntroOpen = false;
+      restoreMobileStartBar();
+      if (isModalOpen()) hideModal();
+      askRoundFn();
+    });
+  }
+
   function syncMobileBar() {
     const mobileBarActive =
       document.body.classList.contains('train-mobile-layout')
@@ -312,6 +341,9 @@ export function initTrainGame() {
     if (mobileStartBtn) {
       mobileStartBtn.disabled = false;
       mobileStartBtn.hidden = startBtn.hidden;
+      if (lotteryIntroOpen && isNativeApp()) {
+        mobileStartBtn.textContent = 'ابدأ الأسئلة';
+      }
     }
     if (mobileDrawBtn) {
       mobileDrawBtn.disabled = drawBtn.disabled;
@@ -2096,55 +2128,79 @@ export function initTrainGame() {
     resetCityQuestionSession();
 
     const askRound = () => {
-      lotteryActive = true;
-      state.started = false;
-      state.waitingForMove = false;
-      state.processingMove = false;
-      state.gameOver = false;
-      state.highlightSquare = null;
-      state.players.forEach((p) => {
-        p.position = 1;
-        delete p.startScore;
-      });
+      try {
+        lotteryActive = true;
+        state.started = false;
+        state.waitingForMove = false;
+        state.processingMove = false;
+        state.gameOver = false;
+        state.highlightSquare = null;
+        state.players.forEach((p) => {
+          p.position = 1;
+          delete p.startScore;
+        });
 
-      const showLocalLotteryQuestion = (playerIndex) => {
-        const player = state.players[playerIndex];
-        if (!player) {
-          resolveStartWinner();
-          return;
-        }
-        updateUI(`🔑 قرعة — دور ${player.name}`);
-        const card = pickTiebreakCard();
-        showQuestionCardModal(
-          card,
-          (userWasCorrect, steps) => {
-            player.startScore = userWasCorrect ? steps : 0;
-            const nextIndex = playerIndex + 1;
-            if (nextIndex >= state.players.length) {
-              hideModal();
-              resolveStartWinner();
-              return;
-            }
-            const nextPlayer = state.players[nextIndex];
-            hideModal();
+        const showLocalLotteryQuestion = (playerIndex) => {
+          const player = state.players[playerIndex];
+          if (!player) {
+            resolveStartWinner();
+            return;
+          }
+          updateUI(`🔑 قرعة — دور ${player.name}`);
+          const card = pickTiebreakCard();
+          if (!card) {
             showModal({
-              title: 'انتظر دور اللاعب التالي',
-              bodyHtml: `<p>أجاب <strong>${player.name}</strong> ✓</p><p>الآن دور <strong>${nextPlayer.name}</strong>.</p><p class="lottery-handoff-hint">مرّر الجهاز إن لزم، ثم اضغط للمتابعة.</p>`,
-              actions: [
-                {
-                  label: `سؤال ${nextPlayer.name}`,
-                  className: 'btn-gold',
-                  onClick: () => showLocalLotteryQuestion(nextIndex),
-                },
-              ],
+              title: 'خطأ',
+              bodyHtml: '<p>تعذّر سحب سؤال القرعة. تأكد من تحميل البطاقات ثم حاول مجدداً.</p>',
+              actions: [{ label: 'حسناً', className: 'btn-primary' }],
             });
-            updateUI(`⏳ انتظر — الآن دور ${nextPlayer.name}`);
-          },
-          { deferClose: true, tiebreak: true, title: `قرعة — ${player.name}` },
-        );
-      };
+            lotteryActive = false;
+            return;
+          }
+          showQuestionCardModal(
+            card,
+            (userWasCorrect, steps) => {
+              player.startScore = userWasCorrect ? steps : 0;
+              const nextIndex = playerIndex + 1;
+              if (nextIndex >= state.players.length) {
+                hideModal();
+                resolveStartWinner();
+                return;
+              }
+              const nextPlayer = state.players[nextIndex];
+              hideModal();
+              showModal({
+                title: 'انتظر دور اللاعب التالي',
+                bodyHtml: `<p>أجاب <strong>${player.name}</strong> ✓</p><p>الآن دور <strong>${nextPlayer.name}</strong>.</p><p class="lottery-handoff-hint">مرّر الجهاز إن لزم، ثم اضغط للمتابعة.</p>`,
+                actions: [
+                  {
+                    label: `سؤال ${nextPlayer.name}`,
+                    className: 'btn-gold',
+                    onClick: () => showLocalLotteryQuestion(nextIndex),
+                  },
+                ],
+              });
+              updateUI(`⏳ انتظر — الآن دور ${nextPlayer.name}`);
+            },
+            { deferClose: true, tiebreak: true, title: `قرعة — ${player.name}` },
+          );
+        };
 
-      showLocalLotteryQuestion(0);
+        const beginLottery = () => showLocalLotteryQuestion(0);
+        if (isNativeApp()) {
+          requestAnimationFrame(() => requestAnimationFrame(beginLottery));
+        } else {
+          beginLottery();
+        }
+      } catch (err) {
+        console.error('askRound failed', err);
+        lotteryActive = false;
+        showModal({
+          title: 'خطأ',
+          bodyHtml: `<p>تعذّر بدء القرعة: ${err?.message || 'خطأ غير معروف'}</p>`,
+          actions: [{ label: 'حسناً', className: 'btn-primary' }],
+        });
+      }
     };
 
     const resolveStartWinner = () => {
@@ -2170,14 +2226,31 @@ export function initTrainGame() {
       setTimeout(() => finishStart(tied[0]), 0);
     };
 
+    const beginLotteryIntro = () => {
+      if (!lotteryIntroOpen) return;
+      lotteryIntroOpen = false;
+      restoreMobileStartBar();
+      askRound();
+    };
+
+    lotteryIntroOpen = true;
     showModal({
       title: 'تحديد من يبدأ',
-      bodyHtml: `<p>كل لاعب يجيب سؤالاً بالترتيب من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong>. من يحصل على أعلى نتيجة يبدأ.</p><p>عند التعادل في أعلى نتيجة تُعاد القرعة.</p>${lowPoolNote}`,
-      actions: [{ label: 'ابدأ الأسئلة', className: 'btn-gold', onClick: askRound, keepOpen: true }],
+      bodyHtml: `<p>كل لاعب يجيب سؤالاً بالترتيب من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong>. من يحصل على أعلى نتيجة يبدأ.</p><p>عند التعادل في أعلى نتيجة تُعاد القرعة.</p>${lowPoolNote}${isNativeApp() ? '<p class="lottery-handoff-hint"><strong>على الجوال:</strong> اضغط «ابدأ الأسئلة» في الشريط السفلي ↓</p>' : ''}`,
+      actions: [{ label: 'ابدأ الأسئلة', className: 'btn-gold', onClick: beginLotteryIntro, keepOpen: true }],
+      onClose: () => {
+        if (lotteryIntroOpen) restoreMobileStartBar();
+      },
     });
+
+    if (isNativeApp()) {
+      hijackMobileStartForLottery(beginLotteryIntro);
+      updateUI('🔑 قرعة — اضغط «ابدأ الأسئلة» في الشريط السفلي');
+    }
   }
 
   function finishStart(winnerIdx) {
+    restoreMobileStartBar();
     hideModal();
     beginMainGameSession();
     lotteryActive = false;
@@ -2210,6 +2283,7 @@ export function initTrainGame() {
 
   function resetGame() {
     onTrainReset();
+    restoreMobileStartBar();
     resetQuestionSession();
     resetCityQuestionSession();
     lotteryActive = false;

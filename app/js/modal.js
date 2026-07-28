@@ -14,23 +14,38 @@ let bodyEl;
 let actionsEl;
 let onCloseCallback = null;
 const modalButtonHandlers = new WeakMap();
+const modalButtonNativeListeners = new WeakMap();
 let modalTapSeq = 0;
+const MODAL_BTN_SEL = '.modal-close, #modal-actions button, .question-card-option-btn';
+
+function closestModalButton(el) {
+  return el?.closest?.(MODAL_BTN_SEL) ?? null;
+}
 
 function resolveModalTapTarget(e) {
+  const fromTarget = closestModalButton(e.target);
+  if (fromTarget) return fromTarget;
+
   const touch = e.changedTouches?.[0];
-  if (touch) {
-    const hit = document.elementFromPoint(touch.clientX, touch.clientY);
-    return hit?.closest?.('.modal-close, #modal-actions button, .question-card-option-btn') ?? null;
-  }
-  return e.target?.closest?.('.modal-close, #modal-actions button, .question-card-option-btn') ?? null;
+  if (!touch) return null;
+
+  const hit = document.elementFromPoint(touch.clientX, touch.clientY);
+  return closestModalButton(hit);
 }
 
 function unbindModalButton(btn) {
   if (!btn) return;
   const key = btn.getAttribute('data-native-tap');
   if (key?.startsWith('modal-')) unregisterNativeTap(key);
+  const invoke = modalButtonNativeListeners.get(btn);
+  if (invoke) {
+    btn.removeEventListener('click', invoke, true);
+    btn.removeEventListener('pointerup', invoke, true);
+    modalButtonNativeListeners.delete(btn);
+  }
   modalButtonHandlers.delete(btn);
   btn.removeAttribute('data-native-tap');
+  btn.removeAttribute('onclick');
   btn.onclick = null;
 }
 
@@ -49,10 +64,28 @@ function bindModalButton(btn, handler) {
     registerNativeTap(key, handler);
     btn.style.touchAction = 'manipulation';
     btn.style.cursor = 'pointer';
-    btn.onclick = (e) => {
+    btn.style.pointerEvents = 'auto';
+
+    let lastAt = 0;
+    const invoke = (e) => {
+      if (btn.disabled) return;
+      const now = Date.now();
+      if (now - lastAt < 400) return;
+      lastAt = now;
       e?.preventDefault?.();
+      e?.stopPropagation?.();
       handler(e);
     };
+
+    btn.onclick = invoke;
+    btn.addEventListener('click', invoke, true);
+    btn.addEventListener('pointerup', invoke, true);
+    modalButtonNativeListeners.set(btn, invoke);
+
+    window.__ptModalActions = window.__ptModalActions || {};
+    const actionId = `ma${Date.now()}${modalTapSeq}`;
+    window.__ptModalActions[actionId] = handler;
+    btn.setAttribute('onclick', `window.__ptModalActions['${actionId}']()`);
     return;
   }
 
@@ -114,12 +147,24 @@ export function showModal({ title, bodyHtml, actions = [], onClose = null }) {
     btn.textContent = label;
     btn.className = className;
     const runAction = () => {
-      try {
-        onClick?.();
-      } catch (err) {
-        console.error('modal action failed', err);
+      const execute = () => {
+        try {
+          onClick?.();
+        } catch (err) {
+          console.error('modal action failed', err);
+          showModal({
+            title: 'خطأ',
+            bodyHtml: `<p>تعذّر تنفيذ الإجراء: ${escapeHtml(err?.message || 'خطأ غير معروف')}</p>`,
+            actions: [{ label: 'حسناً', className: 'btn-primary' }],
+          });
+        }
+        if (!keepOpen) hideModal();
+      };
+      if (keepOpen && isNativeApp()) {
+        requestAnimationFrame(() => requestAnimationFrame(execute));
+      } else {
+        execute();
       }
-      if (!keepOpen) hideModal();
     };
     bindModalButton(btn, runAction);
     actionsEl.appendChild(btn);

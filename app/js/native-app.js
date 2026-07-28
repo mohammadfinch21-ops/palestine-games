@@ -1,6 +1,10 @@
 /**
  * Native shell detection & Capacitor chrome (StatusBar, SplashScreen).
  * Tap handling matches mobile web everywhere; only opt-in keys use the touch bridge.
+ *
+ * Modal buttons register via registerNativeTap + data-native-tap (modal-N keys).
+ * The document touchend bridge resolves taps with elementFromPoint and walks up
+ * to [data-native-tap] — modal.js also keeps a WeakMap fallback on #modal-overlay.
  */
 
 export function isNativeApp() {
@@ -59,18 +63,38 @@ function findNativeTapTarget(el) {
   return null;
 }
 
+function resolveTapHit(x, y, touchTarget) {
+  const hits = [];
+  if (typeof x === 'number' && typeof y === 'number') {
+    hits.push(document.elementFromPoint(x, y));
+  }
+  if (touchTarget) hits.push(touchTarget);
+  for (const hit of hits) {
+    const found = findNativeTapTarget(hit);
+    if (found) return found;
+  }
+  return null;
+}
+
 /** Fallback bridge for buttons inside scroll layers (train mobile bar). */
 function initNativeTouchBridge() {
   if (!isNativeApp() || nativeTouchBridgeReady) return;
   nativeTouchBridgeReady = true;
 
   let last = { t: 0, x: 0, y: 0 };
+  let activeTouchTarget = null;
+
+  document.addEventListener(
+    'touchstart',
+    (e) => {
+      activeTouchTarget = e.target;
+    },
+    { passive: true, capture: true },
+  );
 
   const dispatchNativeTap = (e, x, y) => {
-    const hit = document.elementFromPoint(x, y);
-    if (!hit) return false;
-
-    const found = findNativeTapTarget(hit);
+    const found = resolveTapHit(x, y, activeTouchTarget);
+    activeTouchTarget = null;
     if (!found) return false;
     const handler = nativeTapHandlers.get(found.key);
     if (!handler || isTapBlocked(found.node)) return false;
