@@ -1,8 +1,6 @@
 /**
  * Native shell detection & Capacitor chrome (StatusBar, SplashScreen).
- * Web browsers are unaffected — no `native-app` class is added.
- * UI layout matches the Netlify web app (styles.css); mobile-native.css
- * only adds safe-area / tap / overscroll tweaks — not a separate shell.
+ * Tap handling matches mobile web everywhere; only opt-in keys use the touch bridge.
  */
 
 export function isNativeApp() {
@@ -12,30 +10,180 @@ export function isNativeApp() {
   );
 }
 
-/** Reliable tap on Capacitor Android WebView — click alone often fails on real devices. */
-export function bindTap(el, handler) {
+/** Resolve relative asset paths for Capacitor file:// / https://localhost WebView. */
+export function resolveAssetUrl(path) {
+  if (!path || /^https?:\/\//i.test(path) || path.startsWith('data:')) return path;
+  const Cap = window.Capacitor;
+  if (Cap?.convertFileSrc && Cap.isNativePlatform?.()) {
+    try {
+      const absolute = new URL(path, window.location.href).pathname;
+      return Cap.convertFileSrc(absolute);
+    } catch {
+      /* fall through */
+    }
+  }
+  return path;
+}
+
+function isTapBlocked(el) {
+  return Boolean(
+    el.disabled
+    || el.hidden
+    || el.getAttribute('aria-disabled') === 'true'
+    || el.closest?.('[inert]'),
+  );
+}
+
+const TAP_DEDUPE_MS = 400;
+const nativeTapHandlers = new Map();
+let nativeTouchBridgeReady = false;
+
+export function registerNativeTap(key, handler) {
+  if (!key || typeof handler !== 'function') return;
+  nativeTapHandlers.set(String(key), handler);
+}
+
+export function unregisterNativeTap(key) {
+  nativeTapHandlers.delete(String(key));
+}
+
+function findNativeTapTarget(el) {
+  let node = el;
+  while (node && node !== document.documentElement) {
+    const key = node.getAttribute?.('data-native-tap');
+    if (key && nativeTapHandlers.has(key)) {
+      return { key, node };
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+
+/** Fallback bridge for buttons inside scroll layers (train mobile bar). */
+function initNativeTouchBridge() {
+  if (!isNativeApp() || nativeTouchBridgeReady) return;
+  nativeTouchBridgeReady = true;
+
+  let last = { t: 0, x: 0, y: 0 };
+
+  const dispatchNativeTap = (e, x, y) => {
+    const hit = document.elementFromPoint(x, y);
+    if (!hit) return false;
+
+    const found = findNativeTapTarget(hit);
+    if (!found) return false;
+    const handler = nativeTapHandlers.get(found.key);
+    if (!handler || isTapBlocked(found.node)) return false;
+
+    const now = Date.now();
+    const dx = x - last.x;
+    const dy = y - last.y;
+    if (now - last.t < TAP_DEDUPE_MS && dx * dx + dy * dy < 144) return true;
+    last = { t: now, x, y };
+
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    handler(e);
+    return true;
+  };
+
+  document.addEventListener(
+    'touchend',
+    (e) => {
+      const touch = e.changedTouches?.[0];
+      if (!touch) return;
+      dispatchNativeTap(e, touch.clientX, touch.clientY);
+    },
+    { passive: false, capture: true },
+  );
+}
+
+export function invokeNativeTap(key, e) {
+  const handler = nativeTapHandlers.get(String(key));
+  if (!handler) return false;
+  const el = document.querySelector(`[data-native-tap="${CSS.escape(String(key))}"]`);
+  if (el && isTapBlocked(el)) return false;
+  handler(e);
+  return true;
+}
+
+export function unbindTap(el) {
+  if (!el) return;
+  const key = el.getAttribute?.('data-native-tap');
+  if (key) unregisterNativeTap(key);
+  el.removeAttribute?.('data-native-tap');
+}
+
+/**
+ * Same touchend + click binding on web AND Capacitor (matches mobile browser).
+ * Pass tapKey only for buttons in scroll layers that need the native bridge fallback.
+ */
+export function bindTap(el, handler, tapKey) {
   if (!el || typeof handler !== 'function') return;
 
-  let lastAt = 0;
-  const TAP_DEDUPE_MS = 450;
+  el.style.touchAction = 'manipulation';
+  el.style.cursor = 'pointer';
 
-  const fire = (e) => {
-    if (el.disabled || el.hidden) return;
-    if (e?.pointerType === 'mouse' && e?.button !== 0 && e?.button !== undefined) return;
+  if (isNativeApp() && tapKey) {
+    unbindTap(el);
+    el.setAttribute('data-native-tap', tapKey);
+    registerNativeTap(tapKey, handler);
+  }
+
+  let lastAt = 0;
+  let touchHandled = false;
+
+  const run = (e) => {
+    if (isTapBlocked(el)) return;
     const now = Date.now();
     if (now - lastAt < TAP_DEDUPE_MS) return;
     lastAt = now;
-    if (e?.cancelable) e.preventDefault();
-    e?.stopPropagation?.();
     handler(e);
   };
 
-  if (isNativeApp()) {
-    el.addEventListener('pointerup', fire);
-    el.addEventListener('touchend', fire, { passive: false });
-  } else {
-    el.addEventListener('click', fire);
-  }
+  el.addEventListener(
+    'touchstart',
+    () => {
+      touchHandled = false;
+    },
+    { passive: true },
+  );
+
+  el.addEventListener(
+    'touchend',
+    (e) => {
+      touchHandled = true;
+      if (e.cancelable) e.preventDefault();
+      e.stopPropagation();
+      run(e);
+    },
+    { passive: false },
+  );
+
+  el.addEventListener('click', (e) => {
+    if (touchHandled) {
+      touchHandled = false;
+      if (e.cancelable) e.preventDefault();
+      return;
+    }
+    if (e?.pointerType === 'mouse' && e?.button !== 0 && e?.button !== undefined) return;
+    run(e);
+  });
+}
+
+/** @deprecated Use bindTap */
+export function attachDirectTap(el, handler, tapKey) {
+  bindTap(el, handler, tapKey);
+}
+
+/** @deprecated Use bindTap */
+export function bindNativeClick(el, handler, tapKey) {
+  bindTap(el, handler, tapKey);
+}
+
+/** @deprecated Use bindTap */
+export function bindNativeAction(el, handler, tapKey) {
+  bindTap(el, handler, tapKey);
 }
 
 async function callPlugin(pluginName, method, ...args) {
@@ -53,19 +201,20 @@ export async function initNativeShell() {
 
   document.body.classList.add('native-app');
   document.documentElement.classList.add('native-app');
+  document.dispatchEvent(new CustomEvent('native-shell-ready'));
 
   await callPlugin('StatusBar', 'setStyle', { style: 'DARK' });
   await callPlugin('StatusBar', 'setBackgroundColor', { color: '#1a3d2e' });
   await callPlugin('StatusBar', 'setOverlaysWebView', { overlay: false });
 
   initNativeBackGuard();
+  initNativeTouchBridge();
 
   await callPlugin('SplashScreen', 'hide');
 
   return true;
 }
 
-/** Prevent Android hardware back from leaving the app unintentionally on home */
 function initNativeBackGuard() {
   const App = window.Capacitor?.Plugins?.App;
   if (!App?.addListener) return;
@@ -78,4 +227,8 @@ function initNativeBackGuard() {
     }
     document.dispatchEvent(new CustomEvent('native-navigate', { detail: { screen: 'menu' } }));
   }).catch(() => {});
+}
+
+if (typeof window !== 'undefined' && isNativeApp()) {
+  initNativeTouchBridge();
 }
