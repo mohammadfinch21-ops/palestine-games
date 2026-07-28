@@ -166,6 +166,11 @@ export function initTrainGame() {
   const MOBILE_START_LABEL = '▶ ابدأ';
   let mobileStartDefaultHandler = null;
 
+  function bindMobileStartTap() {
+    if (!mobileStartBtn || !mobileStartDefaultHandler) return;
+    bindTap(mobileStartBtn, mobileStartDefaultHandler, 'train-mobile-start');
+  }
+
   const DEFAULT_LOCAL_PLAYERS = () => [
     { id: 1, name: 'اللاعب 1', position: 1, color: PLAYER_COLORS[0] },
     { id: 2, name: 'اللاعب 2', position: 1, color: PLAYER_COLORS[1] },
@@ -269,21 +274,11 @@ export function initTrainGame() {
     bindTap(trainSidebarBackdrop, closeTrainSidebar);
 
     const handleMobileStart = () => {
-      if (startBtn?.disabled) {
-        if (!areCardsReady()) {
-          showModal({
-            title: 'انتظر',
-            bodyHtml: '<p>بطاقات الأسئلة ما زالت تُحمَّل. انتظر ثوانٍ ثم حاول مجدداً.</p>',
-          });
-        }
-        return;
-      }
       startGame();
     };
     mobileStartDefaultHandler = handleMobileStart;
-    if (mobileStartBtn) {
-      bindTap(mobileStartBtn, handleMobileStart, 'train-mobile-start');
-    }
+
+    bindMobileStartTap();
 
     bindTap(mobileDrawBtn, () => handleDrawAction());
 
@@ -316,6 +311,7 @@ export function initTrainGame() {
       mobileStartBtn.disabled = false;
       mobileStartBtn.hidden = startBtn.hidden;
       mobileStartBtn.textContent = MOBILE_START_LABEL;
+      mobileStartBtn.classList.remove('train-mbar-btn--lottery', 'btn-pulse-ready');
     }
     if (mobileDrawBtn) {
       mobileDrawBtn.disabled = drawBtn.disabled;
@@ -1378,7 +1374,12 @@ export function initTrainGame() {
     loadMapImageOnce();
     renderBoard();
     updateUI();
+    bindMobileStartTap();
   }, { once: true });
+
+  if (document.documentElement.classList.contains('native-app')) {
+    requestAnimationFrame(() => bindMobileStartTap());
+  }
 
   initMobileTrainBar();
   renderLevelSelector();
@@ -2158,9 +2159,26 @@ export function initTrainGame() {
           );
         };
 
-        const beginLottery = () => showLocalLotteryQuestion(0);
+        const beginLottery = () => {
+          showLocalLotteryQuestion(0);
+          if (isNativeApp()) {
+            setTimeout(() => {
+              if (!isModalOpen()) {
+                showModal({
+                  title: 'خطأ',
+                  bodyHtml: '<p>تعذّر فتح سؤال القرعة. اضغط «حاول مجدداً».</p>',
+                  actions: [{
+                    label: 'حاول مجدداً',
+                    className: 'btn-gold',
+                    onClick: () => showLocalLotteryQuestion(0),
+                  }],
+                });
+              }
+            }, 200);
+          }
+        };
         if (isNativeApp()) {
-          requestAnimationFrame(() => requestAnimationFrame(beginLottery));
+          setTimeout(beginLottery, 50);
         } else {
           beginLottery();
         }
@@ -2200,9 +2218,24 @@ export function initTrainGame() {
 
     if (isNativeApp()) {
       updateUI('🔑 بدء قرعة تحديد من يبدأ...');
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => askRound());
-      });
+      const runNativeAskRound = () => {
+        try {
+          askRound();
+        } catch (err) {
+          console.error('native askRound failed', err);
+          lotteryActive = false;
+          showModal({
+            title: 'خطأ',
+            bodyHtml: `<p>تعذّر بدء القرعة: ${err?.message || 'خطأ غير معروف'}</p>`,
+            actions: [{
+              label: 'حاول مجدداً',
+              className: 'btn-gold',
+              onClick: runNativeAskRound,
+            }],
+          });
+        }
+      };
+      setTimeout(runNativeAskRound, 100);
       return;
     }
 

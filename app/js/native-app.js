@@ -42,6 +42,10 @@ const TAP_DEDUPE_MS = 400;
 const nativeTapHandlers = new Map();
 let nativeTouchBridgeReady = false;
 
+if (typeof window !== 'undefined') {
+  window.__ptNativeTaps = window.__ptNativeTaps || {};
+}
+
 export function registerNativeTap(key, handler) {
   if (!key || typeof handler !== 'function') return;
   nativeTapHandlers.set(String(key), handler);
@@ -152,6 +156,8 @@ export function bindTap(el, handler, tapKey) {
     unbindTap(el);
     el.setAttribute('data-native-tap', tapKey);
     registerNativeTap(tapKey, handler);
+    window.__ptNativeTaps[tapKey] = handler;
+    el.setAttribute('onclick', `window.__ptNativeTaps['${tapKey}']()`);
   }
 
   let lastAt = 0;
