@@ -1,11 +1,36 @@
-# Example release signing — copy to key.properties and fill in values
-# NEVER commit key.properties or *.keystore to Git
+# Release signing for Google Play — copy this file to key.properties and fill in values.
+# NEVER commit key.properties, *.keystore, or *.jks to Git.
 #
-# Steps: mobile/STORE_RELEASE.md → Phase 4
-# Create keystore:
-#   keytool -genkey -v -keystore palestine-train-release.keystore -alias palestine-train -keyalg RSA -keysize 2048 -validity 10000
+# Full checklist: mobile/STORE_RELEASE.md → Phase 4
+#
+# ── Step 1a: Create keystore (Windows PowerShell, run once) ──────────────────
+# cd mobile\android
+# keytool -genkey -v `
+#   -keystore palestine-train-release.keystore `
+#   -alias palestine-train `
+#   -keyalg RSA -keysize 2048 -validity 10000
+#
+# When prompted, enter YOUR passwords and org details. Save both passwords safely.
+# Losing the keystore or passwords means you cannot update the app on Play Store.
+#
+# ── Step 1b: Create key.properties from this file ────────────────────────────
+# cd mobile\android
+# Copy-Item key.properties.example key.properties
+# Then edit key.properties — replace YOUR_* placeholders with your real values.
+#
+# ── Step 1c: Build signed AAB ────────────────────────────────────────────────
+# cd mobile\android
+# .\gradlew.bat bundleRelease
+# Output: app\build\outputs\bundle\release\app-release.aab
 
-storeFile=../palestine-train-release.keystore
+# Path to keystore file, relative to mobile/android/ (this folder)
+storeFile=palestine-train-release.keystore
+
+# Keystore password (the one you chose when running keytool)
 storePassword=YOUR_STORE_PASSWORD
+
+# Key alias (must match -alias in keytool command)
 keyAlias=palestine-train
+
+# Key password (often same as storePassword; whatever you entered in keytool)
 keyPassword=YOUR_KEY_PASSWORD
