@@ -49,6 +49,9 @@ import {
   showNativeLotteryQuestion,
   hideNativeLotteryPanel,
   isNativeLotteryPanelOpen,
+  shouldUseNativeLotteryPanel,
+  createLotteryPanelDom,
+  getFallbackLotteryCard,
   FALLBACK_LOTTERY_CARD,
 } from './train-lottery-panel.js';
 import {
@@ -2233,7 +2236,9 @@ export function initTrainGame() {
       });
       return;
     }
-    if (!areCardsReady()) {
+    if (shouldUseNativeLotteryPanel()) {
+      forceNativeCardsReady();
+    } else if (!areCardsReady()) {
       showModal({
         title: 'جاري تحميل البطاقات…',
         bodyHtml: '<p>جاري تحميل بطاقات الأسئلة… انتظر لحظة.</p>',
@@ -2275,7 +2280,11 @@ export function initTrainGame() {
     resetQuestionSession();
     resetCityQuestionSession();
 
+    let lotteryOnComplete = null;
+
     const askRound = () => {
+      console.log('[lottery] askRound');
+      updateUI('🔑 askRound fired');
       try {
         lotteryActive = true;
         state.started = false;
@@ -2295,14 +2304,14 @@ export function initTrainGame() {
             return;
           }
           updateUI(`🔑 قرعة — دور ${player.name}`);
-          if (isNativeApp()) forceNativeCardsReady();
+          if (shouldUseNativeLotteryPanel()) forceNativeCardsReady();
           let card = pickTiebreakCard();
-          if (!card && isNativeApp()) {
+          if (!card && shouldUseNativeLotteryPanel()) {
             forceNativeCardsReady();
             card = pickTiebreakCard();
           }
           if (!card) {
-            card = FALLBACK_LOTTERY_CARD;
+            card = getFallbackLotteryCard();
           }
 
           const onLotteryAnswer = (userWasCorrect, steps) => {
@@ -2317,6 +2326,11 @@ export function initTrainGame() {
             const nextPlayer = state.players[nextIndex];
             hideModal();
             hideNativeLotteryPanel();
+            if (shouldUseNativeLotteryPanel()) {
+              updateUI(`⏳ الآن دور ${nextPlayer.name}`);
+              showLocalLotteryQuestion(nextIndex);
+              return;
+            }
             showModal({
               title: 'انتظر دور اللاعب التالي',
               bodyHtml: `<p>أجاب <strong>${player.name}</strong> ✓</p><p>الآن دور <strong>${nextPlayer.name}</strong>.</p><p class="lottery-handoff-hint">مرّر الجهاز إن لزم، ثم اضغط للمتابعة.</p>`,
@@ -2331,7 +2345,10 @@ export function initTrainGame() {
             updateUI(`⏳ انتظر — الآن دور ${nextPlayer.name}`);
           };
 
-          if (isNativeApp()) {
+          lotteryOnComplete = onLotteryAnswer;
+
+          if (shouldUseNativeLotteryPanel()) {
+            document.getElementById('train-lottery-panel') || createLotteryPanelDom();
             showNativeLotteryQuestion(card, player.name, onLotteryAnswer);
             return;
           }
@@ -2343,37 +2360,45 @@ export function initTrainGame() {
           );
         };
 
-        const beginLottery = () => {
-          showLocalLotteryQuestion(0);
-          if (isNativeApp()) {
-            setTimeout(() => {
-              if (!isNativeLotteryPanelOpen()) {
-                showModal({
-                  title: 'خطأ',
-                  bodyHtml: '<p>تعذّر فتح سؤال القرعة. اضغط «حاول مجدداً».</p>',
-                  actions: [{
-                    label: 'حاول مجدداً',
-                    className: 'btn-gold',
-                    onClick: () => showLocalLotteryQuestion(0),
-                  }],
-                });
-              }
-            }, 200);
-          }
-        };
-        if (isNativeApp()) {
-          setTimeout(beginLottery, 50);
-        } else {
-          beginLottery();
-        }
+        showLocalLotteryQuestion(0);
       } catch (err) {
         console.error('askRound failed', err);
         lotteryActive = false;
+        updateUI(`🔑 خطأ قرعة: ${err?.message || 'unknown'}`);
+        if (shouldUseNativeLotteryPanel()) {
+          document.getElementById('train-lottery-panel') || createLotteryPanelDom();
+          showNativeLotteryQuestion(
+            getFallbackLotteryCard(),
+            state.players[0]?.name || 'اللاعب 1',
+            lotteryOnComplete || (() => {}),
+          );
+          return;
+        }
         showModal({
           title: 'خطأ',
           bodyHtml: `<p>تعذّر بدء القرعة: ${err?.message || 'خطأ غير معروف'}</p>`,
           actions: [{ label: 'حسناً', className: 'btn-primary' }],
         });
+      }
+    };
+
+    const nativeStartLotteryFlow = () => {
+      updateUI('🔑 قرعة — جاري فتح السؤال...');
+      document.getElementById('train-lottery-panel') || createLotteryPanelDom();
+      try {
+        askRound();
+      } catch (err) {
+        console.error('[lottery] nativeStartLotteryFlow failed', err);
+        lotteryActive = true;
+        showNativeLotteryQuestion(
+          getFallbackLotteryCard(),
+          state.players[0]?.name || 'اللاعب 1',
+          (correct, steps) => {
+            const p = state.players[0];
+            if (p) p.startScore = correct ? steps : 0;
+            resolveStartWinner();
+          },
+        );
       }
     };
 
@@ -2400,39 +2425,8 @@ export function initTrainGame() {
       setTimeout(() => finishStart(tied[0]), 0);
     };
 
-    if (isNativeApp()) {
-      updateUI('🔑 بدء قرعة تحديد من يبدأ...');
-      const runNativeAskRound = () => {
-        try {
-          askRound();
-        } catch (err) {
-          console.error('native askRound failed', err);
-          lotteryActive = false;
-          showModal({
-            title: 'خطأ',
-            bodyHtml: `<p>تعذّر بدء القرعة: ${err?.message || 'خطأ غير معروف'}</p>`,
-            actions: [{
-              label: 'حاول مجدداً',
-              className: 'btn-gold',
-              onClick: runNativeAskRound,
-            }],
-          });
-        }
-      };
-      runNativeAskRound();
-      setTimeout(() => {
-        if (!isNativeLotteryPanelOpen() && !lotteryActive) {
-          showModal({
-            title: 'تنبيه',
-            bodyHtml: '<p>تعذّر بدء القرعة. تحقق من تحميل بطاقات الأسئلة ثم اضغط «ابدأ» مجدداً.</p>',
-            actions: [{
-              label: 'إعادة المحاولة',
-              className: 'btn-gold',
-              onClick: runNativeAskRound,
-            }],
-          });
-        }
-      }, 200);
+    if (shouldUseNativeLotteryPanel()) {
+      nativeStartLotteryFlow();
       return;
     }
 

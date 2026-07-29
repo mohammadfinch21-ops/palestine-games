@@ -14,6 +14,20 @@ export const FALLBACK_LOTTERY_CARD = {
   levelName: 'قرعة',
 };
 
+export function getFallbackLotteryCard() {
+  return { ...FALLBACK_LOTTERY_CARD };
+}
+
+/** Native APK panel, or mobile layout when Capacitor detection is late. */
+export function shouldUseNativeLotteryPanel() {
+  if (typeof window.Capacitor !== 'undefined' && window.Capacitor.isNativePlatform?.() === true) {
+    return true;
+  }
+  if (document.documentElement.classList.contains('native-app')) return true;
+  if (document.body.classList.contains('train-mobile-layout')) return true;
+  return false;
+}
+
 const panel = () => document.getElementById('train-lottery-panel');
 const titleEl = () => document.getElementById('train-lottery-title');
 const questionEl = () => document.getElementById('train-lottery-question');
@@ -21,6 +35,41 @@ const optionsEl = () => document.getElementById('train-lottery-options');
 
 let optionTapSeq = 0;
 const activeTapKeys = [];
+
+/** Inject lottery panel when APK ships stale index.html without the element. */
+export function createLotteryPanelDom() {
+  let el = panel();
+  if (el) return el;
+
+  el = document.createElement('div');
+  el.id = 'train-lottery-panel';
+  el.className = 'train-lottery-panel hidden';
+  el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = `
+    <div class="train-lottery-panel-inner">
+      <h3 id="train-lottery-title"></h3>
+      <p id="train-lottery-question"></p>
+      <div id="train-lottery-options"></div>
+    </div>
+  `;
+  document.body.appendChild(el);
+  console.info('[train-lottery-panel] createLotteryPanelDom injected panel');
+  return el;
+}
+
+function ensureLotteryPanelDom() {
+  return panel() || createLotteryPanelDom();
+}
+
+function forcePanelVisible(el) {
+  if (!el) return;
+  if (!el.isConnected) document.body.appendChild(el);
+  el.classList.remove('hidden');
+  el.style.display = 'flex';
+  el.style.zIndex = '999999';
+  el.style.pointerEvents = 'auto';
+  el.setAttribute('aria-hidden', 'false');
+}
 
 function deriveOptions(card) {
   const q = card.question || '';
@@ -60,7 +109,7 @@ function clearOptionTaps() {
 
 export function isNativeLotteryPanelOpen() {
   const el = panel();
-  return Boolean(el && !el.classList.contains('hidden'));
+  return Boolean(el && !el.classList.contains('hidden') && el.style.display !== 'none');
 }
 
 export function hideNativeLotteryPanel() {
@@ -68,6 +117,7 @@ export function hideNativeLotteryPanel() {
   const el = panel();
   if (el) {
     el.classList.add('hidden');
+    el.style.display = 'none';
     el.setAttribute('aria-hidden', 'true');
   }
   const opts = optionsEl();
@@ -81,41 +131,42 @@ export function hideNativeLotteryPanel() {
  * @param {(correct: boolean, steps: number) => void} onComplete
  */
 export function showNativeLotteryQuestion(card, playerName, onComplete) {
-  const el = panel();
+  const safeCard = card && prepareShuffledOptions(card) ? card : getFallbackLotteryCard();
+  const el = ensureLotteryPanelDom();
   const title = titleEl();
   const question = questionEl();
   const optsContainer = optionsEl();
-  if (!el || !title || !question || !optsContainer) {
-    console.error('[train-lottery-panel] missing DOM nodes');
-    onComplete?.(false, 0);
-    return;
+
+  if (!title || !question || !optsContainer) {
+    console.error('[train-lottery-panel] missing inner DOM nodes after ensure');
+    forcePanelVisible(el);
+    if (title) title.textContent = `قرعة — ${playerName || 'اللاعب 1'}`;
+    if (question) question.textContent = safeCard.question || '';
   }
 
-  if (!card) {
-    onComplete?.(false, 0);
-    return;
-  }
-
-  const prepared = prepareShuffledOptions(card);
+  const prepared = prepareShuffledOptions(safeCard);
   const options = prepared?.options;
   if (!options || options.length < 2) {
-    onComplete?.(false, 0);
+    console.error('[train-lottery-panel] no options — showing fallback card UI anyway');
+    forcePanelVisible(el);
+    if (title) title.textContent = `قرعة — ${playerName || 'اللاعب 1'}`;
+    if (question) question.textContent = getFallbackLotteryCard().question;
     return;
   }
 
   const correctAnswer = prepared.correctAnswer;
-  const stepsCorrect = Math.max(0, Number(card.stepsCorrect ?? 3) || 0);
-  const stepsWrong = Math.max(0, Number(card.stepsWrong ?? 1) || 0);
+  const stepsCorrect = Math.max(0, Number(safeCard.stepsCorrect ?? 3) || 0);
+  const stepsWrong = Math.max(0, Number(safeCard.stepsWrong ?? 1) || 0);
 
   hideNativeLotteryPanel();
 
   title.textContent = `قرعة — ${playerName}`;
-  question.textContent = card.question || '';
+  question.textContent = safeCard.question || '';
   optsContainer.innerHTML = '';
 
   let answered = false;
 
-  options.forEach((opt, optionIndex) => {
+  options.forEach((opt) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'train-lottery-option-btn btn-gold';
@@ -150,6 +201,6 @@ export function showNativeLotteryQuestion(card, playerName, onComplete) {
     optsContainer.appendChild(btn);
   });
 
-  el.classList.remove('hidden');
-  el.setAttribute('aria-hidden', 'false');
+  forcePanelVisible(el);
+  console.info('[train-lottery-panel] showNativeLotteryQuestion visible', { playerName });
 }
