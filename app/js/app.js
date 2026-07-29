@@ -1,8 +1,8 @@
 import { initModal } from './modal.js';
 import { initAds, onScreenChange } from './ads/ad-manager.js';
-import { loadCardData } from './questions.js';
+import { loadCardData, primeNativeCardsSync } from './questions.js';
 import { loadCityQuestions } from './city-questions.js';
-import { initNativeShell, isNativeApp } from './native-app.js';
+import { bindTap, initNativeShell, isNativeApp } from './native-app.js';
 
 let currentScreen = 'menu';
 
@@ -35,15 +35,7 @@ function initNavigation() {
       navigateToScreen(el);
     };
 
-    // Capacitor Android WebView: pointerup is more reliable than click alone
-    if (isNativeApp()) {
-      el.addEventListener('pointerup', (e) => {
-        if (e.pointerType === 'mouse' && e.button !== 0) return;
-        handleNavigate(e);
-      });
-    } else {
-      el.addEventListener('click', handleNavigate);
-    }
+    bindTap(el, handleNavigate);
   });
 
   document.addEventListener('native-navigate', (e) => {
@@ -53,13 +45,19 @@ function initNavigation() {
 
 /** Load game modules first (tap handlers), then card JSON — avoids WebView OOM on low-RAM emulators */
 async function runDeferredStartup() {
+  if (isNativeApp()) {
+    primeNativeCardsSync();
+  }
+
   const cardsLoadingEl = document.getElementById('cards-loading-status');
+  let refreshTrainUI = null;
+  let refreshMemoryUI = null;
 
   try {
     const { initTrainGame } = await import('./train-game.js');
-    initTrainGame();
+    ({ refreshUI: refreshTrainUI } = initTrainGame());
     const { initMemoryGame } = await import('./memory-game.js');
-    initMemoryGame();
+    ({ refreshUI: refreshMemoryUI } = initMemoryGame());
   } catch (err) {
     console.error('فشل تحميل وحدات الألعاب', err);
   }
@@ -75,14 +73,23 @@ async function runDeferredStartup() {
     console.info(`بطاقات محمّلة: ${counts.questions} سؤال، ${counts.memory} زوج ذاكرة`);
     if (cardsLoadingEl) {
       cardsLoadingEl.textContent = `✓ ${counts.questions} بطاقة سؤال جاهزة`;
-      setTimeout(() => cardsLoadingEl.classList.add('hidden'), 2500);
+      cardsLoadingEl.classList.remove('cards-loading-status--error');
+      const onTrain = document.getElementById('screen-train')?.classList.contains('active');
+      if (!onTrain) {
+        setTimeout(() => cardsLoadingEl.classList.add('hidden'), 2500);
+      }
     }
+    refreshTrainUI?.();
+    refreshMemoryUI?.();
   } catch (err) {
     console.error('فشل تحميل بطاقات PDF', err);
     if (cardsLoadingEl) {
-      cardsLoadingEl.textContent = '⚠ فشل تحميل البطاقات — أعد تحميل الصفحة';
+      const detail = err?.message ? ` (${err.message})` : '';
+      cardsLoadingEl.textContent = `⚠ فشل تحميل البطاقات${detail} — اضغط «ابدأ» لإعادة المحاولة`;
       cardsLoadingEl.classList.add('cards-loading-status--error');
     }
+    refreshTrainUI?.();
+    refreshMemoryUI?.();
   }
 
   // Ads last — after menu is interactive and first paint complete

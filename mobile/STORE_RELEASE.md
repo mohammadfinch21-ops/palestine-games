@@ -24,7 +24,7 @@
      ↓
 المرحلة 6 → AdSense للويب (مسار موازٍ)
      ↓
-المرحلة 7 → App Store لاحقاً ($99/سنة — يتطلب Mac)
+المرحلة 7 → App Store (GitHub Actions — $99/سنة — بدون Mac)
 ```
 
 **المدة الواقعية:** 2–4 أسابيع من اليوم الأول حتى أول أرباح (مراجعة Google + fill rate).
@@ -96,27 +96,44 @@ gradlew.bat assembleRelease
 
 ### 1) إنشاء Keystore (مرة واحدة — احفظه في مكان آمن)
 
-```bash
-keytool -genkey -v -keystore palestine-train-release.keystore -alias palestine-train -keyalg RSA -keysize 2048 -validity 10000
+من **PowerShell** على Windows:
+
+```powershell
+cd mobile\android
+keytool -genkey -v `
+  -keystore palestine-train-release.keystore `
+  -alias palestine-train `
+  -keyalg RSA -keysize 2048 -validity 10000
 ```
 
-**⚠️ فقدان Keystore = لا يمكن تحديث التطبيق في Play Store.**
+عند الطلب: أدخل **كلمات مرورك** (store + key) وبيانات المؤسسة. احفظ الملف وكلمات المرور في مكان آمن (مدير كلمات مرور / نسخة احتياطية).
+
+**⚠️ فقدان Keystore أو كلمات المرور = لا يمكن تحديث التطبيق في Play Store.**
 
 ### 2) إعداد التوقيع
 
-```bash
-cd mobile/android
-copy key.properties.example key.properties
-# عدّل key.properties بكلمات المرور ومسار keystore
+```powershell
+cd mobile\android
+Copy-Item key.properties.example key.properties
+notepad key.properties
 ```
 
-الملف `key.properties` **غير متتبّع** في Git.
+عدّل `key.properties`:
+
+| الحقل | القيمة |
+|-------|--------|
+| `storeFile` | `palestine-train-release.keystore` (نسبيًا من `mobile/android/`) |
+| `storePassword` | كلمة مرور الـ keystore |
+| `keyAlias` | `palestine-train` |
+| `keyPassword` | كلمة مرور المفتاح (غالباً نفس storePassword) |
+
+الملف `key.properties` و `*.keystore` **غير متتبّعين** في Git — لا ترفعهما أبداً.
 
 ### 3) بناء AAB
 
-```bash
-cd mobile/android
-gradlew.bat bundleRelease
+```powershell
+cd mobile\android
+.\gradlew.bat bundleRelease
 ```
 
 الملف: `mobile/android/app/build/outputs/bundle/release/app-release.aab`
@@ -160,16 +177,18 @@ gradlew.bat bundleRelease
 
 ---
 
-## المرحلة 7 — App Store (لاحقاً — $99/سنة)
+## المرحلة 7 — App Store (GitHub Actions — $99/سنة — بدون Mac)
 
-- [ ] Apple Developer Program
-- [ ] Mac + Xcode
+راجع: **[`IOS_APP_STORE.md`](IOS_APP_STORE.md)**
+
+- [ ] Apple Developer Program ($99/سنة)
+- [ ] Certificate + Provisioning Profile (OpenSSL على Windows)
+- [ ] GitHub Secrets (8 قيم) + repo **public**
+- [ ] Workflow `.github/workflows/ios-appstore.yml`
 - [ ] AdMob iOS App ID + 3 ad units
-- [ ] `admob-config.js` → iOS IDs
-- [ ] App Privacy: Advertising Identifier = نعم
-- [ ] Archive → App Store Connect
+- [ ] TestFlight على iPhone → Submit for Review
 
-لا يمكن بناء IPA للنشر من Windows — استخدم Mac أو CI.
+لا تحتاج Mac — GitHub Actions يبني ويرفع IPA تلقائياً.
 
 ---
 

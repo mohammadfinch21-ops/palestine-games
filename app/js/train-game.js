@@ -13,7 +13,15 @@ import {
   beginMainGameSession,
   resetQuestionSession,
   areCardsReady,
+  ensureCardsReady,
+  loadCardData,
   getCardsLoadState,
+  forceCardsLoadTimeout,
+  primeNativeCardsSync,
+  forceNativeCardsReady,
+  CARDS_LOAD_STUCK_MS,
+  CARDS_LOAD_WATCHDOG_INTERVAL_MS,
+  isQuestionDebugEnabled,
   getTrainLevel,
   setTrainLevel,
   getTrainLevelInfo,
@@ -36,7 +44,16 @@ import {
   showRewardedAd,
 } from './ads/ad-manager.js';
 import { isFirebaseConfigured } from './firebase-config.js';
-import { bindTap } from './native-app.js';
+import { bindTap, isNativeApp, resolveAssetUrl } from './native-app.js';
+import {
+  showNativeLotteryQuestion,
+  hideNativeLotteryPanel,
+  isNativeLotteryPanelOpen,
+  shouldUseNativeLotteryPanel,
+  createLotteryPanelDom,
+  getFallbackLotteryCard,
+  FALLBACK_LOTTERY_CARD,
+} from './train-lottery-panel.js';
 import {
   getPlayerId,
   createRoom,
@@ -163,6 +180,49 @@ export function initTrainGame() {
   };
 
   let lotteryActive = false;
+  const MOBILE_START_LABEL = '▶ ابدأ';
+
+  function showMobileStatus(msg) {
+    if (gameStatus) gameStatus.textContent = msg;
+    if (mobileTurnLabel) mobileTurnLabel.textContent = msg;
+  }
+
+  function showDebugBanner(msg) {
+    if (!isNativeApp()) return;
+    let banner = document.getElementById('debug-banner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'debug-banner';
+      banner.style.cssText =
+        'position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;'
+        + 'z-index:9999999;padding:10px;text-align:center;font-weight:700;font-size:14px;';
+      document.body.appendChild(banner);
+    }
+    banner.textContent = msg;
+    banner.hidden = false;
+    setTimeout(() => {
+      banner.hidden = true;
+    }, 5000);
+  }
+
+  function handleMobileStart(e) {
+    e?.preventDefault?.();
+    console.log('train-game: handleMobileStart');
+    showMobileStatus('🔑 تم اللمس — جاري البدء...');
+    try {
+      startGame();
+    } catch (err) {
+      console.error('handleMobileStart failed', err);
+      showMobileStatus(`⚠ خطأ: ${err?.message || err}`);
+    }
+  }
+
+  function installMobileStartBridge() {
+    window.__ptStartGame = handleMobileStart;
+    if (mobileStartBtn) {
+      bindTap(mobileStartBtn, handleMobileStart, 'train-mobile-start');
+    }
+  }
 
   const DEFAULT_LOCAL_PLAYERS = () => [
     { id: 1, name: 'اللاعب 1', position: 1, color: PLAYER_COLORS[0] },
@@ -183,6 +243,7 @@ export function initTrainGame() {
   const rewardHintBtn = document.getElementById('train-reward-hint-btn');
   const levelSelectorEl = document.getElementById('train-level-selector');
   const poolWarningEl = document.getElementById('train-pool-warning');
+  const cardsLoadingStatusEl = document.getElementById('cards-loading-status');
 
   const modeLocalBtn = document.getElementById('mode-local-btn');
   const modeOnlineBtn = document.getElementById('mode-online-btn');
@@ -223,6 +284,60 @@ export function initTrainGame() {
   const mobileTurnLabel = document.getElementById('train-mobile-turn-label');
   const mobileLayoutMq = window.matchMedia('(max-width: 900px)');
 
+  let mapDomReady = Boolean(boardEl?.querySelector('#board-map'));
+  let mapImageLoaded = false;
+
+  function ensureMapDom() {
+    if (mapDomReady || !boardEl) return;
+    const existingMap = boardEl.querySelector('#board-map');
+    if (existingMap) {
+      mapDomReady = true;
+      return;
+    }
+    boardEl.innerHTML = `
+      <div class="board-map" id="board-map">
+        <img src="${MAP_IMAGE}" alt="خارطة لعبة قطار فلسطين" class="board-map-img" decoding="async" loading="eager" />
+        <div class="board-tokens-layer" aria-hidden="false"></div>
+      </div>`;
+    mapDomReady = true;
+  }
+
+  function loadMapImageOnce() {
+    if (!boardEl) return;
+    ensureMapDom();
+    const mapRoot = boardEl.querySelector('#board-map');
+    if (!mapRoot) return;
+
+    let img = mapRoot.querySelector('.board-map-img');
+    if (!img) {
+      img = document.createElement('img');
+      img.alt = 'خارطة لعبة قطار فلسطين';
+      img.className = 'board-map-img';
+      img.decoding = 'async';
+      img.loading = 'eager';
+      mapRoot.insertBefore(img, mapRoot.firstChild);
+    }
+
+    const resolvedSrc = resolveAssetUrl(MAP_IMAGE);
+    if (img.dataset.resolvedSrc !== resolvedSrc) {
+      if (!img.dataset.loadBound) {
+        img.dataset.loadBound = '1';
+        img.addEventListener('load', () => {
+          mapImageLoaded = true;
+          renderBoard();
+        }, { once: true });
+        img.addEventListener('error', () => {
+          console.error('train-game: failed to load map image', resolvedSrc);
+          mapRoot.classList.add('board-map--load-failed');
+        }, { once: true });
+      }
+      img.dataset.resolvedSrc = resolvedSrc;
+      img.src = resolvedSrc;
+    } else if (img.complete && img.naturalWidth > 0) {
+      mapImageLoaded = true;
+    }
+  }
+
   function isMobileTrainLayout() {
     return mobileLayoutMq.matches || document.documentElement.classList.contains('native-app');
   }
@@ -262,10 +377,12 @@ export function initTrainGame() {
   }
 
   function initMobileTrainBar() {
-    trainSidebarToggle?.addEventListener('click', toggleTrainSidebar);
-    mobileMenuBtn?.addEventListener('click', toggleTrainSidebar);
-    trainSidebarBackdrop?.addEventListener('click', closeTrainSidebar);
-    bindTap(mobileStartBtn, () => startGame());
+    bindTap(trainSidebarToggle, toggleTrainSidebar);
+    bindTap(mobileMenuBtn, toggleTrainSidebar);
+    bindTap(trainSidebarBackdrop, closeTrainSidebar);
+
+    installMobileStartBridge();
+
     bindTap(mobileDrawBtn, () => handleDrawAction());
 
     document.addEventListener('keydown', (e) => {
@@ -289,10 +406,31 @@ export function initTrainGame() {
   }
 
   function syncMobileBar() {
-    if (!document.body.classList.contains('train-mobile-layout')) return;
+    const mobileBarActive =
+      document.body.classList.contains('train-mobile-layout')
+      || document.documentElement.classList.contains('native-app');
+    if (!mobileBarActive) return;
+    const loadState = getCardsLoadState();
+    const cardsReady = areCardsReady();
+    const loadFailed = loadState.state === 'error';
+    const hideLocalStart = online.mode && online.inRoom;
+    const startLocked =
+      hideLocalStart ||
+      (!cardsReady && !loadFailed) ||
+      (state.started && !state.gameOver) ||
+      state.players.length < MIN_PLAYERS;
     if (mobileStartBtn) {
-      mobileStartBtn.disabled = startBtn.disabled;
+      mobileStartBtn.disabled = startLocked;
       mobileStartBtn.hidden = startBtn.hidden;
+      if (cardsReady) {
+        mobileStartBtn.textContent = MOBILE_START_LABEL;
+      } else if (loadFailed) {
+        mobileStartBtn.textContent = '⚠ فشل — اضغط لإعادة المحاولة';
+      } else {
+        mobileStartBtn.textContent = '⏳ تحميل…';
+      }
+      mobileStartBtn.classList.toggle('is-loading', !cardsReady && !loadFailed);
+      mobileStartBtn.classList.remove('train-mbar-btn--lottery', 'btn-pulse-ready');
     }
     if (mobileDrawBtn) {
       mobileDrawBtn.disabled = drawBtn.disabled;
@@ -412,7 +550,7 @@ export function initTrainGame() {
       (text) => `<button type="button" class="online-chat-preset-btn" data-preset="${escapeHtml(text)}">${escapeHtml(text)}</button>`,
     ).join('');
 
-    chatPresetsEl.addEventListener('click', async (e) => {
+    bindTap(chatPresetsEl, async (e) => {
       const btn = e.target.closest('[data-preset]');
       if (!btn || !online.inRoom || !online.roomCode) return;
       const text = btn.dataset.preset;
@@ -426,7 +564,7 @@ export function initTrainGame() {
       }
     });
 
-    chatSendBtn?.addEventListener('click', () => sendFreeformChat());
+    bindTap(chatSendBtn, () => sendFreeformChat());
     chatInput?.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -435,7 +573,7 @@ export function initTrainGame() {
     });
     if (chatInput) chatInput.maxLength = MAX_MESSAGE_LENGTH;
 
-    chatToggle?.addEventListener('click', () => {
+    bindTap(chatToggle, () => {
       online.chatCollapsed = !online.chatCollapsed;
       chatPanel?.classList.toggle('is-collapsed', online.chatCollapsed);
       chatToggle.setAttribute('aria-expanded', online.chatCollapsed ? 'false' : 'true');
@@ -641,14 +779,17 @@ export function initTrainGame() {
     tryResolveOnlineLottery(room);
   }
 
-  function promptOnlineLotteryIfNeeded() {
+  async function promptOnlineLotteryIfNeeded() {
     if (!online.lotteryPhase || state.started || online.lotteryPromptOpen) return;
     const me = state.players.find((p) => String(p.id) === String(online.myId));
     if (!me || typeof me.startScore === 'number') return;
     if (!isMyLotteryTurn()) return;
     if (!areCardsReady()) {
-      scheduleLotteryPromptRetry();
-      return;
+      const ready = await ensureCardsReady();
+      if (!ready) {
+        scheduleLotteryPromptRetry();
+        return;
+      }
     }
     clearLotteryPromptRetry();
 
@@ -1180,10 +1321,23 @@ export function initTrainGame() {
     }
     if (!areCardsReady()) {
       showModal({
-        title: 'انتظر',
-        bodyHtml: '<p>بطاقات الأسئلة ما زالت تُحمَّل.</p>',
+        title: 'جاري تحميل البطاقات…',
+        bodyHtml: '<p>جاري تحميل بطاقات الأسئلة…</p>',
       });
-      return;
+      const ready = await ensureCardsReady();
+      hideModal();
+      if (!ready) {
+        showModal({
+          title: 'خطأ',
+          bodyHtml: '<p>فشل تحميل بطاقات الأسئلة. أعد المحاولة.</p>',
+          actions: [{
+            label: 'إعادة المحاولة',
+            className: 'btn-gold',
+            onClick: () => { loadCardData().finally(() => handleOnlineStart()); },
+          }],
+        });
+        return;
+      }
     }
 
     if (onlineStartBtn) onlineStartBtn.disabled = true;
@@ -1220,12 +1374,12 @@ export function initTrainGame() {
     }
   }
 
-  modeLocalBtn?.addEventListener('click', () => setPlayMode(false));
-  modeOnlineBtn?.addEventListener('click', () => setPlayMode(true));
-  onlineCreateBtn?.addEventListener('click', handleCreateRoom);
-  onlineJoinBtn?.addEventListener('click', handleJoinRoom);
-  onlineStartBtn?.addEventListener('click', handleOnlineStart);
-  onlineLeaveBtn?.addEventListener('click', async () => {
+  bindTap(modeLocalBtn, () => setPlayMode(false));
+  bindTap(modeOnlineBtn, () => setPlayMode(true));
+  bindTap(onlineCreateBtn, handleCreateRoom);
+  bindTap(onlineJoinBtn, handleJoinRoom);
+  bindTap(onlineStartBtn, handleOnlineStart);
+  bindTap(onlineLeaveBtn, async () => {
     await teardownOnlineRoom();
     onlineAuth?.classList.remove('hidden');
     onlineLobby?.classList.add('hidden');
@@ -1233,7 +1387,7 @@ export function initTrainGame() {
     resetGame();
     updateUI();
   });
-  onlineCopyCodeBtn?.addEventListener('click', async () => {
+  bindTap(onlineCopyCodeBtn, async () => {
     const code = online.roomCode || onlineRoomCodeDisplay?.textContent;
     if (!code || code === '------') return;
     try {
@@ -1244,16 +1398,16 @@ export function initTrainGame() {
     }
   });
 
-  rulesBtn.addEventListener('click', () => {
+  bindTap(rulesBtn, () => {
     showModal({ title: 'طريقة اللعب — قطار فلسطين', bodyHtml: TRAIN_RULES });
   });
 
-  addPlayerBtn?.addEventListener('click', () => {
+  bindTap(addPlayerBtn, () => {
     if (!canEditPlayers() || state.players.length >= MAX_PLAYERS) return;
     setPlayerCount(state.players.length + 1);
   });
 
-  playerCountPicker?.addEventListener('click', (e) => {
+  bindTap(playerCountPicker, (e) => {
     const btn = e.target.closest('.player-count-btn');
     if (!btn || btn.disabled) return;
     setPlayerCount(Number(btn.dataset.count));
@@ -1278,7 +1432,7 @@ export function initTrainGame() {
     updateUI();
   });
 
-  playersList.addEventListener('click', (e) => {
+  bindTap(playersList, (e) => {
     const btn = e.target.closest('.player-remove-btn');
     if (!btn) return;
     const chip = btn.closest('[data-player-index]');
@@ -1289,7 +1443,7 @@ export function initTrainGame() {
   bindTap(startBtn, startGame);
   bindTap(drawBtn, () => handleDrawAction());
 
-  rewardHintBtn.addEventListener('click', () => {
+  bindTap(rewardHintBtn, () => {
     if (!isMyTurn() || !state.started || state.gameOver || !state.waitingForMove || state.processingMove) return;
     showRewardedAd({
       title: '🎬 شاهد إعلاناً — تلميح: +2 خطوات',
@@ -1324,7 +1478,7 @@ export function initTrainGame() {
       .join('');
 
     levelSelectorEl.querySelectorAll('.level-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
+      bindTap(btn, () => {
         if (state.started && !state.gameOver) return;
         setTrainLevel(btn.dataset.level);
         if (online.mode && online.inRoom && online.isHost && !state.started && online.roomCode) {
@@ -1341,56 +1495,115 @@ export function initTrainGame() {
     renderLevelSelector();
   });
 
+  document.addEventListener('train-cards-load-settled', () => {
+    renderLevelSelector();
+    renderBoard();
+    updateUI();
+    if (document.getElementById('screen-train')?.classList.contains('active')) {
+      onTrainScreenVisible();
+    }
+  });
+
+  document.addEventListener('native-shell-ready', () => {
+    applyMobileTrainLayout();
+    loadMapImageOnce();
+    renderBoard();
+    updateUI();
+    installMobileStartBridge();
+  }, { once: true });
+
+  if (document.documentElement.classList.contains('native-app')) {
+    requestAnimationFrame(() => installMobileStartBridge());
+  }
+
   initMobileTrainBar();
+
+  let cardsLoadWatchdogTimer = null;
+  let cardsLoadDebugModalShown = false;
+
+  function stopCardsLoadWatchdog() {
+    if (cardsLoadWatchdogTimer) {
+      clearInterval(cardsLoadWatchdogTimer);
+      cardsLoadWatchdogTimer = null;
+    }
+  }
+
+  function startCardsLoadWatchdog() {
+    if (cardsLoadWatchdogTimer) return;
+    cardsLoadWatchdogTimer = setInterval(() => {
+      const loadState = getCardsLoadState();
+      if (loadState.rawState === 'ready' || loadState.state === 'ready') {
+        stopCardsLoadWatchdog();
+        return;
+      }
+      if (loadState.state === 'error' && loadState.rawState !== 'loading') {
+        stopCardsLoadWatchdog();
+        updateUI();
+        return;
+      }
+      if (loadState.stuck || (loadState.rawState === 'loading' && loadState.elapsedMs >= CARDS_LOAD_STUCK_MS)) {
+        forceCardsLoadTimeout(loadState.error?.message);
+        updateUI();
+        stopCardsLoadWatchdog();
+        return;
+      }
+      if (isQuestionDebugEnabled() && !cardsLoadDebugModalShown && loadState.rawState === 'loading') {
+        cardsLoadDebugModalShown = true;
+        console.info('[train-game] cards load watchdog', loadState);
+      }
+      syncMobileBar();
+    }, CARDS_LOAD_WATCHDOG_INTERVAL_MS);
+  }
+
+  startCardsLoadWatchdog();
+
+  if (isNativeApp()) {
+    primeNativeCardsSync();
+    document.addEventListener('train-cards-load-settled', () => {
+      syncMobileBar();
+      updateUI();
+    });
+    setTimeout(() => {
+      if (!areCardsReady()) {
+        forceNativeCardsReady();
+      }
+      if (mobileStartBtn && !state.started && !(online.mode && online.inRoom)) {
+        mobileStartBtn.textContent = MOBILE_START_LABEL;
+        mobileStartBtn.disabled = state.players.length < MIN_PLAYERS;
+        mobileStartBtn.classList.remove('is-loading');
+      }
+      syncMobileBar();
+      updateUI();
+    }, 3000);
+  }
+
   renderLevelSelector();
   renderPlayerCountPicker();
   renderPlayers();
   updateUI();
-
-  let mapDomReady = false;
-  let mapImageLoaded = false;
-
-  function ensureMapDom() {
-    if (mapDomReady || !boardEl) return;
-    boardEl.innerHTML = `
-      <div class="board-map" id="board-map">
-        <div class="board-map-placeholder" aria-hidden="true"></div>
-        <div class="board-tokens-layer" aria-hidden="false"></div>
-      </div>`;
-    mapDomReady = true;
-  }
-
-  function loadMapImageOnce() {
-    if (mapImageLoaded || !boardEl) return;
-    ensureMapDom();
-    const mapRoot = boardEl.querySelector('#board-map');
-    if (!mapRoot) return;
-    if (mapRoot.querySelector('.board-map-img')) {
-      mapImageLoaded = true;
-      return;
-    }
-    const img = document.createElement('img');
-    img.src = MAP_IMAGE;
-    img.alt = 'map';
-    img.className = 'board-map-img';
-    img.decoding = 'async';
-    img.loading = 'lazy';
-    mapRoot.querySelector('.board-map-placeholder')?.remove();
-    mapRoot.insertBefore(img, mapRoot.firstChild);
-    mapImageLoaded = true;
-  }
+  renderBoard();
 
   function onTrainScreenVisible() {
     loadMapImageOnce();
-    renderBoard();
+    const drawTokens = () => renderBoard();
+    drawTokens();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(drawTokens);
+    });
+    [150, 400, 800].forEach((ms) => setTimeout(drawTokens, ms));
   }
 
   document.addEventListener('native-screen-change', (e) => {
-    if (e.detail?.screen === 'train') onTrainScreenVisible();
+    if (e.detail?.screen === 'train') {
+      onTrainScreenVisible();
+      installMobileStartBridge();
+    }
   });
 
   if (document.getElementById('screen-train')?.classList.contains('active')) {
     onTrainScreenVisible();
+  } else if (isNativeApp()) {
+    loadMapImageOnce();
   }
 
   function getPlayerByIndex(index) {
@@ -1409,18 +1622,54 @@ export function initTrainGame() {
     return Math.max(1, Math.min(BOARD_SIZE, Math.round(Number(pos) || 1)));
   }
 
-  function getPlayerKey(playerOrIndex, active = false) {
+  function getPlayerKey(playerOrIndex, active = false, { mapOnly = false } = {}) {
     const idx =
       typeof playerOrIndex === 'number'
         ? playerOrIndex
         : state.players.findIndex((p) => p.id === playerOrIndex.id);
     const color = state.players[idx]?.color || '#888';
     const cls = active ? 'key-token key-token-active' : 'key-token';
-    return `<span class="${cls}" style="--key-color:${color}" title="${state.players[idx]?.name || ''}">🔑</span>`;
+    const title = state.players[idx]?.name || '';
+    if (mapOnly) {
+      return `<span class="${cls} key-token--map" style="--key-color:${color}" title="${title}"><span class="key-token-icon" aria-hidden="true">🔑</span></span>`;
+    }
+    const num = idx >= 0 ? idx + 1 : '';
+    return `<span class="${cls}" style="--key-color:${color}" title="${title}"><span class="key-token-icon" aria-hidden="true">🔑</span><span class="key-token-num">${num}</span></span>`;
+  }
+
+  /** Map token % coords to the visible image box (object-fit: contain letterboxing). */
+  function getMapLayerMetrics() {
+    const mapRoot = boardEl?.querySelector('#board-map');
+    const img = mapRoot?.querySelector('.board-map-img');
+    if (!mapRoot) return null;
+    const cr = mapRoot.getBoundingClientRect();
+    if (!cr.width || !cr.height) return null;
+    const ir = img?.getBoundingClientRect?.();
+    if (!ir || !ir.width || !ir.height) {
+      return { offsetX: 0, offsetY: 0, scaleX: 100, scaleY: 100 };
+    }
+    return {
+      offsetX: ((ir.left - cr.left) / cr.width) * 100,
+      offsetY: ((ir.top - cr.top) / cr.height) * 100,
+      scaleX: (ir.width / cr.width) * 100,
+      scaleY: (ir.height / cr.height) * 100,
+    };
+  }
+
+  function mapCoordToLayerPercent(pos) {
+    const m = getMapLayerMetrics();
+    if (!m) return { x: pos.x, y: pos.y };
+    return {
+      x: m.offsetX + (pos.x / 100) * m.scaleX,
+      y: m.offsetY + (pos.y / 100) * m.scaleY,
+    };
   }
 
   function getTokenOffsetScale() {
-    if (!document.body.classList.contains('train-mobile-layout')) return 1;
+    const mobile =
+      document.body.classList.contains('train-mobile-layout')
+      || document.documentElement.classList.contains('native-app');
+    if (!mobile) return 1;
     const boardMap = boardEl?.querySelector('.board-map');
     if (!boardMap) return 0.55;
     const w = boardMap.getBoundingClientRect().width;
@@ -1431,7 +1680,7 @@ export function initTrainGame() {
     const scale = getTokenOffsetScale();
     const spreads = {
       1: [[0, 0]],
-      2: [[-8, 0], [8, 0]],
+      2: [[-5, 0], [5, 0]],
       3: [[-10, -6], [10, -6], [0, 8]],
       4: [[-10, -6], [10, -6], [-10, 8], [10, 8]],
       5: [[-12, -6], [0, -6], [12, -6], [-8, 8], [8, 8]],
@@ -1453,14 +1702,14 @@ export function initTrainGame() {
 
     let tokensHtml = '';
     Object.entries(tokensBySquare).forEach(([sq, playersHere]) => {
-      const pos = getMapPosition(Number(sq));
+      const pos = mapCoordToLayerPercent(getMapPosition(Number(sq)));
       const n = Math.min(playersHere.length, 6);
       playersHere.slice(0, 6).forEach((p, i) => {
         const [ox, oy] = offsetForTokenIndex(i, n);
         const isActive = p.id === activeId;
         tokensHtml += `<div class="map-token" data-square="${sq}" data-player-id="${p.id}"
           style="left:calc(${pos.x}% + ${ox}px);top:calc(${pos.y}% + ${oy}px)">
-          ${getPlayerKey(p, isActive)}
+          ${getPlayerKey(p, isActive, { mapOnly: true })}
         </div>`;
       });
     });
@@ -1469,13 +1718,17 @@ export function initTrainGame() {
   }
 
   function renderBoard() {
-    if (!mapDomReady || !boardEl) return;
+    if (!boardEl) return;
+    ensureMapDom();
+    loadMapImageOnce();
 
     state.players.forEach((p) => {
       p.position = normalizePosition(p.position);
     });
 
-    const hl = state.highlightSquare ? getMapPosition(state.highlightSquare) : null;
+    const hl = state.highlightSquare
+      ? mapCoordToLayerPercent(getMapPosition(state.highlightSquare))
+      : null;
     const highlightHtml = hl
       ? `<div class="map-highlight" style="left:${hl.x}%;top:${hl.y}%"></div>`
       : '';
@@ -1491,7 +1744,18 @@ export function initTrainGame() {
       tokensLayer.setAttribute('aria-hidden', 'false');
       mapRoot.appendChild(tokensLayer);
     }
-    tokensLayer.innerHTML = `${highlightHtml}${tokensHtml}`;
+    tokensLayer.innerHTML = `${highlightHtml}${tokensHtml || buildFallbackTokensHtml()}`;
+  }
+
+  function buildFallbackTokensHtml() {
+    return state.players
+      .slice(0, 6)
+      .map((p, i) => {
+        const pos = getMapPosition(1);
+        const ox = i === 0 ? -6 : 6;
+        return `<div class="map-token" data-player-id="${p.id}" style="left:calc(${pos.x}% + ${ox}px);top:${pos.y}%">${getPlayerKey(p, false, { mapOnly: true })}</div>`;
+      })
+      .join('');
   }
 
   function canRemovePlayer() {
@@ -1772,6 +2036,35 @@ export function initTrainGame() {
     renderBoard();
   }
 
+  function updateCardsLoadingBanner(cardsReady, loadState) {
+    if (!cardsLoadingStatusEl) return;
+    const onTrain = document.getElementById('screen-train')?.classList.contains('active');
+    if (!onTrain && cardsReady) {
+      return;
+    }
+    if (cardsReady) {
+      if (cardsLoadingStatusEl.textContent.startsWith('✓')) {
+        setTimeout(() => cardsLoadingStatusEl.classList.add('hidden'), 1500);
+      } else {
+        cardsLoadingStatusEl.classList.add('hidden');
+      }
+      cardsLoadingStatusEl.classList.remove('cards-loading-status--error');
+      return;
+    }
+    cardsLoadingStatusEl.classList.remove('hidden');
+    if (loadState.state === 'error') {
+      const detail = loadState.error?.message ? ` (${loadState.error.message})` : '';
+      cardsLoadingStatusEl.textContent = `⚠ فشل تحميل البطاقات${detail} — اضغط «ابدأ» لإعادة المحاولة`;
+      cardsLoadingStatusEl.classList.add('cards-loading-status--error');
+    } else if (loadState.state === 'loading') {
+      cardsLoadingStatusEl.textContent = 'جاري تحميل البطاقات…';
+      cardsLoadingStatusEl.classList.remove('cards-loading-status--error');
+    } else {
+      cardsLoadingStatusEl.textContent = 'جاري تجهيز بطاقات الأسئلة…';
+      cardsLoadingStatusEl.classList.remove('cards-loading-status--error');
+    }
+  }
+
   function updatePoolWarning() {
     if (!poolWarningEl) return;
     const msg = getLowPoolMessage();
@@ -1852,10 +2145,11 @@ export function initTrainGame() {
     drawBtn.textContent = 'اسحب سؤالاً';
 
     const hideLocalStart = online.mode && online.inRoom;
+    const loadFailed = loadState.state === 'error';
     startBtn.hidden = hideLocalStart;
     startBtn.disabled =
       hideLocalStart ||
-      !cardsReady ||
+      (!cardsReady && !loadFailed) ||
       (state.started && !state.gameOver) ||
       state.players.length < MIN_PLAYERS;
     addPlayerBtn.disabled =
@@ -1934,15 +2228,19 @@ export function initTrainGame() {
       });
     }
     renderPlayers();
-    renderBoard();
+    if (document.getElementById('screen-train')?.classList.contains('active')) {
+      renderBoard();
+    }
     renderLevelSelector();
     updatePoolWarning();
+    updateCardsLoadingBanner(cardsReady, loadState);
     updateChatVisibility();
     syncMobileBar();
     renderPlayerCountPicker();
   }
 
   function startGame() {
+    updateUI('🔑 startGame called');
     if (online.mode && online.inRoom) return;
     if (state.players.length < MIN_PLAYERS) {
       showModal({
@@ -1951,14 +2249,54 @@ export function initTrainGame() {
       });
       return;
     }
-    if (!areCardsReady()) {
-      showModal({
-        title: 'انتظر',
-        bodyHtml: '<p>بطاقات الأسئلة ما زالت تُحمَّل. انتظر لحظات ثم حاول مجدداً.</p>',
-      });
+
+    if (shouldUseNativeLotteryPanel()) {
+      forceNativeCardsReady();
+      if (!areCardsReady()) {
+        updateUI('⚠ البطاقات غير جاهزة');
+        return;
+      }
+      startGameLottery();
       return;
     }
 
+    if (!areCardsReady()) {
+      const loadState = getCardsLoadState();
+      if (loadState.state === 'error') {
+        showMobileStatus('🔑 إعادة تحميل البطاقات...');
+        loadCardData().finally(() => startGame());
+        return;
+      }
+      showModal({
+        title: 'جاري تحميل البطاقات…',
+        bodyHtml: '<p>جاري تحميل بطاقات الأسئلة… انتظر لحظة.</p>',
+      });
+      void (async () => {
+        const ready = await ensureCardsReady();
+        hideModal();
+        if (!ready) {
+          showModal({
+            title: 'خطأ',
+            bodyHtml: '<p>فشل تحميل بطاقات الأسئلة. أعد المحاولة بعد لحظات.</p>',
+            actions: [{
+              label: 'إعادة المحاولة',
+              className: 'btn-gold',
+              onClick: () => { loadCardData().finally(() => startGame()); },
+            }],
+          });
+          updateUI();
+          return;
+        }
+        updateUI();
+        startGameLottery();
+      })();
+      return;
+    }
+
+    startGameLottery();
+  }
+
+  function startGameLottery() {
     const poolStats = getSessionQuestionStats();
     const lowPoolNote =
       poolStats.isLow && poolStats.total < state.players.length
@@ -1971,45 +2309,67 @@ export function initTrainGame() {
       resetGame();
       return;
     }
-    if (state.started) return;
+    if (state.started) {
+      updateUI('⚠ اللعبة بدأت بالفعل');
+      return;
+    }
 
     normalizePlayerNames();
     renderPlayers();
     resetQuestionSession();
     resetCityQuestionSession();
 
-    const askRound = () => {
-      lotteryActive = true;
-      state.started = false;
-      state.waitingForMove = false;
-      state.processingMove = false;
-      state.gameOver = false;
-      state.highlightSquare = null;
-      state.players.forEach((p) => {
-        p.position = 1;
-        delete p.startScore;
-      });
+    let lotteryOnComplete = null;
 
-      const showLocalLotteryQuestion = (playerIndex) => {
-        const player = state.players[playerIndex];
-        if (!player) {
-          resolveStartWinner();
-          return;
-        }
-        updateUI(`🔑 قرعة — دور ${player.name}`);
-        const card = pickTiebreakCard();
-        showQuestionCardModal(
-          card,
-          (userWasCorrect, steps) => {
+    const askRound = () => {
+      console.log('[lottery] askRound');
+      updateUI('🔑 askRound fired');
+      try {
+        lotteryActive = true;
+        state.started = false;
+        state.waitingForMove = false;
+        state.processingMove = false;
+        state.gameOver = false;
+        state.highlightSquare = null;
+        state.players.forEach((p) => {
+          p.position = 1;
+          delete p.startScore;
+        });
+
+        const showLocalLotteryQuestion = (playerIndex) => {
+          const player = state.players[playerIndex];
+          if (!player) {
+            resolveStartWinner();
+            return;
+          }
+          updateUI(`🔑 قرعة — دور ${player.name}`);
+          if (shouldUseNativeLotteryPanel()) forceNativeCardsReady();
+          let card = pickTiebreakCard();
+          if (!card && shouldUseNativeLotteryPanel()) {
+            forceNativeCardsReady();
+            card = pickTiebreakCard();
+          }
+          if (!card) {
+            card = getFallbackLotteryCard();
+          }
+
+          const onLotteryAnswer = (userWasCorrect, steps) => {
             player.startScore = userWasCorrect ? steps : 0;
             const nextIndex = playerIndex + 1;
             if (nextIndex >= state.players.length) {
               hideModal();
+              hideNativeLotteryPanel();
               resolveStartWinner();
               return;
             }
             const nextPlayer = state.players[nextIndex];
             hideModal();
+            hideNativeLotteryPanel();
+            if (shouldUseNativeLotteryPanel()) {
+              updateUI(`⏳ الآن دور ${nextPlayer.name}`);
+              showLocalLotteryQuestion(nextIndex);
+              return;
+            }
             showModal({
               title: 'انتظر دور اللاعب التالي',
               bodyHtml: `<p>أجاب <strong>${player.name}</strong> ✓</p><p>الآن دور <strong>${nextPlayer.name}</strong>.</p><p class="lottery-handoff-hint">مرّر الجهاز إن لزم، ثم اضغط للمتابعة.</p>`,
@@ -2022,12 +2382,64 @@ export function initTrainGame() {
               ],
             });
             updateUI(`⏳ انتظر — الآن دور ${nextPlayer.name}`);
-          },
-          { deferClose: true, tiebreak: true, title: `قرعة — ${player.name}` },
-        );
-      };
+          };
 
-      showLocalLotteryQuestion(0);
+          lotteryOnComplete = onLotteryAnswer;
+
+          if (shouldUseNativeLotteryPanel()) {
+            document.getElementById('train-lottery-panel') || createLotteryPanelDom();
+            showNativeLotteryQuestion(card, player.name, onLotteryAnswer);
+            return;
+          }
+
+          showQuestionCardModal(
+            card,
+            onLotteryAnswer,
+            { deferClose: true, tiebreak: true, title: `قرعة — ${player.name}` },
+          );
+        };
+
+        showLocalLotteryQuestion(0);
+      } catch (err) {
+        console.error('askRound failed', err);
+        lotteryActive = false;
+        updateUI(`🔑 خطأ قرعة: ${err?.message || 'unknown'}`);
+        if (shouldUseNativeLotteryPanel()) {
+          document.getElementById('train-lottery-panel') || createLotteryPanelDom();
+          showNativeLotteryQuestion(
+            getFallbackLotteryCard(),
+            state.players[0]?.name || 'اللاعب 1',
+            lotteryOnComplete || (() => {}),
+          );
+          return;
+        }
+        showModal({
+          title: 'خطأ',
+          bodyHtml: `<p>تعذّر بدء القرعة: ${err?.message || 'خطأ غير معروف'}</p>`,
+          actions: [{ label: 'حسناً', className: 'btn-primary' }],
+        });
+      }
+    };
+
+    const nativeStartLotteryFlow = () => {
+      updateUI('🔑 جاري فتح السؤال...');
+      document.getElementById('train-lottery-panel') || createLotteryPanelDom();
+      try {
+        askRound();
+      } catch (err) {
+        console.error('[lottery] nativeStartLotteryFlow failed', err);
+        lotteryActive = true;
+        updateUI(`🔑 خطأ قرعة — سؤال احتياطي: ${err?.message || 'unknown'}`);
+        showNativeLotteryQuestion(
+          getFallbackLotteryCard(),
+          state.players[0]?.name || 'اللاعب 1',
+          (correct, steps) => {
+            const p = state.players[0];
+            if (p) p.startScore = correct ? steps : 0;
+            resolveStartWinner();
+          },
+        );
+      }
     };
 
     const resolveStartWinner = () => {
@@ -2053,10 +2465,15 @@ export function initTrainGame() {
       setTimeout(() => finishStart(tied[0]), 0);
     };
 
+    if (shouldUseNativeLotteryPanel()) {
+      nativeStartLotteryFlow();
+      return;
+    }
+
     showModal({
       title: 'تحديد من يبدأ',
       bodyHtml: `<p>كل لاعب يجيب سؤالاً بالترتيب من مرحلة <strong>${getTrainLevelInfo().nameArabic}</strong>. من يحصل على أعلى نتيجة يبدأ.</p><p>عند التعادل في أعلى نتيجة تُعاد القرعة.</p>${lowPoolNote}`,
-      actions: [{ label: 'ابدأ الأسئلة', className: 'btn-gold', onClick: askRound, keepOpen: true }],
+      actions: [{ label: 'ابدأ الأسئلة', className: 'btn-gold', onClick: () => askRound() }],
     });
   }
 
@@ -2404,5 +2821,12 @@ export function initTrainGame() {
     }
   }
 
-  return { refreshUI: updateUI };
+  function refreshUI(statusOverride = null) {
+    updateUI(statusOverride);
+    if (document.getElementById('screen-train')?.classList.contains('active')) {
+      renderBoard();
+    }
+  }
+
+  return { refreshUI };
 }

@@ -4,6 +4,7 @@ import {
   isNativeAdsActive,
   hideWebBannerSlots,
   showNativeBanner,
+  hideNativeBanner,
   showNativeInterstitial,
   showNativeRewarded,
 } from './native-ads.js';
@@ -27,6 +28,7 @@ export async function initAds() {
   usingNativeAds = await initNativeAds();
   if (usingNativeAds) {
     hideWebBannerSlots();
+    refreshBannerAds('menu');
     return;
   }
 
@@ -176,13 +178,23 @@ function fillAllBannerSlots() {
 
 export function refreshBannerAds(activeScreen = 'menu') {
   if (isNativeAdsActive()) {
-    showNativeBanner();
-    updateWebBannerVisibility(activeScreen);
+    // Hide native banner during gameplay and modals; show on menu only
+    if (activeScreen === 'menu') {
+      showNativeBanner();
+    } else {
+      hideNativeBanner();
+    }
+    updateWebBannerVisibility(activeScreen === 'menu' ? 'menu' : 'hidden');
     return;
   }
 
   updateWebBannerVisibility(activeScreen);
   fillAllBannerSlots();
+}
+
+/** Hide native AdMob banner immediately when modal opens (native view blocks WebView taps). */
+export function hideNativeBannerImmediate() {
+  if (isNativeAdsActive()) hideNativeBanner().catch(() => {});
 }
 
 function injectInterstitialOverlay() {

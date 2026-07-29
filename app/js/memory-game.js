@@ -5,9 +5,11 @@ import {
   getMemoryStageCounts,
   getTotalMemoryPairs,
   shuffle,
+  areCardsReady,
 } from './questions.js';
 import { MEMORY_RULES } from './board-data.js';
 import { showModal, hideModal } from './modal.js';
+import { bindTap, isNativeApp } from './native-app.js';
 import {
   onMemoryPairMatched,
   onMemoryComplete,
@@ -56,31 +58,49 @@ export function initMemoryGame() {
   const progressFillEl = document.getElementById('memory-progress-fill');
   let hintUsedThisGame = false;
 
-  globalTotalEl.textContent = totalPairsAll;
+  function bindMemoryControl(el, handler) {
+    bindTap(el, handler);
+  }
 
-  rulesBtn.addEventListener('click', () => {
+  function handlePlayAll() {
+    if (!areCardsReady()) {
+      showModal({
+        title: 'جاري التحميل',
+        bodyHtml: '<p>انتظر ثوانٍ حتى تُحمَّل بطاقات الذاكرة…</p>',
+        actions: [{ label: 'حسناً', className: 'btn-primary' }],
+      });
+      return;
+    }
+    startSequentialPlay();
+  }
+
+  globalTotalEl.textContent = totalPairsAll;
+  if (playAllBtn) {
+    playAllBtn.disabled = false;
+    bindMemoryControl(playAllBtn, handlePlayAll);
+  }
+
+  bindMemoryControl(rulesBtn, () => {
     showModal({ title: 'طريقة اللعب — بطاقات الذاكرة', bodyHtml: MEMORY_RULES });
   });
 
   if (restartBtn) {
-    restartBtn.addEventListener('click', (e) => {
-      e.preventDefault();
+    bindMemoryControl(restartBtn, (e) => {
+      e?.preventDefault?.();
       restartCurrentStage();
     });
   }
 
   if (changeStageBtn) {
-    changeStageBtn.addEventListener('click', (e) => {
-      e.preventDefault();
+    bindMemoryControl(changeStageBtn, (e) => {
+      e?.preventDefault?.();
       showPicker();
     });
   }
 
-  nextStageBtn.addEventListener('click', advanceToNextStage);
+  bindMemoryControl(nextStageBtn, advanceToNextStage);
 
-  playAllBtn?.addEventListener('click', () => startSequentialPlay());
-
-  rewardHintBtn.addEventListener('click', () => {
+  bindMemoryControl(rewardHintBtn, () => {
     if (hintUsedThisGame || lock || matchedCount >= activePairs.length) return;
     showRewardedAd({
       title: '🎬 شاهد إعلاناً — كشف زوج واحد',
@@ -113,12 +133,20 @@ export function initMemoryGame() {
       .join('');
 
     stageSelectorEl.querySelectorAll('.memory-stage-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
+      bindMemoryControl(btn, () => {
         const stageNum = Number(btn.dataset.stage);
         if (!stageNum || btn.disabled) return;
         startSingleStage(stageNum);
       });
     });
+  }
+
+  function refreshPicker() {
+    totalStages = getMemoryStageCount();
+    totalPairsAll = getTotalMemoryPairs();
+    if (globalTotalEl) globalTotalEl.textContent = totalPairsAll;
+    if (playAllBtn) playAllBtn.disabled = false;
+    renderStageSelector();
   }
 
   function showPicker() {
@@ -131,9 +159,7 @@ export function initMemoryGame() {
     boardEl.innerHTML = '';
     if (pickerEl) pickerEl.hidden = false;
     if (gameAreaEl) gameAreaEl.hidden = true;
-    totalStages = getMemoryStageCount();
-    totalPairsAll = getTotalMemoryPairs();
-    renderStageSelector();
+    refreshPicker();
   }
 
   function showGameArea() {
@@ -233,7 +259,7 @@ export function initMemoryGame() {
   }
 
   function cardBackHtml(card) {
-    return `<img src="${card.image}" alt="${card.label}" class="memory-card-img" loading="lazy" />`;
+    return `<img src="${card.image}" alt="${card.label}" class="memory-card-img" loading="eager" />`;
   }
 
   function render() {
@@ -251,7 +277,7 @@ export function initMemoryGame() {
       .join('');
 
     boardEl.querySelectorAll('.memory-card').forEach((el) => {
-      el.addEventListener('click', () => onCardClick(el.dataset.id));
+      bindTap(el, () => onCardClick(el.dataset.id));
       el.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -442,6 +468,18 @@ export function initMemoryGame() {
     nextStageBtn.hidden = true;
 
     activePairs = getMemoryPairsForStage(currentStage);
+    if (!activePairs.length) {
+      messageEl.textContent = areCardsReady()
+        ? 'لا توجد بطاقات في هذه المرحلة'
+        : 'جاري تحميل البطاقات… انتظر لحظات';
+      boardEl.innerHTML = '';
+      boardEl.classList.add('memory-board--loading');
+      if (!areCardsReady()) {
+        boardEl.textContent = 'جاري تحميل البطاقات…';
+      }
+      return;
+    }
+    boardEl.classList.remove('memory-board--loading');
     totalEl.textContent = activePairs.length;
     if (playMode === 'single') {
       globalTotalEl.textContent = activePairs.length;
@@ -477,5 +515,31 @@ export function initMemoryGame() {
     boardEl?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
+  function onMemoryScreenVisible() {
+    if (playAllBtn) {
+      playAllBtn.disabled = false;
+    }
+    if (gameAreaEl?.hidden) {
+      refreshPicker();
+      return;
+    }
+    if (playMode && !activePairs.length && areCardsReady()) {
+      startStage();
+    } else if (cards.length) {
+      requestAnimationFrame(() => render());
+    }
+  }
+
+  document.addEventListener('train-cards-load-settled', () => {
+    refreshPicker();
+    if (playMode && gameAreaEl && !gameAreaEl.hidden && !activePairs.length) {
+      startStage();
+    }
+  });
+  document.addEventListener('native-screen-change', (e) => {
+    if (e.detail?.screen === 'memory') onMemoryScreenVisible();
+  });
+
   showPicker();
+  return { refreshUI: refreshPicker };
 }

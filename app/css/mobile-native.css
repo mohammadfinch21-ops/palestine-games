@@ -39,10 +39,6 @@ html.native-app body {
     font-size: 16px;
   }
 
-  #screen-train.active .key-token {
-    font-size: clamp(0.55rem, 2.6vw, 0.72rem);
-  }
-
   .modal-overlay {
     -webkit-overflow-scrolling: touch;
   }
@@ -142,4 +138,243 @@ html.native-app body {
   .ad-banner--menu {
     margin-top: 1rem;
   }
+}
+
+/* ===== Native shell — train & memory game layout (Capacitor WebView) ===== */
+html.native-app #screen-train.active,
+body.train-mobile-layout #screen-train.active {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  min-height: 0;
+  padding-bottom: 0;
+}
+
+html.native-app #screen-train.active .in-game-edu-links,
+body.train-mobile-layout #screen-train.active .in-game-edu-links {
+  display: none;
+}
+
+html.native-app #screen-train.active .train-layout,
+body.train-mobile-layout #screen-train.active .train-layout {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  grid-template-columns: none;
+  max-height: none;
+  min-height: 0;
+}
+
+html.native-app #screen-train.active .board-wrap,
+body.train-mobile-layout #screen-train.active .board-wrap {
+  flex: 1 1 auto;
+  min-height: 12rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 0.35rem;
+  max-height: var(--train-board-available-height, 60vh);
+  height: auto;
+}
+
+html.native-app #screen-train.active .board,
+body.train-mobile-layout #screen-train.active .board {
+  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  flex: 0 1 auto;
+  aspect-ratio: 999 / 1400;
+}
+
+html.native-app #screen-train.active .board-map,
+body.train-mobile-layout #screen-train.active .board-map {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  aspect-ratio: 999 / 1400;
+}
+
+html.native-app #screen-train.active .board-map-img,
+body.train-mobile-layout #screen-train.active .board-map-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+html.native-app #screen-train.active .board-tokens-layer,
+body.train-mobile-layout #screen-train.active .board-tokens-layer {
+  z-index: 10;
+  visibility: visible;
+}
+
+html.native-app #screen-train.active .board-map-img,
+body.train-mobile-layout #screen-train.active .board-map-img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+html.native-app #screen-train.active .board-tokens-layer .map-token,
+body.train-mobile-layout #screen-train.active .board-tokens-layer .map-token {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+}
+
+html.native-app #screen-train.active .board-tokens-layer .key-token--map,
+body.train-mobile-layout #screen-train.active .board-tokens-layer .key-token--map {
+  font-size: clamp(7px, 2.5cqi, 11px);
+  background: none;
+  border: none;
+  padding: 0;
+  box-shadow: none;
+}
+
+html.native-app #screen-train.active .train-mbar-btn--gold,
+body.train-mobile-layout #screen-train.active .train-mbar-btn--gold {
+  background: linear-gradient(135deg, #c9a227, #e8c547) !important;
+  color: #1a1a1a !important;
+  border: 2px solid #b8860b !important;
+  opacity: 1 !important;
+}
+
+html.native-app .modal-actions .btn-gold,
+html.native-app .modal-overlay .modal-actions button,
+html.native-app #memory-play-all-btn,
+html.native-app .memory-play-all-btn {
+  background: linear-gradient(135deg, #c9a227, #e8c547) !important;
+  color: #1a1a1a !important;
+  border: 2px solid #b8860b !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  position: relative;
+  z-index: 2;
+}
+
+html.native-app .ad-banner--game,
+html.native-app #ad-banner-train,
+html.native-app #ad-banner-memory {
+  display: none !important;
+  height: 0 !important;
+  min-height: 0 !important;
+  pointer-events: none !important;
+}
+
+html.native-app #screen-train.active .train-mobile-bar,
+body.train-mobile-layout #screen-train.active .train-mobile-bar {
+  display: flex;
+}
+
+html.native-app #screen-memory.active {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+html.native-app #screen-memory.active .in-game-edu-links {
+  display: none;
+}
+
+html.native-app #screen-memory.active .memory-game-area:not([hidden]) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+html.native-app #screen-memory.active .memory-board {
+  flex: 1 1 auto;
+  min-height: 16rem;
+  align-content: start;
+}
+
+html.native-app button,
+html.native-app .btn-gold,
+html.native-app .btn-primary,
+html.native-app .btn-outline {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(201, 162, 39, 0.35);
+}
+
+html.native-app #memory-play-all-btn,
+html.native-app .memory-play-all-btn {
+  min-height: 48px;
+  position: relative;
+  z-index: 50;
+  touch-action: manipulation;
+  pointer-events: auto;
+}
+html.native-app #screen-memory.active .memory-play-all-btn {
+  position: relative;
+  z-index: 50;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+html.native-app #screen-memory.active .memory-stage-picker {
+  touch-action: manipulation;
+}
+
+html.native-app #screen-memory.active .game-learn-panel--memory {
+  display: none;
+}
+
+html.native-app #screen-memory.active .memory-stage-btn,
+html.native-app #screen-memory.active .memory-actions button,
+html.native-app #screen-memory.active .btn-help,
+html.native-app #screen-train.active .train-mbar-btn,
+html.native-app #screen-train.active .train-mobile-levels .level-btn {
+  position: relative;
+  z-index: 10;
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+html.native-app #screen-train.active .board-map {
+  background-image: url('../assets/map-board.jpg');
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+html.native-app #screen-memory.active .memory-board.memory-board--loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 12rem;
+  color: var(--gold-light);
+  font-weight: 700;
+}
+html.native-app #screen-train.active .train-mobile-bar,
+html.native-app #train-mobile-start-btn {
+  z-index: 9999;
+  pointer-events: auto !important;
+  touch-action: manipulation;
+}
+
+/* Native lottery panel — above train bar, full-screen taps */
+html.native-app #train-lottery-panel,
+body.train-mobile-layout #train-lottery-panel {
+  z-index: 100000;
+  pointer-events: auto;
+}
+
+html.native-app .train-lottery-option-btn,
+body.train-mobile-layout .train-lottery-option-btn {
+  min-height: 48px;
+  touch-action: manipulation;
 }
