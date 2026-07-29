@@ -208,7 +208,6 @@ export function initTrainGame() {
   function handleMobileStart(e) {
     e?.preventDefault?.();
     console.log('train-game: handleMobileStart');
-    showDebugBanner('TAP OK');
     showMobileStatus('🔑 تم اللمس — جاري البدء...');
     try {
       startGame();
@@ -284,6 +283,60 @@ export function initTrainGame() {
   const mobileTurnDot = document.getElementById('train-mobile-turn-dot');
   const mobileTurnLabel = document.getElementById('train-mobile-turn-label');
   const mobileLayoutMq = window.matchMedia('(max-width: 900px)');
+
+  let mapDomReady = Boolean(boardEl?.querySelector('#board-map'));
+  let mapImageLoaded = false;
+
+  function ensureMapDom() {
+    if (mapDomReady || !boardEl) return;
+    const existingMap = boardEl.querySelector('#board-map');
+    if (existingMap) {
+      mapDomReady = true;
+      return;
+    }
+    boardEl.innerHTML = `
+      <div class="board-map" id="board-map">
+        <img src="${MAP_IMAGE}" alt="خارطة لعبة قطار فلسطين" class="board-map-img" decoding="async" loading="eager" />
+        <div class="board-tokens-layer" aria-hidden="false"></div>
+      </div>`;
+    mapDomReady = true;
+  }
+
+  function loadMapImageOnce() {
+    if (!boardEl) return;
+    ensureMapDom();
+    const mapRoot = boardEl.querySelector('#board-map');
+    if (!mapRoot) return;
+
+    let img = mapRoot.querySelector('.board-map-img');
+    if (!img) {
+      img = document.createElement('img');
+      img.alt = 'خارطة لعبة قطار فلسطين';
+      img.className = 'board-map-img';
+      img.decoding = 'async';
+      img.loading = 'eager';
+      mapRoot.insertBefore(img, mapRoot.firstChild);
+    }
+
+    const resolvedSrc = resolveAssetUrl(MAP_IMAGE);
+    if (img.dataset.resolvedSrc !== resolvedSrc) {
+      if (!img.dataset.loadBound) {
+        img.dataset.loadBound = '1';
+        img.addEventListener('load', () => {
+          mapImageLoaded = true;
+          renderBoard();
+        }, { once: true });
+        img.addEventListener('error', () => {
+          console.error('train-game: failed to load map image', resolvedSrc);
+          mapRoot.classList.add('board-map--load-failed');
+        }, { once: true });
+      }
+      img.dataset.resolvedSrc = resolvedSrc;
+      img.src = resolvedSrc;
+    } else if (img.complete && img.naturalWidth > 0) {
+      mapImageLoaded = true;
+    }
+  }
 
   function isMobileTrainLayout() {
     return mobileLayoutMq.matches || document.documentElement.classList.contains('native-app');
@@ -1529,60 +1582,6 @@ export function initTrainGame() {
   renderPlayers();
   updateUI();
   renderBoard();
-
-  let mapDomReady = Boolean(boardEl?.querySelector('#board-map'));
-  let mapImageLoaded = false;
-
-  function ensureMapDom() {
-    if (mapDomReady || !boardEl) return;
-    const existingMap = boardEl.querySelector('#board-map');
-    if (existingMap) {
-      mapDomReady = true;
-      return;
-    }
-    boardEl.innerHTML = `
-      <div class="board-map" id="board-map">
-        <img src="${MAP_IMAGE}" alt="خارطة لعبة قطار فلسطين" class="board-map-img" decoding="async" loading="eager" />
-        <div class="board-tokens-layer" aria-hidden="false"></div>
-      </div>`;
-    mapDomReady = true;
-  }
-
-  function loadMapImageOnce() {
-    if (!boardEl) return;
-    ensureMapDom();
-    const mapRoot = boardEl.querySelector('#board-map');
-    if (!mapRoot) return;
-
-    let img = mapRoot.querySelector('.board-map-img');
-    if (!img) {
-      img = document.createElement('img');
-      img.alt = 'خارطة لعبة قطار فلسطين';
-      img.className = 'board-map-img';
-      img.decoding = 'async';
-      img.loading = 'eager';
-      mapRoot.insertBefore(img, mapRoot.firstChild);
-    }
-
-    const resolvedSrc = resolveAssetUrl(MAP_IMAGE);
-    if (img.dataset.resolvedSrc !== resolvedSrc) {
-      if (!img.dataset.loadBound) {
-        img.dataset.loadBound = '1';
-        img.addEventListener('load', () => {
-          mapImageLoaded = true;
-          renderBoard();
-        }, { once: true });
-        img.addEventListener('error', () => {
-          console.error('train-game: failed to load map image', resolvedSrc);
-          mapRoot.classList.add('board-map--load-failed');
-        }, { once: true });
-      }
-      img.dataset.resolvedSrc = resolvedSrc;
-      img.src = resolvedSrc;
-    } else if (img.complete && img.naturalWidth > 0) {
-      mapImageLoaded = true;
-    }
-  }
 
   function onTrainScreenVisible() {
     loadMapImageOnce();
