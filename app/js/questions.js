@@ -203,13 +203,22 @@ export function forceCardsLoadTimeout(reason) {
     }
   }
   activeCardXhrs.length = 0;
-  cardsLoadState = 'error';
-  loadError = new Error(reason || `انتهت مهلة تحميل البطاقات (${CARDS_LOAD_STUCK_MS / 1000}ث)`);
   loadPromise = null;
   loadStartedAt = 0;
-  notifyCardsLoadSettled();
-  console.warn('[questions] forceCardsLoadTimeout', loadError.message);
-  return true;
+  try {
+    applyFallbackDeck();
+    cardsLoadState = 'ready';
+    loadError = null;
+    notifyCardsLoadSettled();
+    console.warn('[questions] forceCardsLoadTimeout — using fallback deck', reason);
+    return true;
+  } catch {
+    cardsLoadState = 'error';
+    loadError = new Error(reason || `انتهت مهلة تحميل البطاقات (${CARDS_LOAD_STUCK_MS / 1000}ث)`);
+    notifyCardsLoadSettled();
+    console.warn('[questions] forceCardsLoadTimeout', loadError.message);
+    return true;
+  }
 }
 
 function notifyCardsLoadSettled() {
@@ -315,10 +324,64 @@ function finalizeLoadedDeck(trainData, memoryData) {
   }
 }
 
+/**
+ * Synchronous native load from cards-native-bundle.js (classic script, no XHR).
+ * @returns {boolean} true when deck is ready
+ */
+export function primeNativeCardsSync() {
+  if (!isNativeApp()) return false;
+  if (cardsLoadState === 'ready' && areCardsReady()) return true;
+
+  const trainData = globalThis.__PT_TRAIN_DECK;
+  const memoryData = globalThis.__PT_MEMORY_PAIRS;
+  if (!trainData?.levels) return false;
+
+  try {
+    finalizeLoadedDeck(trainData, memoryData || []);
+    cardsLoadState = 'ready';
+    loadError = null;
+    loadPromise = null;
+    loadStartedAt = 0;
+    notifyCardsLoadSettled();
+    console.info('[questions] native bundle (sync)', {
+      questions: getPlayableCards().length,
+      memory: MEMORY_PAIRS.length,
+    });
+    return true;
+  } catch (err) {
+    console.warn('[questions] native bundle invalid', err);
+    return false;
+  }
+}
+
+/** Last resort on native — bundled deck, inline fallback, or error. */
+export function forceNativeCardsReady() {
+  if (areCardsReady()) return true;
+  if (primeNativeCardsSync()) return true;
+  try {
+    applyFallbackDeck();
+    cardsLoadState = 'ready';
+    loadError = null;
+    loadPromise = null;
+    loadStartedAt = 0;
+    notifyCardsLoadSettled();
+    console.warn('[questions] forceNativeCardsReady — inline fallback');
+    return true;
+  } catch (err) {
+    console.error('[questions] forceNativeCardsReady failed', err);
+    return false;
+  }
+}
+
 export async function loadCardData() {
   if (cardsLoadState === 'ready') {
     return { questions: getPlayableCards().length, memory: MEMORY_PAIRS.length };
   }
+
+  if (isNativeApp() && primeNativeCardsSync()) {
+    return { questions: getPlayableCards().length, memory: MEMORY_PAIRS.length };
+  }
+
   if (loadPromise) return loadPromise;
 
   cardsLoadState = 'loading';
@@ -326,6 +389,12 @@ export async function loadCardData() {
   loadStartedAt = Date.now();
 
   loadPromise = (async () => {
+    if (isNativeApp()) {
+      if (primeNativeCardsSync()) {
+        return { questions: getPlayableCards().length, memory: MEMORY_PAIRS.length };
+      }
+    }
+
     const trainUrl = resolveFetchUrl('js/train-questions-by-level.json');
     const memoryUrl = resolveFetchUrl('js/memory-pairs-data.json');
     console.info('[questions] loading cards', {

@@ -365,3 +365,16 @@ html.native-app #train-mobile-start-btn {
   pointer-events: auto !important;
   touch-action: manipulation;
 }
+
+/* Native lottery panel — above train bar, full-screen taps */
+html.native-app #train-lottery-panel,
+body.train-mobile-layout #train-lottery-panel {
+  z-index: 100000;
+  pointer-events: auto;
+}
+
+html.native-app .train-lottery-option-btn,
+body.train-mobile-layout .train-lottery-option-btn {
+  min-height: 48px;
+  touch-action: manipulation;
+}

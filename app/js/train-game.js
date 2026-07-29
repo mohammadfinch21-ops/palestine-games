@@ -17,6 +17,8 @@ import {
   loadCardData,
   getCardsLoadState,
   forceCardsLoadTimeout,
+  primeNativeCardsSync,
+  forceNativeCardsReady,
   CARDS_LOAD_STUCK_MS,
   CARDS_LOAD_WATCHDOG_INTERVAL_MS,
   isQuestionDebugEnabled,
@@ -43,6 +45,12 @@ import {
 } from './ads/ad-manager.js';
 import { isFirebaseConfigured } from './firebase-config.js';
 import { bindTap, isNativeApp, resolveAssetUrl } from './native-app.js';
+import {
+  showNativeLotteryQuestion,
+  hideNativeLotteryPanel,
+  isNativeLotteryPanelOpen,
+  FALLBACK_LOTTERY_CARD,
+} from './train-lottery-panel.js';
 import {
   getPlayerId,
   createRoom,
@@ -1480,6 +1488,26 @@ export function initTrainGame() {
 
   startCardsLoadWatchdog();
 
+  if (isNativeApp()) {
+    primeNativeCardsSync();
+    document.addEventListener('train-cards-load-settled', () => {
+      syncMobileBar();
+      updateUI();
+    });
+    setTimeout(() => {
+      if (!areCardsReady()) {
+        forceNativeCardsReady();
+      }
+      if (mobileStartBtn && !state.started && !(online.mode && online.inRoom)) {
+        mobileStartBtn.textContent = MOBILE_START_LABEL;
+        mobileStartBtn.disabled = state.players.length < MIN_PLAYERS;
+        mobileStartBtn.classList.remove('is-loading');
+      }
+      syncMobileBar();
+      updateUI();
+    }, 3000);
+  }
+
   renderLevelSelector();
   renderPlayerCountPicker();
   renderPlayers();
@@ -2267,57 +2295,50 @@ export function initTrainGame() {
             return;
           }
           updateUI(`🔑 قرعة — دور ${player.name}`);
-          const card = pickTiebreakCard();
+          if (isNativeApp()) forceNativeCardsReady();
+          let card = pickTiebreakCard();
+          if (!card && isNativeApp()) {
+            forceNativeCardsReady();
+            card = pickTiebreakCard();
+          }
           if (!card) {
+            card = FALLBACK_LOTTERY_CARD;
+          }
+
+          const onLotteryAnswer = (userWasCorrect, steps) => {
+            player.startScore = userWasCorrect ? steps : 0;
+            const nextIndex = playerIndex + 1;
+            if (nextIndex >= state.players.length) {
+              hideModal();
+              hideNativeLotteryPanel();
+              resolveStartWinner();
+              return;
+            }
+            const nextPlayer = state.players[nextIndex];
+            hideModal();
+            hideNativeLotteryPanel();
             showModal({
-              title: 'خطأ',
-              bodyHtml: '<p>تعذّر سحب سؤال القرعة — البطاقات غير جاهزة.</p>',
-              actions: [{
-                label: 'حاول مجدداً',
-                className: 'btn-gold',
-                onClick: async () => {
-                  hideModal();
-                  if (await ensureCardsReady()) {
-                    showLocalLotteryQuestion(playerIndex);
-                  } else {
-                    lotteryActive = false;
-                    showModal({
-                      title: 'خطأ',
-                      bodyHtml: '<p>فشل تحميل البطاقات. أعد تشغيل التطبيق أو حاول لاحقاً.</p>',
-                      actions: [{ label: 'حسناً', className: 'btn-primary' }],
-                    });
-                  }
+              title: 'انتظر دور اللاعب التالي',
+              bodyHtml: `<p>أجاب <strong>${player.name}</strong> ✓</p><p>الآن دور <strong>${nextPlayer.name}</strong>.</p><p class="lottery-handoff-hint">مرّر الجهاز إن لزم، ثم اضغط للمتابعة.</p>`,
+              actions: [
+                {
+                  label: `سؤال ${nextPlayer.name}`,
+                  className: 'btn-gold',
+                  onClick: () => showLocalLotteryQuestion(nextIndex),
                 },
-              }],
+              ],
             });
-            lotteryActive = false;
+            updateUI(`⏳ انتظر — الآن دور ${nextPlayer.name}`);
+          };
+
+          if (isNativeApp()) {
+            showNativeLotteryQuestion(card, player.name, onLotteryAnswer);
             return;
           }
+
           showQuestionCardModal(
             card,
-            (userWasCorrect, steps) => {
-              player.startScore = userWasCorrect ? steps : 0;
-              const nextIndex = playerIndex + 1;
-              if (nextIndex >= state.players.length) {
-                hideModal();
-                resolveStartWinner();
-                return;
-              }
-              const nextPlayer = state.players[nextIndex];
-              hideModal();
-              showModal({
-                title: 'انتظر دور اللاعب التالي',
-                bodyHtml: `<p>أجاب <strong>${player.name}</strong> ✓</p><p>الآن دور <strong>${nextPlayer.name}</strong>.</p><p class="lottery-handoff-hint">مرّر الجهاز إن لزم، ثم اضغط للمتابعة.</p>`,
-                actions: [
-                  {
-                    label: `سؤال ${nextPlayer.name}`,
-                    className: 'btn-gold',
-                    onClick: () => showLocalLotteryQuestion(nextIndex),
-                  },
-                ],
-              });
-              updateUI(`⏳ انتظر — الآن دور ${nextPlayer.name}`);
-            },
+            onLotteryAnswer,
             { deferClose: true, tiebreak: true, title: `قرعة — ${player.name}` },
           );
         };
@@ -2326,7 +2347,7 @@ export function initTrainGame() {
           showLocalLotteryQuestion(0);
           if (isNativeApp()) {
             setTimeout(() => {
-              if (!isModalOpen()) {
+              if (!isNativeLotteryPanelOpen()) {
                 showModal({
                   title: 'خطأ',
                   bodyHtml: '<p>تعذّر فتح سؤال القرعة. اضغط «حاول مجدداً».</p>',
@@ -2400,7 +2421,7 @@ export function initTrainGame() {
       };
       runNativeAskRound();
       setTimeout(() => {
-        if (!isModalOpen() && !lotteryActive) {
+        if (!isNativeLotteryPanelOpen() && !lotteryActive) {
           showModal({
             title: 'تنبيه',
             bodyHtml: '<p>تعذّر بدء القرعة. تحقق من تحميل بطاقات الأسئلة ثم اضغط «ابدأ» مجدداً.</p>',

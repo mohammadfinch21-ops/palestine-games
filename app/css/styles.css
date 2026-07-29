@@ -2606,6 +2606,75 @@ html.native-app .modal-close {
   background: var(--cream);
 }
 
+/* ===== Native in-screen lottery panel (train start) ===== */
+.train-lottery-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.78);
+  padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem max(1rem, env(safe-area-inset-bottom, 0px));
+  touch-action: manipulation;
+  overscroll-behavior: contain;
+}
+
+.train-lottery-panel.hidden {
+  display: none;
+}
+
+.train-lottery-panel-inner {
+  background: var(--cream, #faf6ee);
+  border: 2px solid var(--gold, #c9a227);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem 1.5rem;
+  max-width: 520px;
+  width: 100%;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.train-lottery-panel-inner h3 {
+  margin: 0 0 0.75rem;
+  color: var(--forest, #1a3d2e);
+  font-size: 1.15rem;
+}
+
+#train-lottery-question {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  line-height: 1.55;
+  color: #1f2937;
+}
+
+#train-lottery-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.train-lottery-option-btn {
+  display: block;
+  width: 100%;
+  min-height: 48px;
+  padding: 0.65rem 1rem;
+  font-size: 1rem;
+  text-align: center;
+  touch-action: manipulation;
+}
+
+.train-lottery-option-btn.correct {
+  box-shadow: 0 0 0 2px #16a34a;
+}
+
+.train-lottery-option-btn.wrong {
+  box-shadow: 0 0 0 2px #dc2626;
+  opacity: 0.85;
+}
+
 #ad-banner-train {
   background: #fff;
   border: 2px dashed var(--gold);

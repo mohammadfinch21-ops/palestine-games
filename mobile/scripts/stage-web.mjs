@@ -5,6 +5,7 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { execSync } from 'child_process';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const mobileRoot = path.resolve(__dirname, '..');
@@ -78,6 +79,8 @@ function dirSize(dir) {
   if (fs.existsSync(dir)) walk(dir);
   return { total, count };
 }
+
+execSync('node scripts/build-cards-native-bundle.mjs', { cwd: mobileRoot, stdio: 'inherit' });
 
 rmDir(outRoot);
 copyTree(appRoot, outRoot);

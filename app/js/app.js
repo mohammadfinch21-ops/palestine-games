@@ -1,6 +1,6 @@
 import { initModal } from './modal.js';
 import { initAds, onScreenChange } from './ads/ad-manager.js';
-import { loadCardData } from './questions.js';
+import { loadCardData, primeNativeCardsSync } from './questions.js';
 import { loadCityQuestions } from './city-questions.js';
 import { bindTap, initNativeShell, isNativeApp } from './native-app.js';
 
@@ -45,6 +45,10 @@ function initNavigation() {
 
 /** Load game modules first (tap handlers), then card JSON — avoids WebView OOM on low-RAM emulators */
 async function runDeferredStartup() {
+  if (isNativeApp()) {
+    primeNativeCardsSync();
+  }
+
   const cardsLoadingEl = document.getElementById('cards-loading-status');
   let refreshTrainUI = null;
   let refreshMemoryUI = null;
