@@ -181,22 +181,48 @@ export function initTrainGame() {
 
   let lotteryActive = false;
   const MOBILE_START_LABEL = '▶ ابدأ';
-  let mobileStartDefaultHandler = null;
 
-  function bindMobileStartTap() {
-    if (!mobileStartBtn || !mobileStartDefaultHandler) return;
-    bindTap(mobileStartBtn, mobileStartDefaultHandler, 'train-mobile-start');
+  function showMobileStatus(msg) {
+    if (gameStatus) gameStatus.textContent = msg;
+    if (mobileTurnLabel) mobileTurnLabel.textContent = msg;
+  }
+
+  function showDebugBanner(msg) {
+    if (!isNativeApp()) return;
+    let banner = document.getElementById('debug-banner');
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.id = 'debug-banner';
+      banner.style.cssText =
+        'position:fixed;top:0;left:0;right:0;background:#c0392b;color:#fff;'
+        + 'z-index:9999999;padding:10px;text-align:center;font-weight:700;font-size:14px;';
+      document.body.appendChild(banner);
+    }
+    banner.textContent = msg;
+    banner.hidden = false;
+    setTimeout(() => {
+      banner.hidden = true;
+    }, 5000);
+  }
+
+  function handleMobileStart(e) {
+    e?.preventDefault?.();
+    console.log('train-game: handleMobileStart');
+    showDebugBanner('TAP OK');
+    showMobileStatus('🔑 تم اللمس — جاري البدء...');
+    try {
+      startGame();
+    } catch (err) {
+      console.error('handleMobileStart failed', err);
+      showMobileStatus(`⚠ خطأ: ${err?.message || err}`);
+    }
   }
 
   function installMobileStartBridge() {
-    window.__ptStartGame = (e) => {
-      e?.preventDefault?.();
-      console.log('train-game: __ptStartGame');
-      const statusEl = document.getElementById('game-status');
-      if (statusEl) statusEl.textContent = '...';
-      mobileStartDefaultHandler?.(e);
-    };
-    bindMobileStartTap();
+    window.__ptStartGame = handleMobileStart;
+    if (mobileStartBtn) {
+      bindTap(mobileStartBtn, handleMobileStart, 'train-mobile-start');
+    }
   }
 
   const DEFAULT_LOCAL_PLAYERS = () => [
@@ -301,19 +327,6 @@ export function initTrainGame() {
     bindTap(trainSidebarToggle, toggleTrainSidebar);
     bindTap(mobileMenuBtn, toggleTrainSidebar);
     bindTap(trainSidebarBackdrop, closeTrainSidebar);
-
-    const handleMobileStart = async (e) => {
-      e?.preventDefault?.();
-      console.log('train-game: handleMobileStart');
-      if (gameStatus) gameStatus.textContent = '...';
-      const loadState = getCardsLoadState();
-      if (loadState.state === 'error') {
-        loadCardData().finally(() => startGame());
-        return;
-      }
-      await startGame();
-    };
-    mobileStartDefaultHandler = handleMobileStart;
 
     installMobileStartBridge();
 
@@ -2227,7 +2240,8 @@ export function initTrainGame() {
     renderPlayerCountPicker();
   }
 
-  async function startGame() {
+  function startGame() {
+    updateUI('🔑 startGame called');
     if (online.mode && online.inRoom) return;
     if (state.players.length < MIN_PLAYERS) {
       showModal({
@@ -2236,31 +2250,54 @@ export function initTrainGame() {
       });
       return;
     }
+
     if (shouldUseNativeLotteryPanel()) {
       forceNativeCardsReady();
-    } else if (!areCardsReady()) {
+      if (!areCardsReady()) {
+        updateUI('⚠ البطاقات غير جاهزة');
+        return;
+      }
+      startGameLottery();
+      return;
+    }
+
+    if (!areCardsReady()) {
+      const loadState = getCardsLoadState();
+      if (loadState.state === 'error') {
+        showMobileStatus('🔑 إعادة تحميل البطاقات...');
+        loadCardData().finally(() => startGame());
+        return;
+      }
       showModal({
         title: 'جاري تحميل البطاقات…',
         bodyHtml: '<p>جاري تحميل بطاقات الأسئلة… انتظر لحظة.</p>',
       });
-      const ready = await ensureCardsReady();
-      hideModal();
-      if (!ready) {
-        showModal({
-          title: 'خطأ',
-          bodyHtml: '<p>فشل تحميل بطاقات الأسئلة. أعد المحاولة بعد لحظات.</p>',
-          actions: [{
-            label: 'إعادة المحاولة',
-            className: 'btn-gold',
-            onClick: () => { loadCardData().finally(() => startGame()); },
-          }],
-        });
+      void (async () => {
+        const ready = await ensureCardsReady();
+        hideModal();
+        if (!ready) {
+          showModal({
+            title: 'خطأ',
+            bodyHtml: '<p>فشل تحميل بطاقات الأسئلة. أعد المحاولة بعد لحظات.</p>',
+            actions: [{
+              label: 'إعادة المحاولة',
+              className: 'btn-gold',
+              onClick: () => { loadCardData().finally(() => startGame()); },
+            }],
+          });
+          updateUI();
+          return;
+        }
         updateUI();
-        return;
-      }
-      updateUI();
+        startGameLottery();
+      })();
+      return;
     }
 
+    startGameLottery();
+  }
+
+  function startGameLottery() {
     const poolStats = getSessionQuestionStats();
     const lowPoolNote =
       poolStats.isLow && poolStats.total < state.players.length
@@ -2273,7 +2310,10 @@ export function initTrainGame() {
       resetGame();
       return;
     }
-    if (state.started) return;
+    if (state.started) {
+      updateUI('⚠ اللعبة بدأت بالفعل');
+      return;
+    }
 
     normalizePlayerNames();
     renderPlayers();
@@ -2383,13 +2423,14 @@ export function initTrainGame() {
     };
 
     const nativeStartLotteryFlow = () => {
-      updateUI('🔑 قرعة — جاري فتح السؤال...');
+      updateUI('🔑 جاري فتح السؤال...');
       document.getElementById('train-lottery-panel') || createLotteryPanelDom();
       try {
         askRound();
       } catch (err) {
         console.error('[lottery] nativeStartLotteryFlow failed', err);
         lotteryActive = true;
+        updateUI(`🔑 خطأ قرعة — سؤال احتياطي: ${err?.message || 'unknown'}`);
         showNativeLotteryQuestion(
           getFallbackLotteryCard(),
           state.players[0]?.name || 'اللاعب 1',

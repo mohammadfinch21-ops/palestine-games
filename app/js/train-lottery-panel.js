@@ -131,7 +131,7 @@ export function hideNativeLotteryPanel() {
  * @param {(correct: boolean, steps: number) => void} onComplete
  */
 export function showNativeLotteryQuestion(card, playerName, onComplete) {
-  const safeCard = card && prepareShuffledOptions(card) ? card : getFallbackLotteryCard();
+  let safeCard = card && prepareShuffledOptions(card) ? card : getFallbackLotteryCard();
   const el = ensureLotteryPanelDom();
   const title = titleEl();
   const question = questionEl();
@@ -141,16 +141,35 @@ export function showNativeLotteryQuestion(card, playerName, onComplete) {
     console.error('[train-lottery-panel] missing inner DOM nodes after ensure');
     forcePanelVisible(el);
     if (title) title.textContent = `قرعة — ${playerName || 'اللاعب 1'}`;
-    if (question) question.textContent = safeCard.question || '';
+    if (question) question.textContent = safeCard.question || getFallbackLotteryCard().question;
+    return;
   }
 
-  const prepared = prepareShuffledOptions(safeCard);
+  let prepared = prepareShuffledOptions(safeCard);
+  if (!prepared?.options || prepared.options.length < 2) {
+    console.error('[train-lottery-panel] no options — using fallback card');
+    safeCard = getFallbackLotteryCard();
+    prepared = prepareShuffledOptions(safeCard);
+  }
+
   const options = prepared?.options;
   if (!options || options.length < 2) {
-    console.error('[train-lottery-panel] no options — showing fallback card UI anyway');
+    console.error('[train-lottery-panel] fallback also failed — showing static panel');
     forcePanelVisible(el);
-    if (title) title.textContent = `قرعة — ${playerName || 'اللاعب 1'}`;
-    if (question) question.textContent = getFallbackLotteryCard().question;
+    title.textContent = `قرعة — ${playerName || 'اللاعب 1'}`;
+    question.textContent = getFallbackLotteryCard().question;
+    optsContainer.innerHTML = '';
+    ['صح', 'خطأ'].forEach((opt) => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'train-lottery-option-btn btn-gold';
+      btn.textContent = opt;
+      btn.onclick = () => {
+        hideNativeLotteryPanel();
+        onComplete?.(opt === 'صح', opt === 'صح' ? 3 : 1);
+      };
+      optsContainer.appendChild(btn);
+    });
     return;
   }
 
