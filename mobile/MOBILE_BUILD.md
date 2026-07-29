@@ -277,9 +277,11 @@ npx cap open ios
 
 ### 7) النشر — Apple App Store
 
+> **بدون Mac:** راجع **[`IOS_APP_STORE.md`](IOS_APP_STORE.md)** — GitHub Actions + TestFlight ($99/سنة Apple فقط).
+
 1. [developer.apple.com](https://developer.apple.com) — $99/سنة
 2. App Store Connect → **New App**
-3. ارفع البناء عبر Xcode Archive
+3. GitHub Actions يبني ويرفع IPA (انظر `IOS_APP_STORE.md`)
 4. **App Privacy** + رابط سياسة الخصوصية
 5. **Advertising Identifier** — نعم (AdMob)
 6. Review (1–3 أيام عادة)

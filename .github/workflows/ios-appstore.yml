@@ -1,0 +1,105 @@
+name: iOS App Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload_testflight:
+        description: Upload IPA to TestFlight after build
+        required: true
+        default: false
+        type: boolean
+  push:
+    tags:
+      - 'ios-v*'
+
+concurrency:
+  group: ios-appstore-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+    timeout-minutes: 60
+    env:
+      IOS_TEAM_ID: ${{ secrets.IOS_TEAM_ID }}
+      IOS_PROVISION_PROFILE_NAME: ${{ secrets.IOS_PROVISION_PROFILE_NAME }}
+      IOS_BUILD_CERTIFICATE_BASE64: ${{ secrets.IOS_BUILD_CERTIFICATE_BASE64 }}
+      IOS_P12_PASSWORD: ${{ secrets.IOS_P12_PASSWORD }}
+      IOS_PROVISION_PROFILE_BASE64: ${{ secrets.IOS_PROVISION_PROFILE_BASE64 }}
+      IOS_KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+      WORKSPACE: mobile/ios/App/App.xcworkspace
+      SCHEME: App
+      ARCHIVE_PATH: ${{ runner.temp }}/App.xcarchive
+      EXPORT_PATH: ${{ runner.temp }}/export
+      EXPORT_PLIST: ${{ runner.temp }}/ExportOptions.plist
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install npm dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Stage web assets for Capacitor
+        working-directory: mobile
+        run: npm run stage:web
+
+      - name: Sync Capacitor iOS
+        working-directory: mobile
+        run: npx cap sync ios
+
+      - name: Install CocoaPods
+        working-directory: mobile/ios/App
+        run: pod install
+
+      - name: Import signing certificate and profile
+        run: bash mobile/scripts/ios-prepare-signing.sh
+
+      - name: Generate ExportOptions.plist
+        run: bash mobile/scripts/ios-generate-export-options.sh "$EXPORT_PLIST"
+
+      - name: Archive iOS app
+        run: |
+          xcodebuild \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -archivePath "$ARCHIVE_PATH" \
+            archive \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM="$IOS_TEAM_ID" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
+            PROVISIONING_PROFILE_SPECIFIER="$IOS_PROVISION_PROFILE_NAME"
+
+      - name: Export App Store IPA
+        run: |
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportPath "$EXPORT_PATH" \
+            -exportOptionsPlist "$EXPORT_PLIST"
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-app-store-ipa
+          path: ${{ runner.temp }}/export/*.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload to TestFlight
+        if: github.event_name == 'push' || (github.event_name == 'workflow_dispatch' && inputs.upload_testflight)
+        uses: apple-actions/upload-testflight-build@v3
+        with:
+          app-path: ${{ runner.temp }}/export/App.ipa
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}

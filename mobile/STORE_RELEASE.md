@@ -24,7 +24,7 @@
      ↓
 المرحلة 6 → AdSense للويب (مسار موازٍ)
      ↓
-المرحلة 7 → App Store لاحقاً ($99/سنة — يتطلب Mac)
+المرحلة 7 → App Store (GitHub Actions — $99/سنة — بدون Mac)
 ```
 
 **المدة الواقعية:** 2–4 أسابيع من اليوم الأول حتى أول أرباح (مراجعة Google + fill rate).
@@ -177,16 +177,18 @@ cd mobile\android
 
 ---
 
-## المرحلة 7 — App Store (لاحقاً — $99/سنة)
+## المرحلة 7 — App Store (GitHub Actions — $99/سنة — بدون Mac)
 
-- [ ] Apple Developer Program
-- [ ] Mac + Xcode
+راجع: **[`IOS_APP_STORE.md`](IOS_APP_STORE.md)**
+
+- [ ] Apple Developer Program ($99/سنة)
+- [ ] Certificate + Provisioning Profile (OpenSSL على Windows)
+- [ ] GitHub Secrets (8 قيم) + repo **public**
+- [ ] Workflow `.github/workflows/ios-appstore.yml`
 - [ ] AdMob iOS App ID + 3 ad units
-- [ ] `admob-config.js` → iOS IDs
-- [ ] App Privacy: Advertising Identifier = نعم
-- [ ] Archive → App Store Connect
+- [ ] TestFlight على iPhone → Submit for Review
 
-لا يمكن بناء IPA للنشر من Windows — استخدم Mac أو CI.
+لا تحتاج Mac — GitHub Actions يبني ويرفع IPA تلقائياً.
 
 ---
 
